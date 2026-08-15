@@ -39,13 +39,13 @@
       </div>
       <p class="menu-kicker">INTERACTIVE DIGITAL TEXTBOOK · DIGITAL IMAGE PROCESSING</p>
       <h1 class="menu-title">การประมวลผล<span class="grad-text">ภาพดิจิทัล</span></h1>
-      <p class="menu-sub">จากพิกเซลและภาพดิจิทัล ไปจนถึงการประมวลผลภาพสี และการทดลอง 12 Experiments ด้วย MATLAB — อธิบายใกล้ตัวแบบจับมือ เข้าใจง่ายแม้ไม่เคยเรียนมาก่อน</p>
+      <p class="menu-sub">จากพิกเซลและภาพดิจิทัล ไปจนถึงการประมวลผลภาพสี การกรองภาพ ตรวจจับขอบ จนถึง Computer Vision (YOLO) — อธิบายใกล้ตัวแบบจับมือ เข้าใจง่ายแม้ไม่เคยเรียนมาก่อน</p>
 
       <div class="menu-hero-stats">
-        <div class="stat"><b data-count="4">0</b><span>บทเรียน</span></div>
-        <div class="stat"><b data-count="123">0</b><span>สไลด์</span></div>
-        <div class="stat"><b data-count="80">0</b><span>ข้อสอบ</span></div>
-        <div class="stat"><b data-count="92">0</b><span>คำศัพท์</span></div>
+        <div class="stat"><b data-count="6">0</b><span>บทเรียน</span></div>
+        <div class="stat"><b data-count="177">0</b><span>สไลด์</span></div>
+        <div class="stat"><b data-count="120">0</b><span>ข้อสอบ</span></div>
+        <div class="stat"><b data-count="113">0</b><span>คำศัพท์</span></div>
       </div>
 
       <div class="flex items-center gap-3 mt-5 wrap" style="justify-content:center">
@@ -62,7 +62,7 @@
         <b class="cyan" id="coursePct">0%</b>
       </div>
       <div class="progress-track mt-3" style="width:100%"><div class="progress-fill" id="courseBar" style="width:0%"></div></div>
-      <p class="text-3 mt-2" style="font-size:12.5px" id="courseDone">เรียนแล้ว 0 / 123 สไลด์ · จบแล้ว 0 / 4 บท</p>
+      <p class="text-3 mt-2" style="font-size:12.5px" id="courseDone">เรียนแล้ว 0 / 177 สไลด์ · จบแล้ว 0 / 6 บท</p>
     </div>
 
     <!-- Chapter cards -->
@@ -137,10 +137,46 @@
         </div>
         <i data-lucide="arrow-right" class="ch-go" aria-hidden="true"></i>
       </button>
+
+      <button class="chapter-card unlocked" data-chapter="5" role="listitem">
+        <span class="ch-top"><span class="ch-num">5</span><span class="ch-icon"><i data-lucide="waves"></i></span></span>
+        <div class="ch-body">
+          <span class="ch-en">Image Filtering &amp; Edge Detection</span>
+          <b class="ch-title">การกรองภาพและตรวจจับขอบ</b>
+          <p class="ch-desc">Noise &amp; Spatial Filtering · Linear/Non-linear · Mean/Gaussian/Median/Bilateral · Lowpass · Sobel (Sobel_x/y) · Laplacian &amp; Sharpening (g = f − ∇²f) · Canny · Fourier Transform · FFT/IFFT · Magnitude/Phase · Walsh/Hadamard</p>
+          <div class="ch-meta">
+            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="5">33</b> สไลด์</span>
+            <span class="chip-sm"><i data-lucide="file-question"></i>ข้อสอบ 20 ข้อ</span>
+          </div>
+          <div class="ch-progress">
+            <div class="ch-bar"><div class="ch-bar-fill"></div></div>
+            <span class="ch-status"><i data-lucide="play"></i>เรียนต่อ <b class="ch-pct" id="ch5Pct">0%</b></span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="ch-go" aria-hidden="true"></i>
+      </button>
+
+      <button class="chapter-card unlocked" data-chapter="6" role="listitem">
+        <span class="ch-top"><span class="ch-num">6</span><span class="ch-icon"><i data-lucide="scan-eye"></i></span></span>
+        <div class="ch-body">
+          <span class="ch-en">Segmentation to Computer Vision</span>
+          <b class="ch-title">Segmentation ถึง Computer Vision</b>
+          <p class="ch-desc">Segmentation · Threshold 5 โหมด · Adaptive (11, 2) · Otsu · Morphology (Erosion/Dilation/Opening/Closing) · Contour &amp; Bounding Box · Feature (Moments/Harris/SIFT/SURF/ORB) · Perspective Transform · Restoration/Stitching · ML/DL/CNN · YOLO · SSD · Faster R-CNN</p>
+          <div class="ch-meta">
+            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="6">33</b> สไลด์</span>
+            <span class="chip-sm"><i data-lucide="file-question"></i>ข้อสอบ 20 ข้อ</span>
+          </div>
+          <div class="ch-progress">
+            <div class="ch-bar"><div class="ch-bar-fill"></div></div>
+            <span class="ch-status"><i data-lucide="play"></i>เรียนต่อ <b class="ch-pct" id="ch6Pct">0%</b></span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="ch-go" aria-hidden="true"></i>
+      </button>
     </div>
 
     <footer class="menu-foot">
-      <div class="menu-foot-badge"><i data-lucide="sparkles"></i> 4 บทเรียน · ONLINE</div>
+      <div class="menu-foot-badge"><i data-lucide="sparkles"></i> 6 บทเรียน · ONLINE</div>
       <span>Designed &amp; Developed by นายนรวิชญ์ แสงรัตน์</span>
     </footer>
   </div>

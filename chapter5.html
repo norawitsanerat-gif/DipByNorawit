@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Interactive Digital Textbook — Digital Image Processing / การกรองภาพและตรวจจับขอบ (Filtering & Edge Detection)" />
+  <title>DIP · บทที่ 5 — การกรองภาพและตรวจจับขอบ (Filtering & Edge Detection)</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* brightness/contrast slider visual */
+    .be-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .be-box { flex: 1; height: 44px; border-radius: 10px; background: linear-gradient(90deg, #0f172a, #334155, #64748b, #94a3b8, #cbd5e1, #f8fafc); transition: filter .4s; }
+    .be-tag { width: 130px; font-size: 13px; font-weight: 800; color: var(--text-2); flex-shrink: 0; }
+
+    /* gamma curves */
+    .g-curve { position: relative; height: 150px; border-radius: 12px; background: var(--card-2); border: 1px solid var(--border); overflow: hidden; }
+    .g-svg { position: absolute; inset: 0; }
+
+    /* histogram bars */
+    .hist-box { display: flex; align-items: flex-end; gap: 2px; height: 90px; border-radius: 10px; background: var(--card-2); border: 1px solid var(--border); padding: 8px; }
+    .hist-bar { flex: 1; border-radius: 2px 2px 0 0; background: linear-gradient(180deg, var(--cyan), rgba(56,189,248,.2)); }
+
+    @media (max-width: 640px) {
+      .be-tag { width: 96px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body data-page="chapter" data-chapter="5">
+
+  <!-- ================= TOP HEADER ================= -->
+  <header id="topbar">
+    <button class="icon-btn" id="menuBtn" aria-label="เปิดเมนูบทเรียน" title="เมนู">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <div class="brand">
+      <div class="cn-logo" aria-hidden="true">DIP</div>
+      <div class="brand-titles">
+        <h1>การประมวลผลภาพดิจิทัล</h1>
+        <p id="headerChapterLabel">การกรองภาพและตรวจจับขอบ · บทที่ 5</p>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" id="homeBtn" aria-label="กลับไปเมนูหลัก" title="เมนูหลัก">
+        <i data-lucide="home"></i>
+      </button>
+      <button class="icon-btn" id="notesBtn" aria-label="เปิดบันทึกย่อ" title="บันทึกย่อ (Notes)">
+        <i data-lucide="notebook-pen"></i>
+      </button>
+
+      <div class="header-progress" aria-label="ความคืบหน้า">
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="headerProgressBar">
+          <div class="progress-fill" id="headerProgressFill"></div>
+        </div>
+        <span class="progress-count" id="headerProgressCount">1 / 33</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SHELL ================= -->
+  <div class="shell">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside id="sidebar" aria-label="เมนูบทเรียน">
+      <div class="sidebar-head">
+        <div class="sidebar-head-title">
+          <h2 id="sidebarChapterTitle">เมนูบทที่ 5</h2>
+          <p id="sidebarChapterSub">หัวข้อในสัปดาห์นี้ · 33 หัวข้อ</p>
+        </div>
+        <button class="icon-btn sidebar-close" id="sidebarCloseBtn" aria-label="ปิดเมนูบทเรียน" title="ปิดเมนู">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="sidebar-info">
+        <i data-lucide="info"></i>
+        <span>คลิกหัวข้อหรือสไลด์เพื่อข้ามไปได้เลย<br />เรียนทีละสไลด์เพื่อเก็บเนื้อหาให้ครบ</span>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav" aria-label="สารบัญสไลด์"></nav>
+      <div class="sidebar-foot">
+        <div class="sf-top"><span>ความคืบหน้า</span><b id="sidebarPct">0%</b></div>
+        <div class="progress-track"><div class="progress-fill" id="sidebarProgressFill"></div></div>
+        <p class="mt-2 text-3" style="font-size:12px" id="sidebarDone">ยังไม่ได้เรียนสไลด์ใดเลย — เริ่มที่ Cover ได้เลย!</p>
+      </div>
+    </aside>
+
+    <!-- ================= STAGE ================= -->
+    <main class="stage">
+
+      <div class="slide-viewport" id="viewport">
+
+        <!-- ============ SLIDE 1 · COVER ============ -->
+        <section class="slide-view" data-title="Cover — การกรองภาพและตรวจจับขอบ" aria-label="สไลด์ 1: เปิดบทเรียน">
+          <div class="slide-inner">
+            <div class="center">
+              <div class="cn-logo float-y" style="width:74px;height:74px;font-size:28px;border-radius:22px;margin:0 auto 18px;background:linear-gradient(135deg,#22d3ee,#8b5cf6)">DIP</div>
+              <p class="slide-eyebrow" style="justify-content:center">DIGITAL IMAGE PROCESSING · CHAPTER 5</p>
+              <h2 class="slide-title" style="font-size:clamp(30px,5vw,54px);text-align:center">
+                การกรองภาพและตรวจจับขอบ <span class="grad-text">(Filtering &amp; Edge Detection)</span>
+              </h2>
+              <p class="slide-subtitle" style="text-align:center;margin:6px auto 0;max-width:660px">
+                Mean · Gaussian · Median · Bilateral · Sobel · Laplacian · Canny · Fourier
+                — ลด Noise และหาขอบวัตถุด้วย OpenCV
+              </p>
+
+              <div class="stat-chips" style="justify-content:center;margin-top:24px">
+                <span class="stat-chip"><i data-lucide="layers"></i> 33 Slides</span>
+                <span class="stat-chip"><i data-lucide="help-circle"></i> 10 Quiz</span>
+                <span class="stat-chip"><i data-lucide="square-stack"></i> 18 Flashcards</span>
+                <span class="stat-chip"><i data-lucide="book-marked"></i> 21 Glossary</span>
+              </div>
+
+              <button class="btn btn-primary mt-6" id="startBtn" style="font-size:16px;padding:14px 30px">
+                Start Learning <i data-lucide="arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 2 · NOISE ============ -->
+        <section class="slide-view" data-title="Noise คืออะไร — ทำไมต้องกรอง" aria-label="สไลด์ 2: Noise คืออะไร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WHY FILTER?</p>
+            <h2 class="slide-title">Noise <span class="grad-text">คืออะไร?</span></h2>
+            <p class="slide-subtitle">จุดรบกวนในภาพ — ค่าพิกเซลที่ไม่ใช่ของจริง ทำให้ภาพเม็ดเล็ก ๆ หรือเกลื่อน</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ภาพปกติ vs ภาพมี Noise</span>
+                <div class="flex mt-3" style="gap:14px;align-items:center">
+                  <div style="flex:1;text-align:center">
+                    <div style="height:120px;border-radius:10px;background:linear-gradient(135deg,#334155,#64748b)"></div>
+                    <p class="text-3 mt-2" style="font-size:12px">ภาพปกติ</p>
+                  </div>
+                  <div style="flex:1;text-align:center">
+                    <div style="height:120px;border-radius:10px;background:linear-gradient(135deg,#334155,#64748b);filter:contrast(1.3) brightness(.9);position:relative;overflow:hidden">
+                      <div style="position:absolute;inset:0;background-image:radial-gradient(circle 2px at 20% 30%,#fff 50%,transparent 51%),radial-gradient(circle 2px at 70% 60%,#000 50%,transparent 51%),radial-gradient(circle 2px at 40% 80%,#fff 50%,transparent 51%),radial-gradient(circle 2px at 85% 20%,#000 50%,transparent 51%),radial-gradient(circle 2px at 55% 40%,#fff 50%,transparent 51%)"></div>
+                    </div>
+                    <p class="text-3 mt-2" style="font-size:12px">มี Noise (จุดขาว-ดำกระจัดกระจาย)</p>
+                  </div>
+                </div>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>Salt &amp; Pepper</b><span>จุดขาว (255) กับจุดดำ (0) กระจัดกระจาย — เหมือนเกลือ-พริกไทย</span></div>
+                  <div class="step-box"><b>Gaussian Noise</b><span>ค่าบวกลบแบบสุ่มรอบค่าเดิม — ภาพดูมีเม็ด (grain)</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>ทำไมต้องกรอง?</h3>
+                  <p class="card-text">Noise ทำให้การวิเคราะห์ต่อผิดพลาด — ขอบปลอม, segmentation พัง, วัดค่าไม่ตรง</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>วิธีแก้ (บทนี้)</h3>
+                  <p class="card-text">ใช้ Filter: Mean · Gaussian · Median · Bilateral — แต่ละแบบเหมาะกับ noise คนละชนิด</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Salt &amp; Pepper = จุดขาว/ดำเดี่ยว ๆ → ใช้ <b class="cyan">Median</b> · Gaussian noise → ใช้ Mean/Gaussian</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 3 · SPATIAL FILTERING ============ -->
+        <section class="slide-view" data-title="Spatial Filtering — เลื่อน Mask ทีละจุด" aria-label="สไลด์ 3: Spatial Filtering">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">SPATIAL FILTERING</p>
+            <h2 class="slide-title">Spatial Filtering <span class="grad-text">— กรองที่พิกเซลโดยตรง</span></h2>
+            <p class="slide-subtitle">เลื่อน filter mask (kernel) ไปทุกจุดของภาพ — ที่แต่ละจุดคำนวณผลจากพิกเซลรอบข้าง</p>
+
+            <div class="visual-box">
+              <span class="vb-label">หลักการ 3 ขั้น</span>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>1</b><span>วาง mask ลงบนภาพ (ซ้อนทับที่พิกเซลเป้าหมายตรงกลาง)</span></div>
+                <div class="step-box"><b>2</b><span>คำนวณ response = ผลรวมถ่วงน้ำหนัก (sum of products)</span></div>
+                <div class="step-box"><b>3</b><span>เขียนค่าลงพิกเซลกลาง แล้วเลื่อน mask ไปจุดถัดไป (ทีละ 1 พิกเซล)</span></div>
+              </div>
+              <pre class="code-block mt-3">response(x,y) = ΣΣ w(i,j) · f(x+i, y+j)
+# ผลรวมของ (น้ำหนักใน mask × พิกเซลที่ซ้อนทับ)</pre>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="move" class="cyan"></i>ทำไมต้องเลื่อน?</h3>
+                <p class="card-text small">ทุกพิกเซลในภาพต้องถูก "มอง" ด้วย neighborhood ของตัวเอง — ภาพใหม่เกิดจากค่าเดิมทั้งภาพ</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="grid" class="cyan"></i>ขนาด mask</h3>
+                <p class="card-text small">3×3, 5×5, 7×7… เลขคี่เสมอ เพื่อให้มีพิกเซลกลาง (center) ให้เขียนค่า</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 4 · LINEAR VS NON-LINEAR ============ -->
+        <section class="slide-view" data-title="Linear vs Non-linear Filter" aria-label="สไลด์ 4: Linear vs Non-linear">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">TWO FAMILIES</p>
+            <h2 class="slide-title">Linear vs <span class="grad-text">Non-linear Filter</span></h2>
+            <p class="slide-subtitle">Filter แบ่งเป็น 2 ตระกูลใหญ่ — ดูว่าใช้สูตรบวก-คูณ หรือเรียงลำดับค่า</p>
+
+            <div class="tbl-wrap mt-4">
+              <table class="tbl">
+                <tr><th>ชนิด</th><th>คำนวณยังไง</th><th>ตัวอย่าง</th><th>เหมาะกับ</th></tr>
+                <tr><td><b>Linear</b></td><td>ผลรวมถ่วงน้ำหนัก ΣΣ w·f (บวก/คูณ)</td><td>Mean · Gaussian · Sobel · Laplacian</td><td>เบลอ ลด noise แบบทั่ว ๆ ไป</td></tr>
+                <tr><td><b>Non-linear</b></td><td>เรียงลำดับค่าพิกเซลแล้วเลือกค่า</td><td>Median · Bilateral</td><td>Salt &amp; Pepper, รักษาขอบ</td></tr>
+              </table>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card hoverable">
+                <h3 class="card-title" style="font-size:14.5px"><i data-lucide="sigma" class="cyan"></i>Linear</h3>
+                <p class="card-text small">เอาค่าเดิมมาถ่วงน้ำหนักแล้วรวมกัน — ผลลัพธ์เป็น "ค่าเฉลี่ยแบบถ่วง" · พฤติกรรมคาดเดาได้ วิเคราะห์คณิตศาสตร์ง่าย</p>
+              </div>
+              <div class="card hoverable">
+                <h3 class="card-title" style="font-size:14.5px"><i data-lucide="list-ordered" class="cyan"></i>Non-linear</h3>
+                <p class="card-text small">ไม่ใช้สูตรบวก-คูณ — เช่น เอาค่ากลางของค่าที่เรียงแล้ว · เก่งกับ noise แบบจุดโดด ๆ</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-4">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>เทคนิคสอบ</b>โจทย์ถาม "Order Statistics / เรียงค่า" → Non-linear (Median) · ถาม "sum of products" → Linear</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 5 · KERNEL ============ -->
+        <section class="slide-view" data-title="Kernel / Mask คืออะไร" aria-label="สไลด์ 5: Kernel / Mask">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">KERNEL / MASK</p>
+            <h2 class="slide-title">Kernel / Mask <span class="grad-text">คืออะไร?</span></h2>
+            <p class="slide-subtitle">เมทริกซ์เล็ก ๆ เก็บ "น้ำหนัก" — ตัวกำหนดว่า filter แต่ละแบบทำอะไรกับภาพ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ตัวอย่าง Kernel 3×3</span>
+                <pre class="code-block">[ 1  1  1 ]
+[ 1  1  1 ] × (1/9)   ← Mean
+[ 1  1  1 ]
+
+[ 1  2  1 ]
+[ 2  4  2 ] × (1/16)  ← Gaussian 3×3
+[ 1  2  1 ]</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>w(i,j)</b><span>น้ำหนักแต่ละช่อง — ยิ่งมาก ยิ่ง "ฟัง" พิกเซลนั้นมาก</span></div>
+                  <div class="step-box"><b>1/9</b><span>ค่าปกติ (normalize) — ทำให้ผลรวมคงที่ ไม่สว่างเกิน</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>kernel ต่างกัน = งานต่างกัน</h3>
+                  <p class="card-text">น้ำหนักทุกช่องเท่ากัน = เบลอ (mean) · กลางเยอะขอบน้อย = gaussian · ข้างหนึ่งบวกอีกข้างลบ = หาขอบ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="refresh-cw" class="cyan"></i>ชื่ออื่น</h3>
+                  <p class="card-text">filter mask · convolution kernel · window — ความหมายเดียวกัน</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>kernel = ตารางน้ำหนักเล็ก ๆ · ผลรวมน้ำหนัก = 1 → ภาพความสว่างรวมคงเดิม</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 6 · MEAN FILTER ============ -->
+        <section class="slide-view" data-title="Mean Filter (Averaging) — cv2.blur()" aria-label="สไลด์ 6: Mean Filter">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">SMOOTHING · LINEAR</p>
+            <h2 class="slide-title">Mean Filter <span class="grad-text">(Averaging)</span></h2>
+            <p class="slide-subtitle">เอาค่าเฉลี่ยของพิกเซลใน neighborhood มาแทนที่พิกเซลกลาง — เบลอ + ลด noise</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">หลักการ</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>รวมค่าทุกพิกเซลใต้ mask (3×3 = 9 ค่า)</span></div>
+                  <div class="step-box"><b>2</b><span>หารด้วยจำนวนพิกเซล (9)</span></div>
+                  <div class="step-box"><b>3</b><span>ได้ค่าเฉลี่ย → เขียนลงพิกเซลกลาง</span></div>
+                </div>
+                <pre class="code-block mt-3">blur = cv2.blur(img, (3, 3))      # 3×3
+average = cv2.boxFilter(img, -1, (5, 5))</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="target" class="cyan"></i>ทำไมช่วยลด noise?</h3>
+                  <p class="card-text">จุด noise (ค่าผิดปกติ) ถูกรวมกับค่าปกติรอบข้าง → เฉลี่ยแล้วเพี้ยนน้อยลง</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>ข้อเสีย</h3>
+                  <p class="card-text">ขอบ (edge) ก็ถูกเฉลี่ยด้วย → ภาพเบลอ ขอบไม่คม</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Mean = averaging filter = lowpass · kernel 3×3 ทุกช่อง = 1/9 · <code>cv2.blur(img,(3,3))</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 7 · MEAN BY HAND ============ -->
+        <section class="slide-view" data-title="คำนวณ Mean ด้วยมือ — ตัวอย่าง 3×3" aria-label="สไลด์ 7: คำนวณ Mean ด้วยมือ">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WORKED EXAMPLE</p>
+            <h2 class="slide-title">คำนวณ Mean <span class="grad-text">ด้วยมือ</span></h2>
+            <p class="slide-subtitle">ตัวอย่างจาก PDF — ภาพ patch 3×3 กรองด้วย mean kernel (ทุกช่อง = 1)</p>
+
+            <div class="visual-box">
+              <span class="vb-label">patch 3×3</span>
+              <pre class="code-block">[ 5  4  5 ]
+[ 2  1  2 ]
+[ 5  4  5 ]</pre>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>1</b><span>รวมทุกค่า: 5+4+5 + 2+1+2 + 5+4+5 = 33</span></div>
+                <div class="step-box"><b>2</b><span>หารด้วยจำนวนพิกเซล: 33 ÷ 9 = 3.67</span></div>
+                <div class="step-box"><b>3</b><span>ปัดเป็นจำนวนเต็ม: 3.67 ≈ <b class="cyan">4</b> ← ค่าใหม่ของพิกเซลกลาง</span></div>
+              </div>
+              <pre class="code-block mt-3"># สูตร: (1/9) × (5+4+5+2+1+2+5+4+5) = 33/9 ≈ 4</pre>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="hash" class="cyan"></i>จุดกลางเดิม = 1</h3>
+                <p class="card-text">ค่า noise (1) โดน "ดึงขึ้น" เป็น 4 เพราะพิกเซลรอบข้างสูงกว่า — ผลคือ noise ถูกลด</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="calculator" class="cyan"></i>ถ้า kernel มีน้ำหนัก</h3>
+                <p class="card-text">คูณน้ำหนักก่อนรวม เช่น kernel [1 2 1;2 4 2;1 2 1] → ใช้ (1×5)+(2×4)+… แล้วหารผลรวมน้ำหนัก</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-4">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>เทคนิคสอบ</b>โจทย์ให้ patch 3×3 + mean kernel → รวม 9 ค่าแล้วหาร 9 เสมอ (kernel น้ำหนักรวม 1)</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 8 · BIGGER MASK ============ -->
+        <section class="slide-view" data-title="Mask ใหญ่ขึ้น → เบลอมากขึ้น" aria-label="สไลด์ 8: Mask ใหญ่ขึ้น">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">KERNEL SIZE</p>
+            <h2 class="slide-title">Mask ใหญ่ขึ้น → <span class="grad-text">เบลอมากขึ้น</span></h2>
+            <p class="slide-subtitle">ยิ่ง mask ใหญ่ ยิ่งเฉลี่ยพิกเซลมาก → ภาพเรียบ (เบลอ) มากขึ้น แต่รายละเอียดหาย</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ขนาด mask เทียบผล</span>
+                <div class="flex mt-3" style="gap:12px;align-items:center">
+                  <div style="flex:1;text-align:center">
+                    <div style="height:90px;border-radius:10px;background:linear-gradient(135deg,#334155,#94a3b8)"></div>
+                    <p class="text-3 mt-2" style="font-size:12px">3×3 — เบลอนิดหน่อย</p>
+                  </div>
+                  <div style="flex:1;text-align:center">
+                    <div style="height:90px;border-radius:10px;background:linear-gradient(135deg,#334155,#94a3b8);filter:blur(3px)"></div>
+                    <p class="text-3 mt-2" style="font-size:12px">5×5 — เบลอปานกลาง</p>
+                  </div>
+                  <div style="flex:1;text-align:center">
+                    <div style="height:90px;border-radius:10px;background:linear-gradient(135deg,#334155,#94a3b8);filter:blur(8px)"></div>
+                    <p class="text-3 mt-2" style="font-size:12px">9×9 — เบลอมาก</p>
+                  </div>
+                </div>
+                <pre class="code-block mt-3">blur3 = cv2.blur(img, (3, 3))
+blur9 = cv2.blur(img, (9, 9))</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="expand" class="cyan"></i>ทำไมเบลอมากขึ้น?</h3>
+                  <p class="card-text">mask 9×9 ใช้พิกเซล 81 ตัวในการเฉลี่ย — ค่าไหนก็ตามโดน "กลืน" ด้วยเพื่อนบ้านจำนวนมาก</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>ข้อควรรู้</h3>
+                  <p class="card-text">mask ใหญ่เกิน → วัตถุเล็ก ๆ (รายละเอียด) อาจหายไปทั้งชิ้น — เลือกขนาดให้พอดีกับงาน</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>mask ใหญ่ = เบลอมาก = รายละเอียดหาย · ใช้ 3×3/5×5 เป็นค่าเริ่มต้น</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 9 · GAUSSIAN ============ -->
+        <section class="slide-view" data-title="Gaussian Filter — cv2.GaussianBlur()" aria-label="สไลด์ 9: Gaussian Filter">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">GAUSSIAN · LINEAR</p>
+            <h2 class="slide-title">Gaussian Filter <span class="grad-text">— เบลอถ่วงน้ำหนัก</span></h2>
+            <p class="slide-subtitle">เหมือน mean แต่พิกเซลใกล้กลางมีน้ำหนักมากกว่า (รูปกระดิ่ง) — เบลอเนียนกว่ามาก</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">Gaussian Kernel 3×3</span>
+                <pre class="code-block">[ 1  2  1 ]
+[ 2  4  2 ] × (1/16)
+[ 1  2  1 ]
+
+blur = cv2.GaussianBlur(img, (5, 5), 0)</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>ตรงกลาง 4</b><span>พิกเซลกลางมีน้ำหนักมากสุด</span></div>
+                  <div class="step-box"><b>ขอบ 1</b><span>พิกเซลไกลมีน้ำหนักน้อยลง</span></div>
+                  <div class="step-box"><b>÷ 16</b><span>ผลรวมน้ำหนัก = 16 (1+2+1+2+4+2+1+2+1)</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="chart-line" class="cyan"></i>น้ำหนักรูปกระดิ่ง</h3>
+                  <p class="card-text">ค่ามาจากฟังก์ชัน Gaussian (normal distribution) — จุดใกล้ศูนย์กลางสำคัญกว่าจุดไกล</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="shield-check" class="cyan"></i>ดีกว่า Mean ตรงไหน?</h3>
+                  <p class="card-text">เบลอเนียน ไม่เกิด artifact แบบเหลี่ยม ๆ · ใช้บ่อยสุดก่อนทำ edge detection</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Gaussian = ถ่วงน้ำหนักรูปกระดิ่ง · kernel 3×3 [1 2 1;2 4 2;1 2 1]/16 · <code>cv2.GaussianBlur(img,(5,5),0)</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 10 · LOWPASS ============ -->
+        <section class="slide-view" data-title="Smoothing = Lowpass Filter" aria-label="สไลด์ 10: Lowpass">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FREQUENCY VIEW</p>
+            <h2 class="slide-title">Smoothing = <span class="grad-text">Lowpass Filter</span></h2>
+            <p class="slide-subtitle">ภาพมองเป็น "ความถี่": บริเวณเรียบ = ความถี่ต่ำ · ขอบ/รายละเอียด/noise = ความถี่สูง</p>
+
+            <div class="visual-box">
+              <span class="vb-label">ความถี่สูง vs ต่ำ ในภาพ</span>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>Low frequency</b><span>บริเวณที่ค่าพิกเซลเปลี่ยนช้า — พื้นเรียบ, ท้องฟ้า, ผนัง</span></div>
+                <div class="step-box"><b>High frequency</b><span>บริเวณที่ค่าเปลี่ยนเร็ว — ขอบวัตถุ, รายละเอียดเล็ก, noise</span></div>
+              </div>
+              <div class="tbl-wrap mt-3">
+                <table class="tbl">
+                  <tr><th>Filter</th><th>ผ่าน</th><th>บล็อก</th><th>ผลภาพ</th></tr>
+                  <tr><td><b>Lowpass (LPF)</b></td><td>ความถี่ต่ำ</td><td>ความถี่สูง</td><td>เบลอ (smoothing)</td></tr>
+                  <tr><td><b>Highpass (HPF)</b></td><td>ความถี่สูง</td><td>ความถี่ต่ำ</td><td>คม/ขอบ (sharpening)</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="chevrons-down" class="cyan"></i>ทำไม Mean/Gaussian เป็น Lowpass?</h3>
+                <p class="card-text small">เฉลี่ยพิกเซล = ลดการเปลี่ยนแปลงเร็ว (high freq) แต่เก็บบริเวณเรียบ (low freq) ไว้</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="chevrons-up" class="cyan"></i>แล้ว Highpass คือใคร?</h3>
+                <p class="card-text small">Sobel / Laplacian (บทถัดไป) — ลบส่วนเรียบ เหลือแต่ส่วนที่เปลี่ยนเร็ว = ขอบ</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 11 · MEDIAN ============ -->
+        <section class="slide-view" data-title="Median Filter — cv2.medianBlur()" aria-label="สไลด์ 11: Median Filter">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">NON-LINEAR</p>
+            <h2 class="slide-title">Median Filter <span class="grad-text">— เรียงค่าแล้วเอาตรงกลาง</span></h2>
+            <p class="slide-subtitle">เอาพิกเซลใน neighborhood มาเรียงลำดับ แล้วใช้ค่าตรงกลาง (median) แทนที่พิกเซลกลาง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ตัวอย่าง 3×3</span>
+                <pre class="code-block">ค่าภายใต้ mask:
+[ 10  12  255 ]   ← 255 คือ noise (จุดขาว)
+[ 11  13   11 ]
+[ 12  10   14 ]
+
+เรียง: 10 10 11 11 12 12 13 14 255
+Median (ค่าที่ 5) = 12 → พิกเซลกลาง = 12</pre>
+                <pre class="code-block mt-3">median = cv2.medianBlur(img, 3)   # ksize = 3</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="list-ordered" class="cyan"></i>ทำไมถึงลบ Salt &amp; Pepper ได้?</h3>
+                  <p class="card-text">จุดขาว 255 กับจุดดำ 0 เป็นค่า "สุดโต่ง" — ตอนเรียงลำดับมันจะไปอยู่ปลายสุด ไม่เคยเป็นค่าตรงกลาง</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="shield-check" class="cyan"></i>ข้อดี</h3>
+                  <p class="card-text">ลบ noise แบบจุดได้ดี โดยที่ขอบไม่เบลอมาก — ต่างจาก mean ที่เบลอขอบ</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Median = non-linear · เรียงค่า → เอาค่ากลาง · เก่งสุดกับ Salt &amp; Pepper · <code>cv2.medianBlur(img, 3)</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 12 · MEDIAN VS MEAN ============ -->
+        <section class="slide-view" data-title="Median vs Mean — Salt & Pepper" aria-label="สไลด์ 12: Median vs Mean">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">COMPARISON</p>
+            <h2 class="slide-title">Median vs <span class="grad-text">Mean</span></h2>
+            <p class="slide-subtitle">สอง filter ที่ใช้ลบ noise เหมือนกัน แต่หลักการและผลต่างกันชัดเจน</p>
+
+            <div class="tbl-wrap mt-4">
+              <table class="tbl">
+                <tr><th>หัวข้อ</th><th>Mean</th><th>Median</th></tr>
+                <tr><td>ชนิด</td><td>Linear</td><td>Non-linear</td></tr>
+                <tr><td>คำนวณ</td><td>ค่าเฉลี่ย (sum ÷ n)</td><td>ค่ากลางหลังเรียงลำดับ</td></tr>
+                <tr><td>Salt &amp; Pepper</td><td>จุด 255 ยังดึงค่าเฉลี่ยขึ้น</td><td><b class="cyan">ลบได้ดีมาก</b> (ค่าสุดโต่งไปอยู่ปลาย)</td></tr>
+                <tr><td>ขอบ (edge)</td><td>เบลอ</td><td>รักษาได้ดีกว่า</td></tr>
+                <tr><td>โค้ด</td><td>cv2.blur()</td><td>cv2.medianBlur()</td></tr>
+              </table>
+            </div>
+
+            <div class="tip-box tip-remember mt-4">
+              <i data-lucide="lightbulb"></i>
+              <div><b>จำง่าย ๆ</b>Mean = "เฉลี่ย" (linear) · Median = "ค่ากลาง" (non-linear) · ภาพมีจุดขาว-ดำกระโดด → เลือก Median ก่อนเสมอ</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 13 · BILATERAL ============ -->
+        <section class="slide-view" data-title="Bilateral Filter — เบลอแต่ขอบคม" aria-label="สไลด์ 13: Bilateral Filter">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EDGE-PRESERVING · NON-LINEAR</p>
+            <h2 class="slide-title">Bilateral Filter <span class="grad-text">— เบลอแต่ขอบคม</span></h2>
+            <p class="slide-subtitle">เบลอลด noise แต่ไม่เบลอขอบ — ถ่วงน้ำหนักด้วยระยะทาง <b>และ</b> ความต่างของค่าพิกเซล</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">หลักการถ่วง 2 อย่าง</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>ระยะทาง</b><span>พิกเซลไกลจากกลาง → น้ำหนักน้อย (เหมือน gaussian)</span></div>
+                  <div class="step-box"><b>ความต่างค่า</b><span>ค่าต่างจากกลางมาก (ขอบ!) → น้ำหนักน้อย → ไม่ถูกเฉลี่ย</span></div>
+                  <div class="step-box"><b>ผล</b><span>พื้นที่เรียบเบลอ แต่ขอบถูกรักษาไว้</span></div>
+                </div>
+                <pre class="code-block mt-3">bilateral = cv2.bilateralFilter(img, d=9,
+                                sigmaColor=75, sigmaSpace=75)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="shield-check" class="cyan"></i>ต่างจาก Gaussian ยังไง?</h3>
+                  <p class="card-text">Gaussian เบลอทุกอย่างรวมขอบ · Bilateral ดู "ค่าต่างกันมากไหม" ก่อนเบลอ — ค่าต่างมาก (ขอบ) ไม่เบลอ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>ข้อเสีย</h3>
+                  <p class="card-text">ช้ากว่า filter ทั่วไปมาก (ต้องคำนวณน้ำหนัก 2 มิติทุกจุด) — ภาพใหญ่ใช้เวลานาน</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>โจทย์ "เบลอแต่รักษาขอบ" → Bilateral · ใช้ sigmaColor/sigmaSpace ควบคุม</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 14 · EDGE / GRADIENT ============ -->
+        <section class="slide-view" data-title="Edge คืออะไร — Gradient" aria-label="สไลด์ 14: Edge คืออะไร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EDGE DETECTION</p>
+            <h2 class="slide-title">Edge <span class="grad-text">คืออะไร?</span></h2>
+            <p class="slide-subtitle">ขอบ = จุดที่ความเข้ม (intensity) เปลี่ยนเร็ว — ตรงรอยต่อระหว่างวัตถุกับพื้นหลัง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ค่าพิกเซลตัดขอบ</span>
+                <pre class="code-block">10 10 10 | 200 200 200
+10 10 10 | 200 200 200
+10 10 10 | 200 200 200
+
+ค่ากระโดดจาก 10 → 200 ตรงเส้นขีด
+ตรงนี้คือ Edge (การเปลี่ยนแปลงมาก)</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>Gradient</b><span>อัตราการเปลี่ยนของค่า — คำนวณจากผลต่างของพิกเซลข้างเคียง</span></div>
+                  <div class="step-box"><b>ขอบ</b><span>จุดที่ gradient สูง (เปลี่ยนเร็ว)</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="ruler" class="cyan"></i>วัดการเปลี่ยนยังไง?</h3>
+                  <p class="card-text">ใช้ derivative (อนุพันธ์): ลำดับที่ 1 = Sobel · ลำดับที่ 2 = Laplacian — 2 วิธีหลักในบทนี้</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="map" class="cyan"></i>เอาไปใช้อะไร?</h3>
+                  <p class="card-text">หาเส้นขอบวัตถุ → segmentation · OCR · ระบบ Robot Vision — ขอบคือ "โครงสร้าง" ของภาพ</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Edge = จุดที่ intensity เปลี่ยนเร็ว = gradient สูง · ตรวจจับด้วยอนุพันธ์อันดับ 1/2</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 15 · SOBEL ============ -->
+        <section class="slide-view" data-title="อนุพันธ์อันดับ 1 — Sobel" aria-label="สไลด์ 15: Sobel">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FIRST-ORDER DERIVATIVE</p>
+            <h2 class="slide-title">อนุพันธ์อันดับ 1 — <span class="grad-text">Sobel</span></h2>
+            <p class="slide-subtitle">First-order derivative — วัด "ความชัน" ของค่าพิกเซลด้วยผลต่างถ่วงน้ำหนัก</p>
+
+            <div class="visual-box">
+              <span class="vb-label">แนวคิด: ความชัน (slope)</span>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>f(x+1) − f(x−1)</b><span>ค่าข้างขวาลบข้างซ้าย — ค่าคงที่ = 0 · ค่ากระโดด = ค่าใหญ่</span></div>
+                <div class="step-box"><b>Gradient สูง</b><span>ค่าพิกเซลเปลี่ยนเร็ว = อยู่บนขอบ</span></div>
+                <div class="step-box"><b>Gradient ≈ 0</b><span>บริเวณเรียบ ไม่มีขอบ</span></div>
+              </div>
+              <pre class="code-block mt-3">sobel = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+# dx=1, dy=0 → gradient แกน x</pre>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="trending-up" class="cyan"></i>อนุพันธ์อันดับ 1</h3>
+                <p class="card-text small">ตอบ "ค่ากำลังเปลี่ยนเร็วแค่ไหน" — ขอบจะออกมาเป็นเส้นหนา ๆ (ridge) เพราะค่าสูงตลอดบริเวณที่เปลี่ยน</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="shield-check" class="cyan"></i>ทำไมถ่วงน้ำหนัก?</h3>
+                <p class="card-text small">kernel Sobel ให้น้ำหนักพิกเซลกลางมากกว่า (2) → ลดผลของ noise พร้อมจับขอบได้</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 16 · SOBEL_X / SOBEL_Y ============ -->
+        <section class="slide-view" data-title="Sobel_x / Sobel_y — ตรวจจับขอบคนละแกน" aria-label="สไลด์ 16: Sobel_x / Sobel_y">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">SOBEL KERNELS</p>
+            <h2 class="slide-title">Sobel_x / <span class="grad-text">Sobel_y</span></h2>
+            <p class="slide-subtitle">สอง kernel จับขอบคนละทิศ — จำจากเครื่องหมายบวกลบว่าชี้แกนไหน</p>
+
+            <div class="visual-box">
+              <span class="vb-label">สอง kernel หลัก</span>
+              <pre class="code-block">Sobel_x  (จับขอบแนวดิ่ง / Vertical edges)
+[ -1  0  +1 ]
+[ -2  0  +2 ]
+[ -1  0  +1 ]
+
+Sobel_y  (จับขอบแนวนอน / Horizontal edges)
+[ -1  -2  -1 ]
+[  0   0   0 ]
+[ +1  +2  +1 ]</pre>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>Sobel_x</b><span>คำนวณ gradient แกน x (ซ้าย-ขวา) → เห็นเส้นขอบแนวตั้ง</span></div>
+                <div class="step-box"><b>Sobel_y</b><span>คำนวณ gradient แกน y (บน-ล่าง) → เห็นเส้นขอบแนวนอน</span></div>
+              </div>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="columns" class="cyan"></i>จำง่าย ๆ</h3>
+                <p class="card-text small">kernel ที่มีเลขเรียงตาม <b>แถว</b> (-1 0 +1 แนวนอน) = Sobel_x · kernel ที่มีเลขเรียงตาม <b>คอลัมน์</b> = Sobel_y</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="code" class="cyan"></i>โค้ด</h3>
+                <pre class="code-block" style="font-size:12.5px">gx = cv2.Sobel(gray, cv2.CV_64F, 1, 0)  # x
+Gy = cv2.Sobel(gray, cv2.CV_64F, 0, 1)  # y
+mag = cv2.magnitude(gx, gy)             # รวมทั้งสอง</pre>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-4">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>เทคนิคสอบ</b>ถาม "vertical edges" → Sobel_x (แกน x) · "horizontal edges" → Sobel_y (แกน y) — ตรงข้ามกับที่คิด!</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 17 · LAPLACIAN ============ -->
+        <section class="slide-view" data-title="อนุพันธ์อันดับ 2 — Laplacian" aria-label="สไลด์ 17: Laplacian">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">SECOND-ORDER DERIVATIVE</p>
+            <h2 class="slide-title">อนุพันธ์อันดับ 2 — <span class="grad-text">Laplacian</span></h2>
+            <p class="slide-subtitle">Second-order derivative — วัด "อัตราการเปลี่ยนของอัตราการเปลี่ยน" — ขอบออกมาเป็นเส้นบาง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">แนวคิด</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>∇²f</b><span>Laplacian operator = ผลรวมของอนุพันธ์อันดับ 2 ทั้งแกน x และ y</span></div>
+                  <div class="step-box"><b>จุดเปลี่ยนทิศ</b><span>ขอบ = จุดที่ gradient เปลี่ยนจากเพิ่มเป็นลด (zero crossing)</span></div>
+                  <div class="step-box"><b>ผล</b><span>ขอบบางเฉียบ + ตรวจจับได้ทุกทิศทาง (isotropic)</span></div>
+                </div>
+                <pre class="code-block mt-3">lap = cv2.Laplacian(gray, cv2.CV_64F)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="focus" class="cyan"></i>ต่างจาก Sobel?</h3>
+                  <p class="card-text">Sobel = อันดับ 1 (เส้นขอบหนา) · Laplacian = อันดับ 2 (เส้นขอบบาง) · Laplacian ไวต่อ noise มากกว่า</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="crosshair" class="cyan"></i>Isotropic</h3>
+                  <p class="card-text">จับขอบได้ทุกทิศเท่ากัน (ไม่ต้องมี kernel แยกแกนเหมือน Sobel)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>อันดับ 1 = Sobel (หนา) · อันดับ 2 = Laplacian (บาง, ทุกทิศ, ไว noise) · <code>cv2.Laplacian()</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 18 · LAPLACIAN KERNELS ============ -->
+        <section class="slide-view" data-title="Laplacian Kernel 4 แบบ — Flat Region = 0" aria-label="สไลด์ 18: Laplacian Kernel">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">LAPLACIAN KERNELS</p>
+            <h2 class="slide-title">Laplacian Kernel <span class="grad-text">4 แบบ</span></h2>
+            <p class="slide-subtitle">หัวใจ: ตรงกลางเป็นลบ รอบข้างเป็นบวก — ผลรวม = 0 → บริเวณเรียบได้ 0</p>
+
+            <div class="visual-box">
+              <span class="vb-label">4 kernels ที่พบบ่อย (จาก PDF)</span>
+              <pre class="code-block">[ 0 -1  0 ]     [ -1 -1 -1 ]     [  0 -1  0 ]     [ -1 -1 -1 ]
+[ -1  4 -1 ]     [ -1  8 -1 ]     [ -1  4 -1 ]     [ -1  8 -1 ]
+[ 0 -1  0 ]     [ -1 -1 -1 ]     [  0 -1  0 ]     [ -1 -1 -1 ]
+ 4-neighbor        8-neighbor       4-neighbor       8-neighbor</pre>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>Flat Region = 0</b><span>ค่าทุกช่องเท่ากัน → ผลรวมถ่วงน้ำหนักเป็น 0 เสมอ (กลางลบกับรอบบวกหักล้าง)</span></div>
+                <div class="step-box"><b>ผลรวม kernel = 0</b><span>จึงไม่เปลี่ยนค่าบริเวณเรียบ — ตอบเฉพาะที่ "ต่าง" เท่านั้น</span></div>
+              </div>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="grid" class="cyan"></i>4-neighbor</h3>
+                <p class="card-text small">กลาง 4 / −1 รอบ 4 ทิศ (บน ล่าง ซ้าย ขวา) · kernel กลาง [0 −1 0; −1 4 −1; 0 −1 0]</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="grid-3x3" class="cyan"></i>8-neighbor</h3>
+                <p class="card-text small">กลาง 8 / −1 รอบ 8 ทิศ (รวมมุม) · kernel กลาง [−1 −1 −1; −1 8 −1; −1 −1 −1] — แรงกว่า ไว noise กว่า</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-4">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>เทคนิคสอบ</b>kernel Laplacian ผลรวม = 0 · ตรงกลางลบ (4 หรือ 8) · บริเวณเรียบตอบ 0</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 19 · SHARPENING ============ -->
+        <section class="slide-view" data-title="Sharpening — g = f − ∇²f" aria-label="สไลด์ 19: Sharpening">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">SHARPENING</p>
+            <h2 class="slide-title">Sharpening — <span class="grad-text">g = f − ∇²f</span></h2>
+            <p class="slide-subtitle">ทำให้ขอบคมขึ้น — เอาภาพเดิมลบด้วย Laplacian (ซึ่งเน้นขอบ) แล้วขอบจะชัดขึ้น</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">สูตร</span>
+                <pre class="code-block">g = f − ∇²f
+
+# f     = ภาพเดิม
+# ∇²f   = Laplacian (ส่วนที่เป็นขอบ)
+# g     = ภาพที่คมขึ้น</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>หา Laplacian ของภาพ (∇²f) — ได้ส่วนขอบ</span></div>
+                  <div class="step-box"><b>2</b><span>ลบออกจากภาพเดิม (f − ∇²f)</span></div>
+                  <div class="step-box"><b>3</b><span>ผล: ขอบเดิม + ขอบที่ถูกเน้น = ภาพคมขึ้น</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="focus" class="cyan"></i>ทำไมลบแล้วคม?</h3>
+                  <p class="card-text">Laplacian เป็นบวกตรงขอบ (ค่ากระโดด) — ลบออกทำให้ฝั่งมืดมืดลง ฝั่งสว่างสว่างขึ้น = ขอบชัด</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="code" class="cyan"></i>โค้ด</h3>
+                  <pre class="code-block" style="font-size:12.5px">lap = cv2.Laplacian(gray, cv2.CV_64F)
+sharp = gray - lap           # g = f − ∇²f
+sharp = np.clip(sharp, 0, 255).astype("uint8")</pre>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Sharpen = g = f − ∇²f · ใช้ Laplacian (ขอบ) มาประกอบกับภาพเดิม</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 20 · CANNY ============ -->
+        <section class="slide-view" data-title="Canny Edge Detection" aria-label="สไลด์ 20: Canny">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">CANNY EDGE DETECTION</p>
+            <h2 class="slide-title">Canny <span class="grad-text">Edge Detection</span></h2>
+            <p class="slide-subtitle">อัลกอริทึมหาขอบขั้นสูง — หลายขั้นตอน ให้ขอบบาง ต่อเนื่อง และแม่นยำ</p>
+
+            <div class="visual-box">
+              <span class="vb-label">5 ขั้นตอนของ Canny</span>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>1</b><span>Gaussian Blur — ลด noise ก่อน (สำคัญมาก)</span></div>
+                <div class="step-box"><b>2</b><span>หา Gradient (Sobel x + y) — ความแรงและทิศของขอบ</span></div>
+                <div class="step-box"><b>3</b><span>Non-maximum suppression — ทำให้ขอบบาง (เก็บเฉพาะจุดที่แรงสุดตามทิศ)</span></div>
+                <div class="step-box"><b>4</b><span>Double threshold — แบ่งขอบแรง/อ่อน (สองค่าขีด)</span></div>
+                <div class="step-box"><b>5</b><span>Hysteresis — ต่อขอบ: ขอบอ่อนที่ติดกับขอบแรงถูกรักษา</span></div>
+              </div>
+              <pre class="code-block mt-3">edges = cv2.Canny(gray, 100, 200)  # threshold1, threshold2
+# ใช้กับ OCR, Robot Vision, หา contour ต่อ</pre>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="git-branch" class="cyan"></i>Double threshold</h3>
+                <p class="card-text small">ค่า gradient &gt; 200 = ขอบแรง (เก็บแน่นอน) · &lt; 100 = ทิ้ง · ระหว่างกลาง = เก็บถ้าต่อกับขอบแรง</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="map" class="cyan"></i>ใช้ที่ไหน</h3>
+                <p class="card-text small">OCR (อ่านตัวหนังสือ) · Robot Vision · งานที่ต้องขอบสะอาดต่อเนื่อง — เป็นตัวเลือกมาตรฐาน</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 21 · FOURIER ============ -->
+        <section class="slide-view" data-title="Fourier Transform — โลกความถี่" aria-label="สไลด์ 21: Fourier Transform">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FOURIER TRANSFORM</p>
+            <h2 class="slide-title">Fourier Transform <span class="grad-text">— โลกความถี่</span></h2>
+            <p class="slide-subtitle">ย่อยภาพออกเป็นคลื่น sine/cosine — ดูภาพในมุมของ "ความถี่" แทนพิกเซล</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">สองมุมมองของภาพเดียวกัน</span>
+                <div class="tbl-wrap mt-3">
+                  <table class="tbl">
+                    <tr><th>Domain</th><th>แกนแทน</th><th>ใช้ทำอะไร</th></tr>
+                    <tr><td><b>Spatial Domain</b></td><td>ตำแหน่ง (x, y) + ความสว่าง</td><td>กรองแบบพิกเซล (บทก่อนหน้า)</td></tr>
+                    <tr><td><b>Frequency Domain</b></td><td>ความถี่ (low→high)</td><td>กรองแบบความถี่ (LPF/HPF)</td></tr>
+                  </table>
+                </div>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>Low frequency</b><span>บริเวณเรียบ — ความสว่างเปลี่ยนช้า</span></div>
+                  <div class="step-box"><b>High frequency</b><span>ขอบ รายละเอียด noise — เปลี่ยนเร็ว</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="activity" class="cyan"></i>แต่ละจุด = 1 ความถี่</h3>
+                  <p class="card-text">ผลลัพธ์ (Fourier domain) แต่ละตำแหน่งแทนคลื่นความถี่หนึ่ง ๆ — ภาพกับ Fourier มีขนาดเท่ากัน</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="briefcase" class="cyan"></i>ใช้ที่ไหน</h3>
+                  <p class="card-text">image analysis · filtering · reconstruction · compression — งานกรองความถี่ทั้งหมด</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Fourier = ย่อยภาพเป็น sine/cosine · สลับ spatial ↔ frequency · ภาพ/ผลลัพธ์ขนาดเท่ากัน</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 22 · FFT / IFFT ============ -->
+        <section class="slide-view" data-title="FFT / IFFT — Workflow 4 ขั้น" aria-label="สไลด์ 22: FFT / IFFT">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FFT WORKFLOW</p>
+            <h2 class="slide-title">FFT / IFFT <span class="grad-text">— Workflow 4 ขั้น</span></h2>
+            <p class="slide-subtitle">FFT = Fast Fourier Transform (เร็ว) · IFFT = Inverse (แปลงกลับ) — ไป-กลับระหว่าง 2 โลก</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">แปลงไป (FFT)</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>อินพุต: ภาพ spatial domain (ค่าความเข้ม)</span></div>
+                  <div class="step-box"><b>2</b><span>ทำ FFT (= DFT แบบเร็ว) → frequency domain</span></div>
+                  <div class="step-box"><b>3</b><span>fftshift — ย้าย DC มาตรงกลางภาพ</span></div>
+                  <div class="step-box"><b>4</b><span>กรองใน frequency domain (LPF / HPF)</span></div>
+                </div>
+                <pre class="code-block mt-3">import numpy as np
+f = np.fft.fft2(gray)        # 2D FFT
+f_shift = np.fft.fftshift(f) # DC มาตรงกลาง</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="undo-2" class="cyan"></i>แปลงกลับ (IFFT)</h3>
+                  <p class="card-text">ย้อนกลับ: ifftshift (เลื่อนกลับ) → IFFT → ได้ภาพ spatial domain กลับมา</p>
+                  <pre class="code-block" style="font-size:12.5px;margin-top:8px">img_back = np.fft.ifft2(
+    np.fft.ifftshift(f_filtered)).real</pre>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>FFT vs DFT</h3>
+                  <p class="card-text">DFT = สูตรเต็ม (ช้า) · FFT = อัลกอริทึมที่คำนวณ DFT ได้เร็วมาก — ผลลัพธ์เหมือนกัน</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ลำดับ: FFT → fftshift → กรอง → ifftshift → IFFT · <code>fft2/ifft2/fftshift</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 23 · MAGNITUDE ============ -->
+        <section class="slide-view" data-title="Magnitude Spectrum — อ่านยังไง" aria-label="สไลด์ 23: Magnitude Spectrum">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">MAGNITUDE SPECTRUM</p>
+            <h2 class="slide-title">Magnitude Spectrum <span class="grad-text">— อ่านยังไง</span></h2>
+            <p class="slide-subtitle">ขนาด (magnitude) ของแต่ละความถี่ — บอกว่าภาพมี "เนื้อหาความถี่" เท่าไรตรงไหน</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ภาพ spectrum หลัง fftshift</span>
+                <div class="center mt-3" style="flex-direction:column;gap:10px">
+                  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-width:260px">
+                    <div style="aspect-ratio:1;border-radius:4px;background:#0f172a"></div><div style="aspect-ratio:1;border-radius:4px;background:#1e293b"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#94a3b8"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#1e293b"></div><div style="aspect-ratio:1;border-radius:4px;background:#0f172a"></div>
+                    <div style="aspect-ratio:1;border-radius:4px;background:#1e293b"></div><div style="aspect-ratio:1;border-radius:4px;background:#f8fafc"></div><div style="aspect-ratio:1;border-radius:4px;background:#e2e8f0"></div><div style="aspect-ratio:1;border-radius:4px;background:#cbd5e1"></div><div style="aspect-ratio:1;border-radius:4px;background:#e2e8f0"></div><div style="aspect-ratio:1;border-radius:4px;background:#f8fafc"></div><div style="aspect-ratio:1;border-radius:4px;background:#1e293b"></div>
+                    <div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#e2e8f0"></div><div style="aspect-ratio:1;border-radius:4px;background:#64748b"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#64748b"></div><div style="aspect-ratio:1;border-radius:4px;background:#e2e8f0"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div>
+                    <div style="aspect-ratio:1;border-radius:4px;background:#94a3b8"></div><div style="aspect-ratio:1;border-radius:4px;background:#cbd5e1"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#0f172a"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#cbd5e1"></div><div style="aspect-ratio:1;border-radius:4px;background:#94a3b8"></div>
+                    <div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#e2e8f0"></div><div style="aspect-ratio:1;border-radius:4px;background:#64748b"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#64748b"></div><div style="aspect-ratio:1;border-radius:4px;background:#e2e8f0"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div>
+                    <div style="aspect-ratio:1;border-radius:4px;background:#1e293b"></div><div style="aspect-ratio:1;border-radius:4px;background:#f8fafc"></div><div style="aspect-ratio:1;border-radius:4px;background:#e2e8f0"></div><div style="aspect-ratio:1;border-radius:4px;background:#cbd5e1"></div><div style="aspect-ratio:1;border-radius:4px;background:#e2e8f0"></div><div style="aspect-ratio:1;border-radius:4px;background:#f8fafc"></div><div style="aspect-ratio:1;border-radius:4px;background:#1e293b"></div>
+                    <div style="aspect-ratio:1;border-radius:4px;background:#0f172a"></div><div style="aspect-ratio:1;border-radius:4px;background:#1e293b"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#94a3b8"></div><div style="aspect-ratio:1;border-radius:4px;background:#334155"></div><div style="aspect-ratio:1;border-radius:4px;background:#1e293b"></div><div style="aspect-ratio:1;border-radius:4px;background:#0f172a"></div>
+                  </div>
+                  <p class="text-3" style="font-size:12px">จุดสว่างตรงกลาง = DC (ความสว่างเฉลี่ย) · ยิ่งไกลกลาง = ความถี่สูง</p>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="circle-dot" class="cyan"></i>กลางภาพ = DC</h3>
+                  <p class="card-text">DC component (ความถี่ 0) = ความสว่างเฉลี่ยของภาพ — สว่างสุดเสมอ หลัง fftshift อยู่ตรงกลาง</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="map-pin" class="cyan"></i>อ่านภาพจริง</h3>
+                  <p class="card-text">Cameraman (ภาพธรรมชาติ) → พลังความถี่ต่ำรวมกลาง · Checkerboard → จุดความถี่สูงเด่น ๆ · Noise → จุดกระจาย</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>กลาง = DC/ความสว่างเฉลี่ย · ใกล้กลาง = ความถี่ต่ำ (เรียบ) · ไกลกลาง = ความถี่สูง (ขอบ/noise)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 24 · PHASE ============ -->
+        <section class="slide-view" data-title="Phase Spectrum — ข้อมูลตำแหน่ง" aria-label="สไลด์ 24: Phase Spectrum">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">PHASE SPECTRUM</p>
+            <h2 class="slide-title">Phase Spectrum <span class="grad-text">— ข้อมูลตำแหน่ง</span></h2>
+            <p class="slide-subtitle">นอกจากขนาด (magnitude) ผลลัพธ์ FFT ยังมีมุม (phase) — บอกว่าโครงสร้างอยู่ตรงไหน</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">Magnitude vs Phase</span>
+                <div class="tbl-wrap mt-3">
+                  <table class="tbl">
+                    <tr><th>ส่วน</th><th>บอกอะไร</th><th>เก็บจาก</th></tr>
+                    <tr><td><b>Magnitude</b></td><td>ความแรงของแต่ละความถี่</td><td>|F(u,v)| = √(Re² + Im²)</td></tr>
+                    <tr><td><b>Phase</b></td><td>ตำแหน่ง (spatial location) ของโครงสร้าง</td><td>atan2(Im, Re)</td></tr>
+                  </table>
+                </div>
+                <pre class="code-block mt-3">mag = np.abs(f_shift)          # magnitude
+phase = np.angle(f_shift)      # phase</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="map" class="cyan"></i>Phase สำคัญขนาดไหน?</h3>
+                  <p class="card-text">ถ้าเก็บแค่ magnitude แล้วคืน phase เป็น 0 → ภาพพัง ไม่รู้ว่าอะไรอยู่ตรงไหน — phase เก็บ "ตำแหน่ง"</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="crosshair" class="cyan"></i>ตัวอย่างจาก PDF</h3>
+                  <p class="card-text">ภาพเส้นแนวตั้ง/แนวนอน (0°/90°) → phase บอกทิศทาง · ภาพ noise → phase กระจายไม่เป็นระเบียบ</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Magnitude = ความแรงของความถี่ · Phase = ตำแหน่งโครงสร้าง — ต้องใช้คู่กัน</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 25 · LPF / HPF ============ -->
+        <section class="slide-view" data-title="Low-pass / High-pass — ใน Frequency Domain" aria-label="สไลด์ 25: Low-pass / High-pass">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FREQUENCY FILTERING</p>
+            <h2 class="slide-title">Low-pass / High-pass <span class="grad-text">— Frequency Domain</span></h2>
+            <p class="slide-subtitle">กรองใน frequency domain = เก็บ/ลบช่วงความถี่ แล้ว IFFT กลับมาเป็นภาพ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">วิธีกรองแบบความถี่</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>FFT + fftshift → frequency domain</span></div>
+                  <div class="step-box"><b>2</b><span>คูณด้วย mask: วงกลมตรงกลาง = LPF · วงแหวนรอบนอก = HPF</span></div>
+                  <div class="step-box"><b>3</b><span>ifftshift + IFFT → ได้ภาพกลับมา</span></div>
+                </div>
+                <pre class="code-block mt-3"># LPF: เก็บความถี่ต่ำ (วงกลมรัศมี r ตรงกลาง)
+mask = np.zeros_like(f_shift)
+mask[h//2-r:h//2+r, w//2-r:w//2+r] = 1
+filtered = f_shift * mask</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="chevrons-down" class="cyan"></i>Low-pass (LPF)</h3>
+                  <p class="card-text">เก็บกลาง (ความถี่ต่ำ) ตัดไกล (สูง) → ภาพเบลอ ลด noise — เหมือน mean/gaussian</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="chevrons-up" class="cyan"></i>High-pass (HPF)</h3>
+                  <p class="card-text">ตัดกลาง เก็บไกล → เหลือขอบ/รายละเอียด — เหมือน sobel/laplacian</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>LPF = เก็บกลาง ภาพเบลอ · HPF = เก็บขอบนอก ภาพคม/ขอบ — คูณ mask แล้ว IFFT</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 26 · WALSH / HADAMARD ============ -->
+        <section class="slide-view" data-title="Walsh / Hadamard Transform" aria-label="สไลด์ 26: Walsh / Hadamard">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">OTHER TRANSFORMS</p>
+            <h2 class="slide-title">Walsh / <span class="grad-text">Hadamard Transform</span></h2>
+            <p class="slide-subtitle">อีกหนึ่งตระกูล transform — ใช้ basis เป็นคลื่นสี่เหลี่ยม (+1/−1) แทน sine/cosine</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">เปรียบเทียบ basis</span>
+                <div class="tbl-wrap mt-3">
+                  <table class="tbl">
+                    <tr><th>Transform</th><th>Basis function</th><th>ค่า</th></tr>
+                    <tr><td><b>Fourier</b></td><td>sine / cosine (คลื่นนุ่ม)</td><td>จำนวนเชิงซ้อน</td></tr>
+                    <tr><td><b>Walsh</b></td><td>คลื่นสี่เหลี่ยม (square wave)</td><td>+1 / −1</td></tr>
+                    <tr><td><b>Hadamard</b></td><td>เมทริกซ์ ±1 (ลำดับ dyadic)</td><td>+1 / −1</td></tr>
+                  </table>
+                </div>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>+1 / −1 เท่านั้น</b><span>คำนวณเร็วมาก (บวก-ลบอย่างเดียว ไม่มีคูณตรีโกณ)</span></div>
+                  <div class="step-box"><b>ใช้กับ</b><span>การบีบอัดข้อมูล, งานที่ต้องการความเร็วสูง</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="zap" class="cyan"></i>ทำไมต้องมี?</h3>
+                  <p class="card-text">Fourier ใช้ sin/cos (ช้า, ซับซ้อน) · Walsh/Hadamard ใช้แค่ +1/−1 → คำนวณไว ฮาร์ดแวร์ทำง่าย</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>จำแค่นี้พอ</h3>
+                  <p class="card-text">basis เป็น square wave ±1 · ต่างจาก Fourier ที่เป็น sine/cosine · เร็ว เหมาะ compression</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Walsh/Hadamard = basis +1/−1 (square wave) · Fourier = sin/cos</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 27 · SUMMARY ============ -->
+        <section class="slide-view" data-title="Chapter Summary — สรุปบทเรียน" aria-label="สไลด์ 27: สรุปบทเรียน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">CHAPTER SUMMARY</p>
+            <h2 class="slide-title">สรุปบทเรียน</h2>
+            <p class="slide-subtitle">เก็บทุกประเด็นสำคัญของบทนี้ไว้ในหน้าเดียว</p>
+            <div class="grid-2 mt-6">
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="layers" class="cyan"></i>Smoothing</h3><p class="card-text small">Mean (เฉลี่ย) · Gaussian (ถ่วงกระดิ่ง) · Median (non-linear) · Bilateral (รักษาขอบ)</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="zap" class="cyan"></i>Noise</h3><p class="card-text small">Salt &amp; Pepper → Median · Gaussian noise → Mean/Gaussian</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="move-horizontal" class="cyan"></i>Edge (อันดับ 1)</h3><p class="card-text small">Sobel_x → ขอบแนวดิ่ง · Sobel_y → ขอบแนวนอน</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="focus" class="cyan"></i>Edge (อันดับ 2)</h3><p class="card-text small">Laplacian ∇²f — kernel ผลรวม 0 · flat region = 0 · Sharpen: g = f − ∇²f</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="git-branch" class="cyan"></i>Canny</h3><p class="card-text small">Blur → Gradient → Suppression → Double threshold → Hysteresis</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="activity" class="cyan"></i>Fourier</h3><p class="card-text small">FFT → fftshift → กรอง (LPF/HPF) → ifftshift → IFFT · Walsh/Hadamard = ±1</p></div>
+            </div>
+            <div class="tip-box tip-remember mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>จำแบบนี้</b>เบลอ = lowpass · ขอบ = highpass · median เก่ง salt &amp; pepper · sobel แยกแกน · laplacian ผลรวม 0</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 28 · CHEAT SHEET ============ -->
+        <section class="slide-view" data-title="Exam Cheat Sheet — สูตรจำก่อนสอบ" aria-label="สไลด์ 28: สูตรจำก่อนสอบ">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXAM CHEAT SHEET</p>
+            <h2 class="slide-title">สูตรจำก่อนสอบ</h2>
+            <p class="slide-subtitle">รวมสูตรและคำสั่งสำคัญ — ทบทวนก่อนสอบในเวลาไม่กี่นาที</p>
+            <div class="cheat-grid mt-6" id="cheatGrid"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 29 · QUIZ 1 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 1 (ข้อ 1–5)" aria-label="สไลด์ 29: แบบทดสอบชุดที่ 1">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 1</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 1</h2>
+            <div id="quiz1" class="mt-4"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 30 · QUIZ 2 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 2 (ข้อ 6–10)" aria-label="สไลด์ 30: แบบทดสอบชุดที่ 2">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 2</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 2</h2>
+            <div id="quiz2" class="mt-4"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 31 · FLASHCARDS ============ -->
+        <section class="slide-view" data-title="Flashcards — ทบทวนการ์ด" aria-label="สไลด์ 31: การ์ดทบทวน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">REVIEW</p>
+            <h2 class="slide-title">Flashcards — <span class="grad-text">ทบทวนการ์ด</span></h2>
+            <p class="slide-subtitle">คลิกการ์ดเพื่อพลิกดูคำตอบ — ใช้ปุ่มซ้าย/ขวาเพื่อสลับใบ</p>
+
+            <div class="split mt-6" style="grid-template-columns:1fr">
+              <div class="flashcard-wrap">
+                <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-label="การ์ดคำถาม — คลิกเพื่อพลิก">
+                  <div class="flashcard-face flashcard-front">
+                    <span class="fc-eyebrow">QUESTION</span>
+                    <p class="fc-q" id="fcQ">—</p>
+                    <span class="flashcard-hint">คลิกเพื่อพลิกการ์ด 🔄</span>
+                  </div>
+                  <div class="flashcard-face flashcard-back">
+                    <span class="fc-eyebrow">ANSWER</span>
+                    <p class="fc-a" id="fcA">—</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-5 wrap" style="justify-content:center">
+              <button class="btn btn-ghost" id="fcPrev"><i data-lucide="chevron-left"></i> Previous</button>
+              <span class="chip" id="fcCounter">1 / 18</span>
+              <button class="btn btn-ghost" id="fcNext">Next <i data-lucide="chevron-right"></i></button>
+              <button class="btn btn-cyan" id="fcShuffle"><i data-lucide="shuffle"></i> Shuffle</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 32 · GLOSSARY ============ -->
+        <section class="slide-view" data-title="Glossary — คำศัพท์" aria-label="สไลด์ 32: คำศัพท์">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">GLOSSARY</p>
+            <h2 class="slide-title">Glossary — <span class="grad-text">คำศัพท์</span></h2>
+            <p class="slide-subtitle">คำศัพท์สำคัญของบทนี้ — ค้นหาได้ด้วยช่องด้านล่าง</p>
+
+            <div class="glossary-wrap mt-6">
+              <div class="glossary-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="glossarySearch" placeholder="ค้นหาคำศัพท์ เช่น sobel, laplacian, fourier..." aria-label="ค้นหาคำศัพท์" />
+              </div>
+              <div class="glossary-count" id="glossaryCount">0 คำศัพท์</div>
+              <div class="glossary-list" id="glossaryList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 33 · POST-LESSON EXAM ============ -->
+        <section class="slide-view quiz-slide" data-title="ข้อสอบหลังเรียน — แบบทดสอบท้ายบท 20 ข้อ" aria-label="สไลด์ 33: ข้อสอบหลังเรียน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">POST-LESSON EXAM</p>
+            <div id="examHeadTitle"><h2 class="slide-title">ข้อสอบหลังเรียน <span class="grad-text">20 ข้อ</span></h2></div>
+            <p class="slide-subtitle" id="examHeadSub">Mean/Gaussian/Median · Sobel/Laplacian/Canny · Fourier (FFT) — เรียนครบทุกสไลด์เพื่อปลดล็อก ดูเฉลยได้ทันทีหลังตอบ</p>
+            <div id="quizExam" class="mt-4"></div>
+          </div>
+        </section>
+
+      </div><!-- /viewport -->
+
+      <!-- ================= BOTTOM BAR ================= -->
+      <footer class="bottombar">
+        <button class="bb-nav-btn" id="prevBtn" aria-label="สไลด์ก่อนหน้า">
+          <i data-lucide="chevron-left"></i><span class="bb-label">ก่อนหน้า</span>
+        </button>
+
+        <div class="bb-center">
+          สไลด์ <b id="bbCounter">1</b> / <b id="bbTotal">33</b>
+        </div>
+
+        <div class="bb-tools">
+          <button class="icon-btn" id="fullscreenBtn" aria-label="ขยายสไลด์เต็มจอ" title="ขยายสไลด์">
+            <i data-lucide="maximize-2"></i>
+          </button>
+          <button class="icon-btn" id="printSlidesBtn" aria-label="พิมพ์สไลด์ทั้งหมด" title="พิมพ์สไลด์ทั้งหมด">
+            <i data-lucide="printer"></i>
+          </button>
+          <button class="icon-btn" id="printCardsBtn" aria-label="พิมพ์การ์ดสรุป" title="พิมพ์การ์ดสรุป">
+            <i data-lucide="file-output"></i>
+          </button>
+        </div>
+
+        <button class="bb-nav-btn next" id="nextBtn" aria-label="สไลด์ถัดไป">
+          <span class="bb-label">ถัดไป</span><i data-lucide="chevron-right"></i>
+        </button>
+      </footer>
+
+    </main>
+  </div><!-- /shell -->
+</div><!-- /app -->
+
+<!-- ================= DRAWER BACKDROP ================= -->
+<div id="drawerBackdrop" aria-hidden="true"></div>
+
+<!-- ================= NOTES PANEL ================= -->
+<aside class="notes-panel" id="notesPanel" aria-label="บันทึกย่อ">
+  <div class="flex items-center justify-between" style="padding:16px 20px;border-bottom:1px solid var(--border)">
+    <div>
+      <b style="font-size:15px">📝 บันทึกย่อ (Notes)</b>
+      <p class="text-3" style="font-size:12px" id="notesLabel">สไลด์ที่กำลังเรียน</p>
+    </div>
+    <button class="icon-btn" id="notesCloseBtn" aria-label="ปิดบันทึกย่อ"><i data-lucide="x"></i></button>
+  </div>
+  <textarea id="notesTextarea" placeholder="เขียนสิ่งที่ต้องจำจากสไลด์นี้...&#10;เช่น:&#10;- new = (alpha × pixel) + beta&#10;- γ<1 สว่าง · γ>1 มืด&#10;- equalizeHist ใช้กับ grayscale" aria-label="บันทึกย่อ"></textarea>
+  <div class="text-3" style="padding:10px 20px 14px;font-size:12px;border-top:1px solid var(--border)">
+    💾 บันทึกอัตโนมัติลงในเครื่องของคุณ (localStorage)
+  </div>
+</aside>
+
+<!-- ================= TOAST ================= -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================= COMPLETION OVERLAY ================= -->
+<div id="completionOverlay" role="dialog" aria-modal="true" aria-label="จบบทเรียน">
+  <div class="card center" style="max-width:440px;position:relative;padding:40px 32px;z-index:1">
+    <div style="font-size:56px" class="float-y">🎉</div>
+    <h2 class="slide-title mt-4" style="font-size:28px">Chapter Complete!</h2>
+    <p class="text-2 mt-2" id="completionMsg">คุณเรียนครบทุกสไลด์แล้ว — ยอดเยี่ยมมาก! <b class="grad-text">Keep Learning!</b></p>
+    <div class="grid-3 mt-5" style="grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneSlides">33</b><p class="text-3" style="font-size:12px">สไลด์</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneScore">–</b><p class="text-3" style="font-size:12px">คะแนน Quiz</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px">100%</b><p class="text-3" style="font-size:12px">ความคืบหน้า</p></div>
+    </div>
+    <div class="flex items-center gap-3 mt-6 wrap" style="justify-content:center">
+      <button class="btn btn-ghost" id="completionCloseBtn">ปิด 🎊</button>
+      <button class="btn btn-primary" id="completionRestartBtn"><i data-lucide="rotate-ccw"></i> เรียนใหม่อีกครั้ง</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PRINT AREA ================= -->
+<div id="printArea" aria-hidden="true"></div>
+
+<!-- App scripts -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+<!-- Histogram demo bars -->
+<script>
+  (function () {
+    var boxes = document.querySelectorAll('.hist-bar-set');
+    boxes.forEach(function (box) {
+      var data = box.getAttribute('data-bars');
+      if (!data) return;
+      var vals = data.split(',').map(Number);
+      vals.forEach(function (v) {
+        var b = document.createElement('div');
+        b.className = 'hist-bar';
+        b.style.height = v + '%';
+        box.appendChild(b);
+      });
+    });
+  })();
+</script>
+</body>
+</html>

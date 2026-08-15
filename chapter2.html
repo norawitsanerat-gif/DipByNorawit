@@ -3,80 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="Interactive Digital Textbook — Digital Image Processing / การประมวลผลภาพสี" />
-  <title>DIP · บทที่ 2 — การประมวลผลภาพสี</title>
+  <meta name="description" content="Interactive Digital Textbook — Digital Image Processing / เริ่มต้น OpenCV" />
+  <title>DIP · บทที่ 2 — เริ่มต้น OpenCV</title>
 
-  <!-- App styles — โหลดก่อนเสมอ (สำคัญต่อการแสดงผล) -->
   <link rel="stylesheet" href="styles.css" />
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <!-- Tailwind CSS (Play CDN) — defer: ไม่บล็อกการโหลดหน้าและ app.js -->
   <script defer src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide icons — defer: ไม่บล็อกการโหลดหน้าและ app.js -->
   <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
-  <!-- ส่วนประกอบเคลื่อนไหวเฉพาะบท 2 (ภาพสี) -->
   <style>
-    /* color swatch grid — เปิดทีละช่อง */
-    .sw-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; max-width: 360px; margin: 0 auto; }
-    .sw { aspect-ratio: 1; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); box-shadow: inset 0 0 12px rgba(0,0,0,.25); opacity: 0; transform: scale(.6); animation: swIn .5s ease forwards; }
-    .sw.on { opacity: 1; transform: scale(1); }
-    @keyframes swIn { to { opacity: 1; transform: scale(1); } }
+    /* shape diagram — (H, W, C) */
+    .shape-box { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .shape-dim { background: var(--card-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; text-align: center; }
+    .shape-dim b { font-size: 20px; display: block; font-family: Consolas, monospace; color: var(--cyan); }
+    .shape-dim small { color: var(--text-3); font-size: 12px; }
 
-    /* EM band 400–700 nm */
-    .em-band { position: relative; height: 34px; border-radius: 10px; overflow: hidden; background: linear-gradient(90deg, #3b0764, #6d28d9, #2563eb, #22d3ee, #4ade80, #facc15, #fb923c, #ef4444); border: 1px solid var(--border); }
-    .em-tick { position: absolute; top: 40px; font-size: 12px; font-weight: 700; color: var(--text-3); transform: translateX(-50%); }
-    .em-label { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-3); margin-top: 34px; }
+    /* pixel coordinate visual */
+    .coord-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; max-width: 300px; margin: 0 auto; }
+    .coord-cell { aspect-ratio: 1; border-radius: 6px; background: var(--card-2); border: 1px solid var(--border); display: grid; place-items: center; font-size: 10px; color: var(--text-3); }
+    .coord-cell.hl { background: rgba(56,189,248,.25); border-color: var(--cyan); color: var(--cyan); font-weight: 800; }
 
-    /* cone distribution bar */
-    .cone-bar { display: flex; height: 34px; border-radius: 10px; overflow: hidden; gap: 2px; }
-    .cone-seg { display: grid; place-items: center; color: #fff; font-size: 12px; font-weight: 800; opacity: 0; animation: coneGrow .8s ease forwards; }
-    .cone-seg:nth-child(1) { width: 65%; background: linear-gradient(180deg, #f87171, #dc2626); }
-    .cone-seg:nth-child(2) { width: 33%; background: linear-gradient(180deg, #4ade80, #16a34a); animation-delay: .25s; }
-    .cone-seg:nth-child(3) { width: 2%; background: linear-gradient(180deg, #60a5fa, #2563eb); animation-delay: .5s; }
-    @keyframes coneGrow { from { opacity: 0; transform: scaleY(0); } to { opacity: 1; transform: scaleY(1); } }
+    /* BGR chip bar */
+    .ch-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ch-chip { flex: 1; min-width: 90px; text-align: center; border-radius: 12px; padding: 12px 8px; font-size: 13px; font-weight: 800; color: #fff; border: 1px solid rgba(255,255,255,.15); }
 
-    /* intensity slicing bar */
-    .slice-wrap { background: var(--card-2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-    .slice-gray { height: 34px; border-radius: 8px; background: linear-gradient(90deg, #000, #333, #666, #999, #ccc, #fff); position: relative; overflow: hidden; }
-    .slice-color { display: flex; height: 34px; border-radius: 8px; overflow: hidden; margin-top: 10px; }
-    .slice-seg { height: 100%; opacity: 0; animation: sliceIn .6s ease forwards; }
-    .slice-seg:nth-child(1) { animation-delay: 0s; } .slice-seg:nth-child(2) { animation-delay: .12s; }
-    .slice-seg:nth-child(3) { animation-delay: .24s; } .slice-seg:nth-child(4) { animation-delay: .36s; }
-    .slice-seg:nth-child(5) { animation-delay: .48s; } .slice-seg:nth-child(6) { animation-delay: .6s; }
-    @keyframes sliceIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-
-    /* additive / subtractive chips */
-    .pig-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .pig-chip { text-align: center; background: var(--card-2); border: 1px solid var(--border); border-radius: 14px; padding: 14px 10px; transition: transform .25s, border-color .25s; }
-    .pig-chip:hover { transform: translateY(-4px); border-color: rgba(56,189,248,.5); }
-    .pig-swatch { width: 44px; height: 44px; border-radius: 12px; margin: 0 auto 8px; border: 1px solid rgba(255,255,255,.15); }
-
-    /* HSI triangle */
-    .hsi-box { position: relative; width: 200px; height: 180px; margin: 0 auto; }
-    .hsi-tri { position: absolute; inset: 6px 0 30px 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: linear-gradient(180deg, #f43f5e, #f59e0b, #22c55e, #3b82f6, #a855f7, #f43f5e); opacity: .85; }
-    .hsi-pts { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
-
-    /* pipeline / step list (จับมือ) */
-    .step-list { display: flex; flex-direction: column; gap: 10px; }
-    .step-box { display: flex; gap: 12px; align-items: flex-start; background: var(--card-2); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 12px; padding: 12px 16px; font-size: 14px; line-height: 1.7; animation: dipStepIn .5s ease both; }
-    .step-box:nth-child(2) { animation-delay: .15s; } .step-box:nth-child(3) { animation-delay: .3s; }
-    .step-box:nth-child(4) { animation-delay: .45s; } .step-box:nth-child(5) { animation-delay: .6s; }
-    @keyframes dipStepIn { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
-
-    /* color model cards */
-    .cm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .cm-card { background: var(--card-2); border: 1px solid var(--border); border-radius: 16px; padding: 18px 16px; text-align: center; transition: transform .25s, border-color .25s; }
-    .cm-card:hover { transform: translateY(-5px); border-color: var(--cyan); }
-    .cm-card .cm-i { width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 14px; display: grid; place-items: center; }
-    .cm-card b { font-size: 15px; display: block; }
-    .cm-card small { color: var(--text-3); font-size: 12px; display: block; margin-top: 6px; line-height: 1.6; }
+    /* ROI box */
+    .roi-stage { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); background: linear-gradient(135deg, #1e293b, #334155); }
+    .roi-box { position: absolute; border: 2px dashed var(--cyan); border-radius: 6px; background: rgba(56,189,248,.15); display: grid; place-items: center; color: var(--cyan); font-size: 12px; font-weight: 800; }
 
     @media (max-width: 640px) {
-      .cm-grid { grid-template-columns: 1fr; }
-      .pig-row { grid-template-columns: 1fr; }
+      .shape-box { flex-direction: column; align-items: center; }
     }
   </style>
 </head>
@@ -92,7 +50,7 @@
       <div class="cn-logo" aria-hidden="true">DIP</div>
       <div class="brand-titles">
         <h1>การประมวลผลภาพดิจิทัล</h1>
-        <p id="headerChapterLabel">การประมวลผลภาพสี · บทที่ 2</p>
+        <p id="headerChapterLabel">เริ่มต้น OpenCV · บทที่ 2</p>
       </div>
     </div>
 
@@ -108,7 +66,7 @@
         <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="headerProgressBar">
           <div class="progress-fill" id="headerProgressFill"></div>
         </div>
-        <span class="progress-count" id="headerProgressCount">1 / 28</span>
+        <span class="progress-count" id="headerProgressCount">1 / 29</span>
       </div>
     </div>
   </header>
@@ -121,7 +79,7 @@
       <div class="sidebar-head">
         <div class="sidebar-head-title">
           <h2 id="sidebarChapterTitle">เมนูบทที่ 2</h2>
-          <p id="sidebarChapterSub">หัวข้อในสัปดาห์นี้ · 28 หัวข้อ</p>
+          <p id="sidebarChapterSub">หัวข้อในสัปดาห์นี้ · 29 หัวข้อ</p>
         </div>
         <button class="icon-btn sidebar-close" id="sidebarCloseBtn" aria-label="ปิดเมนูบทเรียน" title="ปิดเมนู">
           <i data-lucide="x"></i>
@@ -145,24 +103,24 @@
       <div class="slide-viewport" id="viewport">
 
         <!-- ============ SLIDE 1 · COVER ============ -->
-        <section class="slide-view" data-title="Cover — Color Image Processing" aria-label="สไลด์ 1: เปิดบทเรียน">
+        <section class="slide-view" data-title="Cover — เริ่มต้น OpenCV" aria-label="สไลด์ 1: เปิดบทเรียน">
           <div class="slide-inner">
             <div class="center">
-              <div class="cn-logo float-y" style="width:74px;height:74px;font-size:28px;border-radius:22px;margin:0 auto 18px;background:linear-gradient(135deg,#f43f5e,#a855f7)">DIP</div>
+              <div class="cn-logo float-y" style="width:74px;height:74px;font-size:28px;border-radius:22px;margin:0 auto 18px;background:linear-gradient(135deg,#22c55e,#0ea5e9)">DIP</div>
               <p class="slide-eyebrow" style="justify-content:center">DIGITAL IMAGE PROCESSING · CHAPTER 2</p>
               <h2 class="slide-title" style="font-size:clamp(30px,5vw,54px);text-align:center">
-                Color Image Processing <span class="grad-text">การประมวลผลภาพสี</span>
+                เริ่มต้น <span class="grad-text">OpenCV</span>
               </h2>
               <p class="slide-subtitle" style="text-align:center;margin:6px auto 0;max-width:660px">
-                ทำไมภาพสีถึงสำคัญ · แสงและสี (Color Fundamentals) · โมเดลสี RGB / CMY / HSI
-                · Pseudo-color และการประมวลผลภาพสีแบบเต็ม — เข้าใจง่ายด้วยภาพสีจริงและตัวอย่างใกล้ตัว
+                อ่าน-แสดง-บันทึกภาพ · img.shape / img.dtype · BGR vs RGB · เข้าถึงและแก้พิกเซล
+                · ROI (Region Of Interest) — ปูพื้นฐานโค้ดจริงที่ใช้ทุกบทต่อไป
               </p>
 
               <div class="stat-chips" style="justify-content:center;margin-top:24px">
-                <span class="stat-chip"><i data-lucide="layers"></i> 28 Slides</span>
+                <span class="stat-chip"><i data-lucide="layers"></i> 29 Slides</span>
                 <span class="stat-chip"><i data-lucide="help-circle"></i> 10 Quiz</span>
-                <span class="stat-chip"><i data-lucide="square-stack"></i> 20 Flashcards</span>
-                <span class="stat-chip"><i data-lucide="book-marked"></i> 20 Glossary</span>
+                <span class="stat-chip"><i data-lucide="square-stack"></i> 16 Flashcards</span>
+                <span class="stat-chip"><i data-lucide="book-marked"></i> 18 Glossary</span>
               </div>
 
               <button class="btn btn-primary mt-6" id="startBtn" style="font-size:16px;padding:14px 30px">
@@ -173,779 +131,784 @@
         </section>
 
         <!-- ============ SLIDE 2 · OVERVIEW ============ -->
-        <section class="slide-view" data-title="เราจะเรียนอะไรบ้าง" aria-label="สไลด์ 2: สิ่งที่จะเรียน">
+        <section class="slide-view" data-title="OpenCV คืออะไร — และติดตั้งยังไง" aria-label="สไลด์ 2: OpenCV คืออะไร">
           <div class="slide-inner">
             <p class="slide-eyebrow">CHAPTER OVERVIEW</p>
             <h2 class="slide-title">เราจะเรียนอะไรบ้างในบทนี้?</h2>
-            <p class="slide-subtitle">บทนี้แบ่งออกเป็น 6 ส่วนใหญ่ ๆ ตามสไลด์ตำรา — อ่านเรียงกันไปจะต่อยอดกันเป็นเรื่องเดียว</p>
+            <p class="slide-subtitle">บทนี้คือ "ภาษาแรก" ของการประมวลผลภาพ — ทุกบทที่เหลือใช้คำสั่งจากบทนี้ทั้งหมด</p>
             <div class="grid-3 mt-6">
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="sun" class="cyan"></i>Color Fundamentals</h3><p class="card-text small">แสงคืออะไร ตามองเห็นสีได้ยังไง Radiance/Luminance/Brightness และสีปฐมภูมิ</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="palette" class="cyan"></i>Color Models</h3><p class="card-text small">RGB · CMY/CMYK · HSI — ระบบพิกัดที่ใช้แทนสีแต่ละแบบ</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="swatch-book" class="cyan"></i>Pseudo-color</h3><p class="card-text small">ใส่สีให้ภาพเทา (intensity slicing, gray→color) เพื่อช่วยการมองเห็น</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="monitor" class="cyan"></i>Full-color Basics</h3><p class="card-text small">การประมวลผลภาพสีที่ได้จากเซนเซอร์เต็มรูปแบบ</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="wand-2" class="cyan"></i>Color Transformations</h3><p class="card-text small">ปรับแต่งสีในแต่ละ component หรือรวมภาพหลายสเปกตรัม</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="waves" class="cyan"></i>Smoothing &amp; Sharpening</h3><p class="card-text small">ทำให้ภาพสีเรียบเนียนหรือคมชัดขึ้น ต้องทำที่ HSI intensity</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="folder-open" class="cyan"></i>อ่าน/แสดง/บันทึก</h3><p class="card-text small">imread · imshow + waitKey · imwrite — เปิดภาพและเก็บภาพ</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="shape" class="cyan"></i>รู้จักภาพในคอม</h3><p class="card-text small">NumPy array · img.shape · img.dtype — ภาพคือตารางตัวเลข</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="palette" class="cyan"></i>BGR vs RGB</h3><p class="card-text small">ลำดับสีใน OpenCV กับ Matplotlib และการแปลง cvtColor</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="square-dot" class="cyan"></i>จัดการพิกเซล</h3><p class="card-text small">img[y, x] · แยก/ตั้งค่าช่องสี · เปลี่ยนทั้งโซน</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="crop" class="cyan"></i>ROI</h3><p class="card-text small">ตัดเฉพาะบริเวณที่สนใจด้วย slicing — พื้นฐานทุกโปรเจกต์จริง</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="rocket" class="cyan"></i>ROI งานจริง</h3><p class="card-text small">OCR · ทะเบียนรถ · ตรวจจับใบหน้า · ลดงานประมวลผล</p></div>
             </div>
             <div class="tip-box tip-note mt-6">
               <i data-lucide="lightbulb"></i>
-              <div><b>วิธีเรียนที่แนะนำ</b>กด Next ไปทีละสไลด์ ดูภาพสีประกอบทุกสไลด์ และอย่าลืมทำ Quiz + ข้อสอบท้ายบท (สลับภาษา TH/EN ได้)</div>
+              <div><b>ต้องติดตั้งก่อน</b><code>pip install opencv-python numpy matplotlib</code> — แล้วใช้ <code>import cv2</code> ในโค้ด</div>
             </div>
           </div>
         </section>
 
-        <!-- ============ SLIDE 3 · WHY COLOR ============ -->
-        <section class="slide-view" data-title="ทำไมต้องใช้สี? (Preview)" aria-label="สไลด์ 3: ทำไมต้องใช้สี">
+        <!-- ============ SLIDE 3 · NumPy Array ============ -->
+        <section class="slide-view" data-title="ภาพใน OpenCV คือ NumPy Array" aria-label="สไลด์ 3: ภาพ = Array">
           <div class="slide-inner">
-            <p class="slide-eyebrow">PREVIEW</p>
-            <h2 class="slide-title">ทำไมต้องใช้ <span class="grad-text">สี</span> ในการประมวลผลภาพ?</h2>
-            <p class="slide-subtitle">คำตอบสั้น ๆ: เพราะสีเป็นตัวอธิบายที่ทรงพลังที่สุดอย่างหนึ่งของภาพ</p>
-
-            <div class="split mt-6">
-              <div class="flex" style="flex-direction:column;gap:16px">
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="sparkles" class="cyan"></i>สี = Powerful Descriptor</h3>
-                  <p class="card-text">สีช่วย <b class="cyan">ระบุและแยกวัตถุ</b> (object identification &amp; extraction) — เช่น <b class="cyan">การหาใบหน้าด้วยสีผิว (face detection using skin colors)</b> เร็วและง่ายกว่าการวิเคราะห์รูปร่างอย่างเดียว</p>
-                </div>
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="eye" class="cyan"></i>ตาคนเก่งเรื่องสี</h3>
-                  <p class="card-text">มนุษย์สามารถแยก <b class="cyan">เฉดสีและความเข้มได้หลายพันเฉด</b> (thousands of color shades &amp; intensities) — เทียบกับโทนเทา (gray) ที่แยกได้แค่ <b class="cyan">สองโหลกว่า</b> (two dozen shades)</p>
-                </div>
-                <div class="tip-box tip-remember">
-                  <i data-lucide="lightbulb"></i>
-                  <div><b>จำแบบนี้</b>สีแยกวัตถุได้ดีกว่า · คนแยกสีได้หลายพันเฉด แต่แยกเทาได้แค่ 2 โหลกว่า</div>
-                </div>
-              </div>
-
-              <div class="visual-box">
-                <span class="vb-label">ลองสังเกต: ภาพเดียวกัน ต่างกันแค่สี</span>
-                <div class="center mt-3" style="flex-direction:column;gap:10px">
-                  <div style="display:flex;gap:6px">
-                    <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#f87171,#b91c1c)"></div>
-                    <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#fb923c,#ea580c)"></div>
-                    <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#facc15,#ca8a04)"></div>
-                    <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#4ade80,#16a34a)"></div>
-                    <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#38bdf8,#0284c7)"></div>
-                    <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#a78bfa,#7c3aed)"></div>
-                  </div>
-                  <div style="font-size:13px;color:var(--text-3);text-align:center">
-                    แอปเปิลแดง แอปเปิลเขียว แยกได้ในเสี้ยววินาที<br />
-                    แต่ถ้าเป็นภาพเทา แอปเปิลทั้งสองแทบแยกไม่ออก
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 4 · FULL vs PSEUDO ============ -->
-        <section class="slide-view" data-title="Full-color vs Pseudo-color" aria-label="สไลด์ 4: Full vs Pseudo">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">PREVIEW</p>
-            <h2 class="slide-title">การประมวลผลภาพสี แบ่งเป็น <span class="grad-text">2 ประเภท</span></h2>
-            <p class="slide-subtitle">จำแค่นี้ก่อน: <b class="cyan">Full-color</b> = ภาพสีจริง · <b class="cyan">Pseudo-color</b> = ใส่สีให้ภาพเทา</p>
-
-            <div class="split mt-6">
-              <div class="card" style="border-top:3px solid var(--cyan)">
-                <h3 class="card-title"><i data-lucide="camera" class="cyan"></i>Full-color Processing</h3>
-                <p class="card-text">ภาพถูกถ่าย/รับเข้ามาจาก <b class="cyan">เซนเซอร์หรืออุปกรณ์สีเต็มรูปแบบ</b> (full-color sensor / equipment) โดยตรง — สีเป็นข้อมูลจริงจากกล้อง</p>
-                <div class="tip-box tip-note mt-3">
-                  <i data-lucide="lightbulb"></i>
-                  <div>ตัวอย่าง: ภาพจากกล้องมือถือ/กล้องดิจิทัลสมัยนี้ — แต่ละพิกเซลมีค่าสี R, G, B จริง</div>
-                </div>
-              </div>
-              <div class="card" style="border-top:3px solid var(--warning)">
-                <h3 class="card-title"><i data-lucide="paintbrush" class="cyan"></i>Pseudo-color Processing</h3>
-                <p class="card-text">ในอดีต <b class="cyan">ยังไม่มี color sensor / ฮาร์ดแวร์สี</b> จึงต้อง <b class="cyan">กำหนดสีให้กับช่วงความเข้มของภาพเทา</b> (monochrome intensities) — สีที่เห็นเป็นสีที่เรา "ใส่" ลงไป ไม่ใช่สีจริง</p>
-                <div class="tip-box tip-note mt-3">
-                  <i data-lucide="lightbulb"></i>
-                  <div>ตัวอย่าง: ภาพเอกซเรย์ / ภาพความร้อน ที่ย้อมสีตามช่วงความเข้มเพื่อให้ตาอ่านง่ายขึ้น</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="tip-box tip-exam mt-6">
-              <i data-lucide="graduation-cap"></i>
-              <div><b>Exam Tip</b>ข้อสอบถามว่า "ข้อใดคือ Pseudo-color?" → คำตอบคือ <b class="cyan">กำหนดสีให้กับช่วงความเข้มของภาพ monochrome</b> — อย่าสับสนกับภาพจากกล้องสีจริง</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 5 · COLOR FUNDAMENTALS ============ -->
-        <section class="slide-view" data-title="Color Fundamentals" aria-label="สไลด์ 5: Color Fundamentals">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR FUNDAMENTALS</p>
-            <h2 class="slide-title">พื้นฐานของสี: <span class="grad-text">2 มุมมอง</span></h2>
-            <p class="slide-subtitle">เรื่องสีต้องมอง 2 ด้านประกอบกัน — ด้านฟิสิกส์ กับด้านสมองของคน</p>
-
-            <div class="split mt-6">
-              <div class="card">
-                <h3 class="card-title"><i data-lucide="atom" class="cyan"></i>Physical Phenomenon</h3>
-                <p class="card-text">ธรรมชาติทางฟิสิกส์ของสีเป็นสิ่งที่ <b class="cyan">รู้จักและวัดได้</b> — แสงคือคลื่นแม่เหล็กไฟฟ้า ความยาวคลื่นต่างกัน = สีต่างกัน (เราจะเรียนเรื่องนี้ต่อในสไลด์ Visible Light)</p>
-              </div>
-              <div class="card">
-                <h3 class="card-title"><i data-lucide="brain" class="cyan"></i>Physio-psychological Phenomenon</h3>
-                <p class="card-text">สมองมนุษย์ <b class="cyan">รับรู้และตีความสี</b> อย่างไร — ทำไมสีเดียวกัน ฉากเดียวกัน คนดูอาจเห็นต่างกันได้ นี่คืออีกครึ่งของเรื่องสี</p>
-              </div>
-            </div>
-
-            <div class="step-list mt-6">
-              <div class="step-box"><b>📜 1666 · Isaac Newton</b> — ทดลองหักเหแสงขาวด้วยปริซึม พบว่าแสงขาวประกอบด้วยสีรุ้ง 7 สี นี่คือจุดเริ่มต้นของศาสตร์เรื่องสี</div>
-              <div class="step-box"><b>💡 สรุป</b> — สี = ฟิสิกส์ (แสงที่วัดได้) + จิตวิทยา/สรีรวิทยา (ตากับสมองตีความ) — เรียนทั้งสองด้านถึงจะเข้าใจภาพสี</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 6 · VISIBLE LIGHT ============ -->
-        <section class="slide-view" data-title="Visible Light 400–700 nm" aria-label="สไลด์ 6: Visible Light">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR FUNDAMENTALS</p>
-            <h2 class="slide-title">Visible Light — <span class="grad-text">แสงที่ตามองเห็น</span></h2>
-            <p class="slide-subtitle">แสงสี (chromatic light) ครอบคลุม EM spectrum ช่วง <b class="cyan">400–700 นาโนเมตร (nm)</b></p>
-
-            <div class="visual-box mt-6">
-              <span class="vb-label">แถบ EM spectrum — ช่องที่ตาเรามองเห็น (มีสี)</span>
-              <div class="em-band" style="margin-top:14px"></div>
-              <div class="em-tick" style="left:12%">400 nm</div>
-              <div class="em-tick" style="left:88%">700 nm</div>
-              <div class="em-label"><span>UV (มองไม่เห็น)</span><span>IR (มองไม่เห็น)</span></div>
-            </div>
-
-            <div class="split mt-6">
-              <div class="card">
-                <h3 class="card-title"><i data-lucide="sun" class="cyan"></i>สีที่ตามองเห็นบนวัตถุ = ?</h3>
-                <p class="card-text"><b class="cyan">แสงที่สะท้อนจากวัตถุนั้น</b> (the light reflected from the object) — แหล่งกำเนิดแสง (illumination source) ส่องฉาก แล้วตารับแสงสะท้อนกลับมา ไม่ใช่แสงที่วัตถุดูดซับ</p>
-              </div>
-              <div class="card">
-                <h3 class="card-title"><i data-lucide="refresh-cw" class="cyan"></i>วงจรการมองเห็นสี</h3>
-                <p class="card-text">Illumination source → ส่อง scene → วัตถุ <b class="cyan">สะท้อน</b> แสงบางช่วงคลื่น → ตา (eye) รับ reflection → สมองแปลเป็น "สี"</p>
-              </div>
-            </div>
-
-            <div class="tip-box tip-exam mt-6">
-              <i data-lucide="graduation-cap"></i>
-              <div><b>Exam Tip</b>จำ 2 อย่าง: <b class="cyan">400–700 nm</b> (ช่วงแสงที่มองเห็น) และ <b class="cyan">สีที่เห็น = แสงสะท้อนจากวัตถุ</b></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 7 · RADIANCE LUMINANCE BRIGHTNESS ============ -->
-        <section class="slide-view" data-title="Radiance · Luminance · Brightness" aria-label="สไลด์ 7: ปริมาณแสง 3 อย่าง">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR FUNDAMENTALS</p>
-            <h2 class="slide-title">ปริมาณทางฟิสิกส์ 3 อย่าง <span class="grad-text">ของแหล่งแสง</span></h2>
-            <p class="slide-subtitle">คนละตัว หน่วยคนละอย่าง — นี่คือจุดที่ข้อสอบชอบจับผิด</p>
-
-            <div class="cm-grid mt-6">
-              <div class="cm-card" style="border-top:3px solid var(--danger)">
-                <div class="cm-i" style="background:rgba(239,68,68,.12);color:#f87171"><i data-lucide="zap"></i></div>
-                <b>Radiance</b>
-                <small>พลังงาน<b>ทั้งหมด</b>ที่ไหลจากแหล่งแสง (total energy)<br />หน่วย: <b class="cyan">วัตต์ (W)</b></small>
-              </div>
-              <div class="cm-card" style="border-top:3px solid var(--success)">
-                <div class="cm-i" style="background:rgba(34,197,94,.12);color:#4ade80"><i data-lucide="eye"></i></div>
-                <b>Luminance</b>
-                <small>พลังงานที่<b>ผู้สังเกตรับรู้</b>จากแหล่งแสง (perceived)<br />หน่วย: <b class="cyan">ลูเมน (lm)</b></small>
-              </div>
-              <div class="cm-card" style="border-top:3px solid var(--warning)">
-                <div class="cm-i" style="background:rgba(245,158,11,.12);color:#fbbf24"><i data-lucide="gauge"></i></div>
-                <b>Brightness</b>
-                <small>ตัวอธิบายแบบ<b>subjective</b> วัดยาก<br />คล้าย intensity แบบ <b class="cyan">achromatic</b></small>
-              </div>
-            </div>
-
-            <div class="tip-box tip-exam mt-6">
-              <i data-lucide="graduation-cap"></i>
-              <div><b>ตัวอย่างที่ต้องจำ</b>แสงอินฟราเรดไกล (far infrared) มี <b class="cyan">radiance สูง แต่ luminance = 0</b> — เพราะมีพลังงานจริง (W เยอะ) แต่ตามนุษย์มองไม่เห็น จึงรับรู้ได้ 0 (lm = 0)</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 8 · CONES ============ -->
-        <section class="slide-view" data-title="ตาเรารับแสงยังไง? (Cones)" aria-label="สไลด์ 8: Cones ในตา">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR FUNDAMENTALS</p>
-            <h2 class="slide-title">ตามนุษย์รับสีได้ยังไง? — <span class="grad-text">Cones</span></h2>
-            <p class="slide-subtitle">ตาเรามีเซลล์รับแสง 2 ประเภท ประเภทที่รับสีคือ <b class="cyan">Cones</b></p>
+            <p class="slide-eyebrow">FUNDAMENTALS</p>
+            <h2 class="slide-title">ภาพใน OpenCV คือ <span class="grad-text">NumPy Array</span></h2>
+            <p class="slide-subtitle">ภาพที่อ่านเข้ามาแล้ว = ตารางตัวเลข (array) — ตัวเลขแต่ละช่องคือค่าพิกเซล</p>
 
             <div class="split mt-6">
               <div class="visual-box">
-                <span class="vb-label">Cones แบ่งเป็น 3 ประเภท รับสีไม่เท่ากัน</span>
-                <div class="cone-bar" style="margin-top:14px">
-                  <div class="cone-seg">แดง 65%</div>
-                  <div class="cone-seg">เขียว 33%</div>
-                  <div class="cone-seg" style="font-size:9px">น้ำเงิน 2%</div>
+                <span class="vb-label">ภาพเล็ก 3×4 (grayscale) มองเป็นตารางตัวเลข</span>
+                <div class="tbl-wrap mt-3">
+                  <table class="tbl">
+                    <tr><th></th><th>x=0</th><th>x=1</th><th>x=2</th><th>x=3</th></tr>
+                    <tr><th>y=0</th><td>10</td><td>40</td><td>90</td><td>160</td></tr>
+                    <tr><th>y=1</th><td>20</td><td>60</td><td>120</td><td>200</td></tr>
+                    <tr><th>y=2</th><td>30</td><td>80</td><td>150</td><td>240</td></tr>
+                  </table>
                 </div>
-                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">ตาเรามี Cones ประมาณ <b class="cyan">6–7 ล้านเซลล์</b> — 3 กลุ่มรับแสง: แดง 65% · เขียว 33% · น้ำเงิน 2%</p>
+                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">ยิ่งเลขมากยิ่งสว่าง — ภาพ = เมทริกซ์ตัวเลขนี้เอง</p>
               </div>
-
-              <div class="flex" style="flex-direction:column;gap:16px">
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="scan-eye" class="cyan"></i>ทำไมสัดส่วนไม่เท่ากัน?</h3>
-                  <p class="card-text">เพราะธรรมชาติเลือกให้ตามนุษย์ไวต่อแสงแดง-เขียวมากที่สุด (จำเป็นต่อการมองในป่า/แยกผลไม้) — นี่คือที่มาของระบบสีแบบ 3 สี (trichromatic)</p>
-                </div>
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>อีกประเภท: Rods</h3>
-                  <p class="card-text">นอกจาก Cones ยังมี <b class="cyan">Rods</b> (~120 ล้านเซลล์) ที่รับแสงน้อย/ขาวดำ — ทำงานตอนที่แสงสลัว</p>
-                </div>
-                <div class="tip-box tip-exam">
-                  <i data-lucide="graduation-cap"></i>
-                  <div><b>Exam Tip</b>จำตัวเลขเป๊ะ: Cones <b class="cyan">6–7 ล้าน</b> · แดง 65% · เขียว 33% · น้ำเงิน 2%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 9 · PRIMARY & SECONDARY ============ -->
-        <section class="slide-view" data-title="Primary & Secondary Colors" aria-label="สไลด์ 9: สีปฐมภูมิ/ทุติยภูมิ">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR FUNDAMENTALS</p>
-            <h2 class="slide-title">สีปฐมภูมิ &amp; <span class="grad-text">ทุติยภูมิ</span> ของแสง</h2>
-            <p class="slide-subtitle">ในปี 1931 <b class="cyan">CIE (International Commission on Illumination)</b> กำหนดความยาวคลื่นเฉพาะให้สีปฐมภูมิ</p>
-
-            <div class="split mt-6">
-              <div class="card">
-                <h3 class="card-title"><i data-lucide="ruler" class="cyan"></i>CIE 1931 — ความยาวคลื่นปฐมภูมิ</h3>
-                <p class="card-text small" style="line-height:2">
-                  • Blue (B) = <b class="cyan">435.8 nm</b><br />
-                  • Green (G) = <b class="cyan">546.1 nm</b><br />
-                  • Red (R) = <b class="cyan">700 nm</b><br />
-                  <span class="text-3" style="font-size:12.5px">หมายเหตุ: ไม่มีสีเดียวใดที่เรียกว่า "แดง/เขียว/น้ำเงินแท้ 100%" ได้จริง (no single color may be called red, green, or blue)</span>
-                </p>
-              </div>
-              <div class="card">
-                <h3 class="card-title"><i data-lucide="plus" class="cyan"></i>สีทุติยภูมิ (Secondary) — บวกกันแบบ additive</h3>
-                <p class="card-text small" style="line-height:2.2">
-                  • <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;border-radius:5px;background:#22c55e;display:inline-block"></span>G</span> + <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;border-radius:5px;background:#3b82f6;display:inline-block"></span>B</span> = <b class="cyan">Cyan</b> (ฟ้าเขียว)<br />
-                  • R + G = <b class="cyan">Yellow</b> (เหลือง)<br />
-                  • R + B = <b class="cyan">Magenta</b> (ม่วงแดง)
-                </p>
-              </div>
-            </div>
-
-            <div class="tip-box tip-exam mt-6">
-              <i data-lucide="graduation-cap"></i>
-              <div><b>Exam Tip</b>จำชุดตัวเลข CIE 1931: <b class="cyan">B=435.8 · G=546.1 · R=700</b> nm และสูตรทุติยภูมิ: <b class="cyan">G+B=Cyan · R+G=Yellow · R+B=Magenta</b></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 10 · LIGHT vs PIGMENT ============ -->
-        <section class="slide-view" data-title="สีของแสง vs สีของเม็ดสี" aria-label="สไลด์ 10: แสง vs เม็ดสี">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR FUNDAMENTALS</p>
-            <h2 class="slide-title">สีของแสง vs <span class="grad-text">สีของเม็ดสี</span></h2>
-            <p class="slide-subtitle">แสงใช้การบวก (additive) แต่เม็ดสีใช้การลบ (subtractive) — สีปฐมภูมิคนละชุดกัน!</p>
-
-            <div class="card mt-6">
-              <h3 class="card-title"><i data-lucide="droplets" class="cyan"></i>เม็ดสีปฐมภูมิ = สีที่ "ดูดซับ" สีปฐมภูมิของแสง 1 สี และสะท้อน/ส่งผ่านอีก 2 สี</h3>
-              <div class="pig-row mt-4">
-                <div class="pig-chip">
-                  <div class="pig-swatch" style="background:linear-gradient(135deg,#22d3ee,#0891b2)"></div>
-                  <b>Cyan</b><br /><small style="color:var(--text-3);font-size:12px">ดูดซับ <b style="color:#f87171">R</b> (แดง)</small>
-                </div>
-                <div class="pig-chip">
-                  <div class="pig-swatch" style="background:linear-gradient(135deg,#f472b6,#db2777)"></div>
-                  <b>Magenta</b><br /><small style="color:var(--text-3);font-size:12px">ดูดซับ <b style="color:#4ade80">G</b> (เขียว)</small>
-                </div>
-                <div class="pig-chip">
-                  <div class="pig-swatch" style="background:linear-gradient(135deg,#facc15,#eab308)"></div>
-                  <b>Yellow</b><br /><small style="color:var(--text-3);font-size:12px">ดูดซับ <b style="color:#60a5fa">B</b> (น้ำเงิน)</small>
-                </div>
-              </div>
-            </div>
-
-            <div class="split mt-6">
-              <div class="tip-box tip-note">
-                <i data-lucide="lightbulb"></i>
-                <div><b>สีของแสง (additive)</b>ปฐมภูมิ = <b class="cyan">R, G, B</b> — ยิ่งบวกกันยิ่งสว่าง (R+G+B = ขาว) ใช้กับจอ/ทีวี</div>
-              </div>
-              <div class="tip-box tip-note">
-                <i data-lucide="lightbulb"></i>
-                <div><b>สีของเม็ดสี (subtractive)</b>ปฐมภูมิ = <b class="cyan">Cyan, Magenta, Yellow</b> — ยิ่งผสมกันยิ่งมืด (C+M+Y ≈ ดำ) ใช้กับงานพิมพ์</div>
-              </div>
-            </div>
-
-            <div class="tip-box tip-exam mt-6">
-              <i data-lucide="graduation-cap"></i>
-              <div><b>Exam Tip</b>เม็ดสีปฐมภูมิ = <b class="cyan">Cyan, Magenta, Yellow</b> — Cyan ดูด R · Magenta ดูด G · Yellow ดูด B</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 11 · CIE XYZ ============ -->
-        <section class="slide-view" data-title="CIE XYZ Model" aria-label="สไลด์ 11: CIE XYZ">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR FUNDAMENTALS</p>
-            <h2 class="slide-title">CIE XYZ Model</h2>
-            <p class="slide-subtitle">แปลง RGB เป็นระบบพิกัดสีที่มาตรฐาน — ฟังดูยาก แต่หัวใจคือสมการเดียว</p>
-
-            <div class="split mt-6">
-              <div class="card">
-                <h3 class="card-title"><i data-lucide="table" class="cyan"></i>แปลง RGB → XYZ (เมทริกซ์)</h3>
-                <div class="center mt-2" style="font-family:Inter,monospace;font-size:13px;line-height:1.9;background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:14px">
-                  X = 0.431R + 0.342G + 0.178B<br />
-                  Y = 0.222R + 0.707G + 0.071B<br />
-                  Z = 0.020R + 0.130G + 0.939B
-                </div>
-              </div>
-              <div class="flex" style="flex-direction:column;gap:16px">
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="divide" class="cyan"></i>Normalized Tristimulus — สมการสำคัญ</h3>
-                  <p class="card-text small" style="line-height:2">
-                    x = X/(X+Y+Z) · y = Y/(X+Y+Z) · z = Z/(X+Y+Z)<br />
-                    → <b class="cyan">x + y + z = 1</b> เสมอ!
-                  </p>
-                </div>
-                <div class="tip-box tip-exam">
-                  <i data-lucide="graduation-cap"></i>
-                  <div><b>เพราะ x+y+z=1</b> ดังนั้นแค่ <b class="cyan">x, y</b> (chromaticity coordinates) ก็พอจะอธิบายสีทั้งหมดได้ — z หาได้จาก 1 - x - y</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="tip-box tip-remember mt-6">
-              <i data-lucide="lightbulb"></i>
-              <div><b>จำแบบนี้</b>x + y + z = 1 → ใช้แค่ x, y ก็อธิบายสีได้ครบ (ข้อสอบถามบ่อยมาก)</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 12 · COLOR MODELS ============ -->
-        <section class="slide-view" data-title="Color Models (RGB · CMY · HSI)" aria-label="สไลด์ 12: Color Models">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR MODELS</p>
-            <h2 class="slide-title">Color Models / Color Space / <span class="grad-text">Color System</span></h2>
-            <p class="slide-subtitle">คือ <b class="cyan">ระบบพิกัดที่แต่ละสีแทนด้วยจุดเดียว</b> — กำหนดสีในแบบมาตรฐาน</p>
-
-            <div class="cm-grid mt-6">
-              <div class="cm-card" style="border-top:3px solid var(--primary)">
-                <div class="cm-i" style="background:rgba(37,99,235,.12);color:#60a5fa"><i data-lucide="monitor"></i></div>
-                <b>RGB Model</b>
-                <small>เหมาะกับ <b class="cyan">ฮาร์ดแวร์</b> (จอ, กล้อง, เซนเซอร์)</small>
-              </div>
-              <div class="cm-card" style="border-top:3px solid var(--warning)">
-                <div class="cm-i" style="background:rgba(245,158,11,.12);color:#fbbf24"><i data-lucide="printer"></i></div>
-                <b>CMY / CMYK Model</b>
-                <small>เหมาะกับ <b class="cyan">งานพิมพ์</b> (applications / hardcopy)</small>
-              </div>
-              <div class="cm-card" style="border-top:3px solid var(--success)">
-                <div class="cm-i" style="background:rgba(34,197,94,.12);color:#4ade80"><i data-lucide="heart-handshake"></i></div>
-                <b>HSI Model</b>
-                <small>ตรงกับ <b class="cyan">วิธีที่มนุษย์บรรยายสี</b> (hue/saturation/intensity)</small>
-              </div>
-            </div>
-
-            <div class="tip-box tip-exam mt-6">
-              <i data-lucide="graduation-cap"></i>
-              <div><b>Exam Tip</b>จำคู่ให้แม่น: <b class="cyan">RGB → ฮาร์ดแวร์ · CMY/CMYK → งานพิมพ์ · HSI → วิธีที่คนบรรยายสี</b></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 13 · RGB & PIXEL DEPTH ============ -->
-        <section class="slide-view" data-title="RGB Model & Pixel Depth" aria-label="สไลด์ 13: RGB & Pixel Depth">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR MODELS</p>
-            <h2 class="slide-title">RGB Model &amp; <span class="grad-text">Pixel Depth</span></h2>
-            <p class="slide-subtitle">RGB = ลูกบาศก์สี 3 แกน · Pixel depth = จำนวนบิตแทนแต่ละพิกเซล</p>
-
-            <div class="split mt-6">
-              <div class="visual-box">
-                <span class="vb-label">RGB color cube — มุมของลูกบาศก์ = สีหลัก 8 สี</span>
-                <div class="sw-grid" id="swGrid" style="margin-top:14px"></div>
-                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">ขาว = R+G+B ทั้งหมด · ดำ = ไม่มีสีใดเลย</p>
-              </div>
-
-              <div class="flex" style="flex-direction:column;gap:16px">
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="bitcoin" class="cyan"></i>Pixel Depth คืออะไร?</h3>
-                  <p class="card-text">คือ <b class="cyan">จำนวนบิตที่ใช้แทนแต่ละพิกเซลใน RGB space</b> — ยิ่งบิตเยอะ ยิ่งแสดงสีละเอียด</p>
-                </div>
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="camera" class="cyan"></i>Full-color = 24-bit RGB</h3>
-                  <p class="card-text">(R, G, B) = <b class="cyan">(8, 8, 8) บิต</b> → 8+8+8 = <b class="cyan">24 บิตต่อพิกเซล</b> = 16.7 ล้านสี</p>
-                </div>
-                <div class="tip-box tip-exam">
-                  <i data-lucide="graduation-cap"></i>
-                  <div><b>Exam Tip</b>24-bit RGB = 3 ช่อง × 8 บิต = 24 บิต/พิกเซล — ข้อสอบอาจถาม "แต่ละช่องใช้กี่บิต?" → ตอบ 8</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 14 · SAFE RGB ============ -->
-        <section class="slide-view" data-title="Safe RGB Colors (216 สี)" aria-label="สไลด์ 14: Safe RGB">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR MODELS</p>
-            <h2 class="slide-title">Safe RGB Colors — <span class="grad-text">216 สี</span></h2>
-            <p class="slide-subtitle">บางแอปพลิเคชันใช้แค่สี "ปลอดภัย" ชุดหนึ่งก็พอ — สีที่เว็บ/เบราว์เซอร์แสดงได้แน่นอน</p>
-
-            <div class="split mt-6">
-              <div class="visual-box">
-                <span class="vb-label">Safe color cube — 6 × 6 × 6 = 216 สี</span>
-                <div class="sw-grid" id="safeGrid" style="margin-top:14px"></div>
-                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">แต่ละช่อง (R, G, B) ใช้แค่ <b class="cyan">6 ค่า</b> → 6³ = 216</p>
-              </div>
-
-              <div class="flex" style="flex-direction:column;gap:16px">
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="shield-check" class="cyan"></i>ทำไมต้อง "Safe"?</h3>
-                  <p class="card-text">ในยุคจอ 256 สี / เว็บแรก ๆ เบราว์เซอร์แต่ละตัวแสดงสีไม่เหมือนกัน — สีชุดนี้รับประกันว่า <b class="cyan">แสดงเหมือนกันทุกเครื่อง</b> (safe Web / browser colors)</p>
-                </div>
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="calculator" class="cyan"></i>คำนวณแบบจับมือ</h3>
-                  <p class="card-text small" style="line-height:2">
-                    1. แต่ละช่อง (R, G, B) ใช้ 6 ค่า<br />
-                    2. 3 ช่อง → 6 × 6 × 6<br />
-                    3. = <b class="cyan">216 สี</b> ✓
-                  </p>
-                </div>
-                <div class="tip-box tip-exam">
-                  <i data-lucide="graduation-cap"></i>
-                  <div><b>Exam Tip</b>(6)³ = 216 · ข้อสอบถาม "ค่าต่อช่อง" → ตอบ <b class="cyan">6</b> · ถาม "ทั้งหมด" → ตอบ <b class="cyan">216</b></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 15 · CMY/CMYK ============ -->
-        <section class="slide-view" data-title="CMY / CMYK Model" aria-label="สไลด์ 15: CMY / CMYK">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR MODELS</p>
-            <h2 class="slide-title">CMY Model (+Black = <span class="grad-text">CMYK</span>)</h2>
-            <p class="slide-subtitle">CMY = สีทุติยภูมิของแสง = สีปฐมภูมิของเม็ดสี — ใช้สร้าง <b class="cyan">hardcopy output</b> (งานพิมพ์)</p>
-
-            <div class="split mt-6">
-              <div class="card">
-                <h3 class="card-title"><i data-lucide="repeat" class="cyan"></i>สูตรแปลง RGB → CMY</h3>
-                <div class="center mt-2" style="font-family:Inter,monospace;font-size:15px;line-height:2;background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:14px">
-                  C = 1 - R<br />
-                  M = 1 - G<br />
-                  Y = 1 - B
-                </div>
-                <p class="card-text small mt-3">ค่า R, G, B ใช้แบบ normalized (0–1) — CMY คือ <b class="cyan">complement (ส่วนเติมเต็ม)</b> ของ RGB นั่นเอง</p>
-              </div>
-
-              <div class="flex" style="flex-direction:column;gap:16px">
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="help-circle" class="cyan"></i>ตัวอย่าง: R = 1 (แดงเต็ม)</h3>
-                  <p class="card-text small" style="line-height:2">
-                    C = 1 - 1 = <b class="cyan">0</b><br />
-                    M = 1 - 0 = <b class="cyan">1</b><br />
-                    Y = 1 - 0 = <b class="cyan">1</b><br />
-                    → แดงเต็ม = Cyan 0, Magenta 1, Yellow 1 (ถูกต้อง: M+Y = แดง)
-                  </p>
-                </div>
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="key" class="cyan"></i>ทำไมต้อง + K (Black)?</h3>
-                  <p class="card-text">CMY ผสมกันได้ดำ <b class="cyan">ไม่สมบูรณ์</b> (ออกน้ำตาล/เทา) จึงเพิ่มหมึกดำ K แยกต่างหาก → CMYK (K = Key/Black)</p>
-                </div>
-                <div class="tip-box tip-exam">
-                  <i data-lucide="graduation-cap"></i>
-                  <div><b>Exam Tip</b>สูตร C = 1 - R, M = 1 - G, Y = 1 - B + K ย่อมาจาก <b class="cyan">Black</b> ใช้กับงานพิมพ์</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 16 · HSI ============ -->
-        <section class="slide-view" data-title="HSI Model (Hue · Saturation · Intensity)" aria-label="สไลด์ 16: HSI Model">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR MODELS</p>
-            <h2 class="slide-title">HSI Model — <span class="grad-text">ตรงกับวิธีที่คนบรรยายสี</span></h2>
-            <p class="slide-subtitle">ลองถามตัวเอง: จะบรรยายสี "แอปเปิลเขียวลูกนี้" ยังไง? ไม่มีใครตอบว่า R=120, G=180, B=60 หรอก — แต่ตอบว่า <b class="cyan">เขียว, สดใส, สว่างพอควร</b></p>
-
-            <div class="split mt-6">
-              <div class="visual-box">
-                <span class="vb-label">Hue + Saturation อยู่บนสามเหลี่ยมสี</span>
-                <div class="hsi-box">
-                  <div class="hsi-tri"></div>
-                  <div class="hsi-pts">สีเดียวกัน (hue) อยู่บนเส้นเดียวกัน</div>
-                </div>
-                <p class="text-3" style="font-size:12.5px;text-align:center">Intensity (ความสว่าง) เป็นแกนตั้งฉากออกจากระนาบ</p>
-              </div>
-
               <div class="flex" style="flex-direction:column;gap:14px">
                 <div class="card">
-                  <h3 class="card-title"><i data-lucide="droplet" class="cyan"></i>Hue (ฮิว)</h3>
-                  <p class="card-text">คุณลักษณะของสี (color attribute) — บอกว่าเป็นสีอะไร: แดง เขียว น้ำเงิน...</p>
+                  <h3 class="card-title"><i data-lucide="cpu" class="cyan"></i>ทำไมต้อง NumPy?</h3>
+                  <p class="card-text">คำนวณทั้ง array ได้เร็วมาก (vectorized) — ปรับความสว่างทั้งภาพ = บวกเลขทั้งตารางครั้งเดียว</p>
                 </div>
                 <div class="card">
-                  <h3 class="card-title"><i data-lucide="gauge" class="cyan"></i>Saturation (ความอิ่ม)</h3>
-                  <p class="card-text"><b class="cyan">ความบริสุทธิ์ของสี</b> — ขาว = <b class="cyan">0</b> (ไม่มีสี) · สีปฐมภูมิเต็ม = <b class="cyan">1</b> (บริสุทธิ์สุด)</p>
-                </div>
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="sun" class="cyan"></i>Intensity / Brightness</h3>
-                  <p class="card-text">ความสว่าง — แนวคิดแบบ achromatic (ไม่มีสี) เหมือนระดับเทา</p>
-                </div>
-                <div class="tip-box tip-exam">
-                  <i data-lucide="graduation-cap"></i>
-                  <div><b>Exam Tip</b>Saturation: ขาว = 0 · สีปฐมภูมิ = 1 — ข้อสอบถามค่านี้บ่อย</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 17 · HSI COMPONENTS ============ -->
-        <section class="slide-view" data-title="HSI Component Images" aria-label="สไลด์ 17: HSI Components">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">COLOR MODELS</p>
-            <h2 class="slide-title">HSI Component Images</h2>
-            <p class="slide-subtitle">ภาพสี 1 ภาพ แยกเป็น 3 ชิ้นส่วน (component) — แต่ละชิ้นบอกคนละเรื่อง</p>
-
-            <div class="grid-4 mt-6">
-              <div class="card">
-                <h3 class="card-title" style="font-size:14px"><i data-lucide="grid-3x3" class="cyan"></i>R, G, B (ดั้งเดิม)</h3>
-                <div class="center mt-3" style="flex-direction:column;gap:6px">
-                  <div style="display:flex;gap:4px">
-                    <div style="width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#f87171,#7f1d1d)"></div>
-                    <div style="width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#4ade80,#14532d)"></div>
-                    <div style="width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#60a5fa,#1e3a8a)"></div>
-                  </div>
-                  <small class="text-3">3 ช่องสีแยกกัน</small>
-                </div>
-              </div>
-              <div class="card">
-                <h3 class="card-title" style="font-size:14px"><i data-lucide="droplet" class="cyan"></i>Hue</h3>
-                <div class="center mt-3" style="flex-direction:column;gap:6px">
-                  <div style="width:120px;height:40px;border-radius:9px;background:linear-gradient(90deg,#f43f5e,#f59e0b,#22c55e,#3b82f6,#a855f7,#f43f5e)"></div>
-                  <small class="text-3">บอก "สีอะไร"</small>
-                </div>
-              </div>
-              <div class="card">
-                <h3 class="card-title" style="font-size:14px"><i data-lucide="gauge" class="cyan"></i>Saturation</h3>
-                <div class="center mt-3" style="flex-direction:column;gap:6px">
-                  <div style="width:120px;height:40px;border-radius:9px;background:linear-gradient(90deg,#f8fafc,#ef4444)"></div>
-                  <small class="text-3">บอก "สีสด/ซีดแค่ไหน"</small>
-                </div>
-              </div>
-              <div class="card">
-                <h3 class="card-title" style="font-size:14px"><i data-lucide="sun" class="cyan"></i>Intensity</h3>
-                <div class="center mt-3" style="flex-direction:column;gap:6px">
-                  <div style="width:120px;height:40px;border-radius:9px;background:linear-gradient(90deg,#000,#333,#666,#999,#ccc,#fff)"></div>
-                  <small class="text-3">บอก "สว่าง/มืด"</small>
-                </div>
-              </div>
-            </div>
-
-            <div class="tip-box tip-remember mt-6">
-              <i data-lucide="lightbulb"></i>
-              <div><b>จำแบบนี้</b>Hue = สีอะไร · Saturation = สีสดแค่ไหน · Intensity = สว่างแค่ไหน — ตรงกับที่คนดูภาพเข้าใจ</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 18 · INTENSITY SLICING ============ -->
-        <section class="slide-view" data-title="Pseudo-color: Intensity Slicing" aria-label="สไลด์ 18: Intensity Slicing">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">PSEUDO-COLOR</p>
-            <h2 class="slide-title">Pseudo-color: <span class="grad-text">Intensity Slicing</span></h2>
-            <p class="slide-subtitle">กำหนดสีให้ค่าความเข้มเทา ตามเกณฑ์ที่ตั้งไว้ — เพื่อช่วยมนุษย์มองเห็นและตีความภาพเทา</p>
-
-            <div class="split mt-6">
-              <div class="slice-wrap">
-                <span class="vb-label">ภาพเทา (ระดับ 0–255)</span>
-                <div class="slice-gray"></div>
-                <span class="vb-label mt-3" style="display:block;margin-top:16px">แบ่งเป็น 6 ชิ้น (slices) แล้วย้อมสีแต่ละชิ้น</span>
-                <div class="slice-color">
-                  <div class="slice-seg" style="width:16.66%;background:#1d4ed8"></div>
-                  <div class="slice-seg" style="width:16.66%;background:#0891b2"></div>
-                  <div class="slice-seg" style="width:16.66%;background:#16a34a"></div>
-                  <div class="slice-seg" style="width:16.66%;background:#ca8a04"></div>
-                  <div class="slice-seg" style="width:16.66%;background:#ea580c"></div>
-                  <div class="slice-seg" style="width:16.66%;background:#dc2626"></div>
-                </div>
-              </div>
-
-              <div class="flex" style="flex-direction:column;gap:16px">
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>มองแบบ 3 มิติ</h3>
-                  <p class="card-text">ภาพเทา = ระนาบที่ความสูงแต่ละจุดคือระดับเทา — เอาระนาบ (plane) ตัดแบ่งเป็นชั้น แล้วให้แต่ละชั้นคนละสี</p>
-                </div>
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="trending-up" class="cyan"></i>ยิ่ง slicing เยอะ = ยิ่งสีเยอะ</h3>
-                  <p class="card-text">More slicing planes → more colors — เห็นรายละเอียดระดับเทาแยกเป็นสีต่าง ๆ ชัดเจนขึ้น</p>
-                </div>
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="flask-conical" class="cyan"></i>ตัวอย่างการใช้งานจริง</h3>
-                  <p class="card-text small">ภาพทดสอบรังสี (radiation test pattern) · ภาพ X-ray รอยเชื่อมโลหะ (weld) · สถิติฝน (rainfall) — ใช้สีแยกช่วงค่าต่าง ๆ ให้อ่านง่าย</p>
-                </div>
-                <div class="tip-box tip-exam">
-                  <i data-lucide="graduation-cap"></i>
-                  <div><b>Exam Tip</b>Intensity slicing = <b class="cyan">แบ่งระดับเทาเป็นช่วง แล้วกำหนดสีให้แต่ละช่วง</b></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ============ SLIDE 19 · GRAY → COLOR ============ -->
-        <section class="slide-view" data-title="Gray-level → Color Transformation" aria-label="สไลด์ 19: Gray → Color">
-          <div class="slide-inner">
-            <p class="slide-eyebrow">PSEUDO-COLOR</p>
-            <h2 class="slide-title">Gray-level → <span class="grad-text">Color Transformation</span></h2>
-            <p class="slide-subtitle">อีกวิธีของ pseudo-color: ใช้ฟังก์ชันแปลงค่าระดับเทาเป็นค่าสี</p>
-
-            <div class="split mt-6">
-              <div class="visual-box">
-                <span class="vb-label">Intensity slicing = piecewise linear transformation</span>
-                <div style="background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:12px">
-                  <div style="position:relative;height:110px;border-left:2px solid var(--border);border-bottom:2px solid var(--border)">
-                    <div style="position:absolute;left:0;bottom:0;width:20%;height:25%;background:linear-gradient(180deg,#1d4ed8,#1d4ed8)"></div>
-                    <div style="position:absolute;left:20%;bottom:0;width:20%;height:50%;background:linear-gradient(180deg,#0891b2,#0891b2)"></div>
-                    <div style="position:absolute;left:40%;bottom:0;width:20%;height:75%;background:linear-gradient(180deg,#16a34a,#16a34a)"></div>
-                    <div style="position:absolute;left:60%;bottom:0;width:20%;height:100%;background:linear-gradient(180deg,#dc2626,#dc2626)"></div>
-                  </div>
-                  <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-3);margin-top:4px"><span>0</span><span>85</span><span>170</span><span>255</span></div>
-                </div>
-                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">แต่ละช่วงของระดับเทา (0–255) ถูกแมปเป็น "บันได" ขึ้นไปยังสีที่กำหนด</p>
-              </div>
-
-              <div class="flex" style="flex-direction:column;gap:16px">
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="route" class="cyan"></i>สองแนวทาง</h3>
-                  <p class="card-text small" style="line-height:2">
-                    • <b class="cyan">Intensity slicing</b>: piecewise linear — แบ่งช่วงเป็นท่อน ๆ<br />
-                    • <b class="cyan">General gray→color</b>: ฟังก์ชันอิสระ (R = f₁(L), G = f₂(L), B = f₃(L)) — แต่ละช่องมีฟังก์ชันของตัวเอง
-                  </p>
-                </div>
-                <div class="card">
-                  <h3 class="card-title"><i data-lucide="combine" class="cyan"></i>รวมภาพ monochrome หลายภาพ</h3>
-                  <p class="card-text">Application: นำภาพเทาหลายภาพมาเป็นช่อง R, G, B ของภาพสีเดียว — เช่น <b class="cyan">multi-spectral images</b> (ภาพดาวเทียม Washington D.C.: R, G, B + near-infrared ที่ไวต่อมวลชีวภาพ)</p>
+                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>ภาพสี = array 3 มิติ</h3>
+                  <p class="card-text">(แถว, คอลัมน์, ช่องสี) — แต่ละจุดมีค่า 3 ตัว (B, G, R) แทนที่จะเป็น 1 ตัว</p>
                 </div>
                 <div class="tip-box tip-remember">
                   <i data-lucide="lightbulb"></i>
-                  <div><b>จำแบบนี้</b>Pseudo-color = ใส่สีให้ภาพเทา มี 2 วิธี: slicing (แบ่งช่วง) + gray→color (ฟังก์ชันแปลง)</div>
+                  <div><b>จำแบบนี้</b>img = ตารางตัวเลข (NumPy array) · แก้พิกเซล = แก้ตัวเลขในตาราง</div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ============ SLIDE 20 · FULL-COLOR PROCESSING ============ -->
-        <section class="slide-view" data-title="Full-color Processing — 2 หลักคิด" aria-label="สไลด์ 20: Full-color 2 หลักคิด">
+        <!-- ============ SLIDE 4 · IMREAD ============ -->
+        <section class="slide-view" data-title="อ่านภาพ — cv2.imread()" aria-label="สไลด์ 4: cv2.imread">
           <div class="slide-inner">
-            <p class="slide-eyebrow">FULL-COLOR PROCESSING</p>
-            <h2 class="slide-title">Full-color Processing — <span class="grad-text">2 หลักคิด</span></h2>
-            <p class="slide-subtitle">การประมวลผลภาพสีจริง มีหลักคิด 2 แบบ</p>
+            <p class="slide-eyebrow">READ IMAGE</p>
+            <h2 class="slide-title">อ่านภาพ — <span class="grad-text">cv2.imread()</span></h2>
+            <p class="slide-subtitle">คำสั่งแรกของทุกโปรเจกต์ — เปิดไฟล์ภาพเข้ามาเป็น NumPy array</p>
 
             <div class="split mt-6">
-              <div class="card" style="border-top:3px solid var(--cyan)">
-                <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>แบบที่ 1: ไล่ทีละ component</h3>
-                <p class="card-text">แยกภาพเป็นช่อง R, G, B (หรือ H, S, I) แล้วประมวลผล <b class="cyan">ทีละช่องอิสระ</b> (per-component) — ทำกับแต่ละช่องเหมือนภาพเทา แล้วนำกลับมารวม</p>
-                <div class="tip-box tip-note mt-3"><i data-lucide="lightbulb"></i><div>เช่น เพิ่ม contrast ให้ช่อง R, G, B อย่างละเท่า ๆ กัน</div></div>
-              </div>
-              <div class="card" style="border-top:3px solid var(--success)">
-                <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>แบบที่ 2: ประมวลผลทั้งภาพ</h3>
-                <p class="card-text">มองทุกพิกเซลเป็น <b class="cyan">เวกเตอร์สี</b> (color vector) แล้วประมวลผลทีละพิกเซลทั้งเวกเตอร์ (vector-based) — ไม่แยกช่อง</p>
-                <div class="tip-box tip-note mt-3"><i data-lucide="lightbulb"></i><div>เช่น หมุนสีทั้งภาพ (color rotation) ด้วยเมทริกซ์</div></div>
-              </div>
-            </div>
+              <div class="visual-box">
+                <span class="vb-label">โค้ดพื้นฐาน</span>
+                <pre class="code-block">import cv2
 
-            <div class="tip-box tip-exam mt-6">
-              <i data-lucide="graduation-cap"></i>
-              <div><b>Exam Tip</b>จำ 2 คำ: <b class="cyan">per-component</b> = ทำทีละช่อง · <b class="cyan">vector-based</b> = ทำทั้งเวกเตอร์สี</div>
+img = cv2.imread("image.jpg")   # อ่านภาพเข้ามา
+print(img)                       # ดูตัวเลขพิกเซล
+print(type(img))                 # &lt;class 'numpy.ndarray'&gt;</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>cv2.imread(path) — path คือที่อยู่ไฟล์ภาพ</span></div>
+                  <div class="step-box"><b>2</b><span>ได้ผลลัพธ์เป็น array เก็บในตัวแปร img</span></div>
+                  <div class="step-box"><b>3</b><span>ถ้า path ผิดจะได้ <code>None</code> — เช็คเสมอว่าไม่ว่าง</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="file-image" class="cyan"></i>อ่านเป็น grayscale ได้ด้วย</h3>
+                  <p class="card-text"><code>img = cv2.imread("image.jpg", 0)</code> — อ่านตรง ๆ เป็นภาพเทา 1 ช่อง (ขาว-ดำ)</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>ข้อควรจำ</h3>
+                  <p class="card-text">นามสกุลไฟล์ (jpg/png) ไม่สำคัญตอนอ่าน — OpenCV เดารูปแบบจากเนื้อไฟล์ให้อัตโนมัติ</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>อ่านภาพ = <code>cv2.imread()</code> · แสดงภาพ = <code>cv2.imshow()</code> — อย่าสลับกัน!</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- ============ SLIDE 21 · COLOR TRANSFORMATIONS ============ -->
-        <section class="slide-view" data-title="Color Transformations sᵢ = Tᵢ(r₁,r₂,r₃)" aria-label="สไลด์ 21: Color Transformations">
+        <!-- ============ SLIDE 5 · SHAPE ============ -->
+        <section class="slide-view" data-title="img.shape — (Height, Width, Channels)" aria-label="สไลด์ 5: img.shape">
           <div class="slide-inner">
-            <p class="slide-eyebrow">FULL-COLOR PROCESSING</p>
-            <h2 class="slide-title">Color <span class="grad-text">Transformations</span></h2>
-            <p class="slide-subtitle">หลักคิดเดียวกับภาพเทา s = T(r) — แต่ภาพสีต้องแปลงครบทั้ง 3 component</p>
+            <p class="slide-eyebrow">IMAGE PROPERTIES</p>
+            <h2 class="slide-title">img.shape — <span class="grad-text">(Height, Width, Channels)</span></h2>
+            <p class="slide-subtitle">ถามขนาดภาพด้วย <code>img.shape</code> — คำตอบเรียง: <b class="cyan">ความสูง, ความกว้าง, จำนวนช่อง</b></p>
 
-            <div class="formula mt-6">sᵢ = Tᵢ(r₁, r₂, r₃) &nbsp;สำหรับ i = 1, 2, 3</div>
-
-            <div class="step-list mt-6">
-              <div class="step-box"><b>📥 r₁, r₂, r₃</b> = ค่าสี 3 ช่องของพิกเซลต้นทาง (เช่น R, G, B)</div>
-              <div class="step-box"><b>🔄 Tᵢ</b> = ฟังก์ชันแปลงของช่อง i — อาจใช้ค่าจากทั้ง 3 ช่องมาคิด (ไม่ใช่แค่ช่องตัวเอง)</div>
-              <div class="step-box"><b>📤 sᵢ</b> = ผลลัพธ์ช่องที่ i — ทำครบ i = 1, 2, 3 ได้พิกเซลใหม่ทั้ง 3 ช่อง</div>
-              <div class="step-box"><b>🧮 จับมือ</b> ภาพเทา: s = T(r) แปลงค่าเดียว · ภาพสี: ต้องแปลง 3 ช่องพร้อมกันด้วย T₁, T₂, T₃</div>
-            </div>
-
-            <div class="tip-box tip-exam mt-6">
-              <i data-lucide="graduation-cap"></i>
-              <div><b>Exam Tip</b>การแปลงภาพสีต้องทำกับ <b class="cyan">ทุก component (ทั้ง 3 ช่อง)</b> — ไม่ใช่แค่ช่องเดียว</div>
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ตัวอย่าง: ภาพ 640×480 สี</span>
+                <div class="shape-box mt-3">
+                  <div class="shape-dim"><b>(480</b><small>Height · แถว · y</small></div>
+                  <div class="shape-dim"><b>640</b><small>Width · คอลัมน์ · x</small></div>
+                  <div class="shape-dim"><b>3)</b><small>Channels · ช่องสี</small></div>
+                </div>
+                <pre class="code-block mt-3">img = cv2.imread("image.jpg")   # 640 x 480
+print(img.shape)
+# (480, 640, 3)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>กับดักที่เจอบ่อยที่สุด</h3>
+                  <p class="card-text"><b class="cyan">Height (480) มาก่อน Width (640)</b> — เพราะใน array แถว (y) มาก่อนคอลัมน์ (x) เสมอ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="hash" class="cyan"></i>แยกอ่านทีละค่า</h3>
+                  <p class="card-text"><code>h, w = img.shape[:2]</code> (grayscale)<br /><code>h, w, c = img.shape</code> (ภาพสี)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>shape = (Height, Width, Channels) — ตัวแรกคือ <b>แถว (y)</b> เสมอ!</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- ============ SLIDE 22 · SMOOTHING & SHARPENING ============ -->
-        <section class="slide-view" data-title="Smoothing & Sharpening ภาพสี" aria-label="สไลด์ 22: Smoothing/Sharpening">
+        <!-- ============ SLIDE 6 · DTYPE ============ -->
+        <section class="slide-view" data-title="img.dtype — uint8 (0–255)" aria-label="สไลด์ 6: img.dtype">
           <div class="slide-inner">
-            <p class="slide-eyebrow">FULL-COLOR PROCESSING</p>
-            <h2 class="slide-title">Smoothing &amp; Sharpening <span class="grad-text">ภาพสี</span></h2>
-            <p class="slide-subtitle">ใช้หลักเดียวกับภาพเทา แต่ต้องระวัง: ทำที่ <b class="cyan">HSI intensity</b> ไม่ใช่ที่ RGB ตรง ๆ</p>
+            <p class="slide-eyebrow">IMAGE PROPERTIES</p>
+            <h2 class="slide-title">img.dtype — <span class="grad-text">uint8</span></h2>
+            <p class="slide-subtitle">dtype = ชนิดข้อมูลของพิกเซล — ภาพปกติเป็น <b class="cyan">uint8</b> = เลขเต็ม 0–255</p>
 
-            <div class="cm-grid mt-6">
-              <div class="cm-card" style="border-top:3px solid var(--primary)">
-                <div class="cm-i" style="background:rgba(37,99,235,.12);color:#60a5fa"><i data-lucide="waves"></i></div>
-                <b>Smoothing (เบลอ)</b>
-                <small>เฉลี่ยค่าพิกเซลรอบข้าง (neighborhood averaging)<br />ทำกับทั้ง 3 ช่อง RGB หรือทำที่ <b class="cyan">intensity ของ HSI</b> อย่างเดียว</small>
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">เช็คชนิดข้อมูล</span>
+                <pre class="code-block">print(img.dtype)
+# uint8</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>u</b><span>unsigned = ไม่มีค่าลบ → เริ่มที่ 0</span></div>
+                  <div class="step-box"><b>int8</b><span>8 บิต → ค่าสูงสุด 2^8−1 = 255</span></div>
+                  <div class="step-box"><b>รวม</b><span>uint8 = 0 ถึง 255 — พอดีกับระดับเทาของภาพ</span></div>
+                </div>
               </div>
-              <div class="cm-card" style="border-top:3px solid var(--success)">
-                <div class="cm-i" style="background:rgba(34,197,94,.12);color:#4ade80"><i data-lucide="scan" class="cyan"></i></div>
-                <b>Sharpening (คมชัด)</b>
-                <small>ใช้ Laplacian (หาอนุพันธ์อันดับ 2) เพิ่มความคม<br />ทำทีละ component ก็ได้</small>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>ระวังเวลาคำนวณ</h3>
+                  <p class="card-text">uint8 เก็บเลข 0–255 เท่านั้น — ถ้าคำนวณแล้วเกิน 255 จะ <b class="cyan">wrap (วนกลับ)</b> หรือถูก clip ต้องแปลงเป็น float ก่อนแล้วค่อยกลับ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="hash" class="cyan"></i>ชนิดอื่น ๆ</h3>
+                  <p class="card-text">float32/float64 ใช้ตอนคำนวณ (เช่น แบ่ง 255) · uint16 สำหรับภาพ 16 บิต</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>uint8 = 0–255 = 8 บิตไม่มีเครื่องหมาย — dtype ของภาพปกติ</div>
+                </div>
               </div>
-              <div class="cm-card" style="border-top:3px solid var(--warning)">
-                <div class="cm-i" style="background:rgba(245,158,11,.12);color:#fbbf24"><i data-lucide="alert-triangle"></i></div>
-                <b>⚠ ข้อควรระวัง</b>
-                <small>ถ้าทำที่ RGB ตรง ๆ สีอาจ<b>เพี้ยน</b> — วิธีที่ปลอดภัย: แปลงเป็น HSI แล้วทำที่ <b class="cyan">intensity</b> เท่านั้น (hue/saturation ไม่แตะ)</small>
-              </div>
-            </div>
-
-            <div class="step-list mt-6">
-              <div class="step-box"><b>🛠 วิธีทำ (จับมือ)</b> 1) แปลง RGB → HSI · 2) ทำ smoothing/sharpening เฉพาะช่อง Intensity (เหมือนภาพเทา) · 3) แปลง HSI กลับ → RGB</div>
-              <div class="step-box"><b>💡 ทำไม?</b> เพราะ H (hue) กับ S (saturation) คือ "ข้อมูลสี" — ถ้าไปปรับจะสีเพี้ยน แต่ I (intensity) คือ "ความสว่าง" — ปรับแล้วภาพคม/เบลอโดยสีไม่เปลี่ยน</div>
-            </div>
-
-            <div class="tip-box tip-exam mt-6">
-              <i data-lucide="graduation-cap"></i>
-              <div><b>Exam Tip</b>จำไว้ว่า: smoothing/sharpening ภาพสีที่ถูกต้อง = ทำที่ <b class="cyan">Intensity ของ HSI</b> ไม่ใช่ RGB ตรง ๆ</div>
             </div>
           </div>
         </section>
 
-        <!-- ============ SLIDE 22 · SUMMARY ============ -->
+        <!-- ============ SLIDE 7 · IMSHOW ============ -->
+        <section class="slide-view" data-title="แสดงภาพแบบที่ 1 — cv2.imshow() + waitKey()" aria-label="สไลด์ 7: imshow + waitKey">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">DISPLAY · OPENCV</p>
+            <h2 class="slide-title">แสดงภาพ — <span class="grad-text">cv2.imshow()</span></h2>
+            <p class="slide-subtitle">วิธีที่ 1: หน้าต่างของ OpenCV เอง — ต้องใช้ 3 คำสั่งคู่กัน</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โค้ดที่ถูกต้อง</span>
+                <pre class="code-block">cv2.imshow("Image", img)   # 1. เปิดหน้าต่างชื่อ Image
+cv2.waitKey(0)             # 2. รอจนกว่าจะกดปุ่ม
+cv2.destroyAllWindows()    # 3. ปิดหน้าต่างทั้งหมด</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>imshow(ชื่อ, ภาพ) — เปิดหน้าต่าง</span></div>
+                  <div class="step-box"><b>2</b><span>waitKey(0) — ค้างหน้าต่างไว้ รอคีย์บอร์ด</span></div>
+                  <div class="step-box"><b>3</b><span>destroyAllWindows() — เคลียร์หน้าต่างหลังเลิกใช้</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>ลืม waitKey = หน้าต่างกะพริบแล้วปิด</h3>
+                  <p class="card-text">โปรแกรมจบทันที → หน้าต่างปิดตาม — imshow ต้องคู่กับ waitKey เสมอ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="timer" class="cyan"></i>waitKey(5000) = รอ 5 วินาที</h3>
+                  <p class="card-text">ใส่ตัวเลขเป็นมิลลิวินาที — waitKey(0) คือรอไม่จำกัดเวลา</p>
+                </div>
+                <div class="tip-box tip-note">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>ไม่สะดวกใช้หน้าต่าง?</b>ถ้าใช้ Jupyter/Colab ให้ข้ามไปวิธี Matplotlib ในสไลด์ถัดไป</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 8 · MATPLOTLIB ============ -->
+        <section class="slide-view" data-title="แสดงภาพแบบที่ 2 — Matplotlib plt.imshow()" aria-label="สไลด์ 8: plt.imshow">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">DISPLAY · MATPLOTLIB</p>
+            <h2 class="slide-title">แสดงภาพแบบที่ 2 — <span class="grad-text">Matplotlib</span></h2>
+            <p class="slide-subtitle">วิธีที่ 2: แสดงในกรอบพล็อตของ Matplotlib — นิยมใช้ใน Jupyter/Colab</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โค้ดพื้นฐาน</span>
+                <pre class="code-block">import matplotlib.pyplot as plt
+
+plt.imshow(img, cmap="gray")   # แสดงภาพ (grayscale ใช้ cmap="gray")
+plt.show()                      # วาดออกจอ</pre>
+                <div class="tip-box tip-note mt-3">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>cmap ที่มี</b>gray · hot · viridis · jet · plasma — ไว้เปลี่ยนโทนสีของภาพเทา</div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="image" class="cyan"></i>ภาพสี = ต้องแปลงก่อน!</h3>
+                  <p class="card-text">Matplotlib คิดว่าภาพเป็น RGB แต่ OpenCV ส่งมาเป็น BGR → สีเพี้ยน ต้อง <code>cvtColor</code> ก่อน (สไลด์ 12)</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="layout-grid" class="cyan"></i>ข้อดี</h3>
+                  <p class="card-text">โชว์หลายภาพในหน้ากระดาษเดียว + วาดกราฟกำกับ (histogram, title, axis) ได้ด้วย</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>imshow แบบ OpenCV ใช้ <code>cv2.</code> · แบบ Matplotlib ใช้ <code>plt.</code> — และ plt ต้องคู่กับ plt.show()</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 9 · SUBPLOT ============ -->
+        <section class="slide-view" data-title="จัดหน้าต่างพล็อต — subplot · title · colorbar" aria-label="สไลด์ 9: subplot · colorbar">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">MATPLOTLIB · LAYOUT</p>
+            <h2 class="slide-title">จัดหน้าต่างพล็อต — <span class="grad-text">subplot · title · colorbar</span></h2>
+            <p class="slide-subtitle">โชว์ภาพหลายภาพในรูปเดียว และใส่ป้ายกำกับให้อ่านง่าย</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โค้ด: 2 ภาพในแถวเดียว</span>
+                <pre class="code-block">plt.figure(figsize=(8, 6))     # ขนาดรูป
+plt.subplot(1, 2, 1)            # แถว 1, คอลัมน์ 2, ช่องที่ 1
+plt.imshow(img1, cmap="gray")
+plt.title("Original")           # ใส่ชื่อ
+
+plt.subplot(1, 2, 2)            # ช่องที่ 2
+plt.imshow(img2, cmap="gray")
+plt.title("Processed")
+plt.show()</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="layout-grid" class="cyan"></i>อ่าน subplot(1, 2, 1)</h3>
+                  <p class="card-text">(จำนวนแถว, จำนวนคอลัมน์, ตำแหน่ง) — 1 แถว 2 คอลัมน์ ช่องแรก = ด้านซ้าย</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>ป้ายกำกับที่ใช้บ่อย</h3>
+                  <p class="card-text"><code>plt.title()</code> ชื่อเรื่อง · <code>plt.xlabel()/ylabel()</code> แกน · <code>plt.colorbar()</code> แถบสีบอกค่า</p>
+                </div>
+                <div class="tip-box tip-note">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>เคล็ดลับ</b>วางภาพก่อน-หลัง (original vs processed) ไว้ข้างกัน — ดูผลต่างชัดทันที</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 10 · พล็อตเสริม ============ -->
+        <section class="slide-view" data-title="พล็อตเสริม — hist · plot · text · axis" aria-label="สไลด์ 10: hist · plot · text">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">MATPLOTLIB · EXTRAS</p>
+            <h2 class="slide-title">พล็อตเสริม — <span class="grad-text">hist · plot · text · axis</span></h2>
+            <p class="slide-subtitle">เครื่องมือเล็ก ๆ ที่ใช้ประกอบการวิเคราะห์ภาพ</p>
+
+            <div class="visual-box">
+              <span class="vb-label">โค้ดรวมของฟังก์ชันยอดนิยม</span>
+              <pre class="code-block">plt.hist(img.ravel(), bins=256)     # histogram ของค่าพิกเซล
+plt.plot(100, 200, "ro")            # จุดแดงที่ (x=100, y=200)
+plt.text(100, 100, "Pixel")         # เขียนข้อความบนรูป
+plt.xlim(100, 300)                   # ซูมแกน x
+plt.ylim(300, 100)                   # ซูมแกน y (กลับหัวได้)
+plt.grid()                           # ตารางกริด
+plt.axis("off")                     # ซ่อนแกน
+plt.colorbar()                       # แถบสี</pre>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>hist</b><span>นับจำนวนพิกเซลแต่ละระดับ 0–255 — ดูความสว่าง/คอนทราสต์</span></div>
+                <div class="step-box"><b>plot/text</b><span>วาดจุด/ข้อความกำกับบนภาพ</span></div>
+                <div class="step-box"><b>xlim/ylim</b><span>ซูมช่วงที่สนใจ (หมายเหตุ: ใส่ <code>plt.ylim(300, 100)</code> = กลับแกน)</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 11 · BGR vs RGB ============ -->
+        <section class="slide-view" data-title="BGR vs RGB — กับดักสีสลับ" aria-label="สไลด์ 11: BGR vs RGB">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">COLOR ORDER</p>
+            <h2 class="slide-title">BGR vs RGB — <span class="grad-text">กับดักสีสลับ</span></h2>
+            <p class="slide-subtitle">OpenCV เก็บช่องสีเรียง <b class="cyan">BGR</b> แต่ Matplotlib/ภาพทั่วไปเรียง <b class="cyan">RGB</b> — เรื่องนี้สอบติดชัวร์</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">พิกเซลเดียวกัน อ่าน 2 แบบ</span>
+                <pre class="code-block">pixel = img[100, 200]
+print(pixel)
+# [ 50 120 200 ]</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>OpenCV (BGR)</b><span>B = 50 · G = 120 · R = 200 → ภาพออกโทนแดง</span></div>
+                  <div class="step-box"><b>Matplotlib (RGB)</b><span>R = 50 · G = 120 · B = 200 → ภาพออกโทนน้ำเงิน</span></div>
+                  <div class="step-box"><b>ผล</b><span>สีแดงกับน้ำเงินสลับกัน — ภาพผิดเพี้ยน</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="history" class="cyan"></i>ทำไม OpenCV ใช้ BGR?</h3>
+                  <p class="card-text">มรดกจากยุคแรกของ C/C++ และฮาร์ดแวร์กล้อง — OpenCV เลยเรียง BGR มาจนถึงทุกวันนี้</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="eye" class="cyan"></i>ดูยังไงว่าสีสลับ?</h3>
+                  <p class="card-text">ท้องฟ้าควรเป็นฟ้าแต่กลายเป็นส้ม/แดง = อาการคลาสสิกของ BGR แสดงเป็น RGB</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>BGR = OpenCV · RGB = Matplotlib/ปกติ · ไม่แปลง = สีเพี้ยน</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 12 · CVTCOLOR ============ -->
+        <section class="slide-view" data-title="แปลงสี — cv2.cvtColor()" aria-label="สไลด์ 12: cvtColor">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">COLOR CONVERSION</p>
+            <h2 class="slide-title">แปลงสี — <span class="grad-text">cv2.cvtColor()</span></h2>
+            <p class="slide-subtitle">วิธีแก้สีสลับ: แปลง BGR → RGB ก่อนแสดงด้วย Matplotlib</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โค้ดที่ต้องจำ</span>
+                <pre class="code-block">img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+plt.imshow(img_rgb)
+plt.show()</pre>
+                <div class="tip-box tip-note mt-3">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>flag อื่น ๆ</b>COLOR_BGR2GRAY (เทา) · COLOR_RGB2BGR (กลับทาง) · COLOR_BGR2HSV · COLOR_BGR2LAB</div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="arrows-right-left" class="cyan"></i>อ่านชื่อ flag</h3>
+                  <p class="card-text"><code>COLOR_A2B</code> = แปลงจาก A เป็น B — BGR2RGB คือ BGR → RGB</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="swap" class="cyan"></i>สลับด้วย slicing ก็ได้</h3>
+                  <p class="card-text"><code>img_rgb = img[:, :, ::-1]</code> — กลับลำดับช่องสุดท้าย (เทียบเท่า cvtColor สำหรับ BGR↔RGB)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ก่อน plt.imshow ภาพสี → ต้อง cvtColor(img, cv2.COLOR_BGR2RGB) เสมอ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 13 · PIXEL ACCESS ============ -->
+        <section class="slide-view" data-title="เข้าถึงพิกเซล — img[y, x]" aria-label="สไลด์ 13: img[y, x]">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">PIXEL ACCESS</p>
+            <h2 class="slide-title">เข้าถึงพิกเซล — <span class="grad-text">img[y, x]</span></h2>
+            <p class="slide-subtitle">กฎเหล็กของ OpenCV: <b class="cyan">y (แถว) มาก่อน x (คอลัมน์) เสมอ</b> — ต่างจากคณิตศาสตร์ที่ใช้ (x, y)</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ตัวอย่าง: พิกเซลแถว 100 คอลัมน์ 200</span>
+                <pre class="code-block">pixel = img[100, 200]   # y=100, x=200
+print(pixel)             # [ 50 120 200 ] → BGR</pre>
+                <div class="coord-grid mt-3" id="coordGrid"></div>
+                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">ช่องฟ้า = (y=2, x=2) — y คือแถว (ลงมา) x คือคอลัมน์ (ไปขวา)</p>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>กับดักที่พบบ่อย</h3>
+                  <p class="card-text">เคยชินจากคณิต (x, y) → เขียน img[x, y] → ได้ตำแหน่งคนละจุด! จำให้ขึ้นใจ: <b class="cyan">img[แถว, คอลัมน์]</b></p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="coords" class="cyan"></i>ผลลัพธ์เป็น array 3 ตัว</h3>
+                  <p class="card-text">ภาพสี: [B, G, R] · ภาพเทา: ค่าเดียว เช่น <code>img[100, 200] = 120</code></p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>พิกเซล = <code>img[y, x]</code> — y = แถว (row) · x = คอลัมน์ (column)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 14 · CHANNEL ============ -->
+        <section class="slide-view" data-title="แยก Channel — b, g, r = img[y, x]" aria-label="สไลด์ 14: แยก Channel">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">CHANNELS</p>
+            <h2 class="slide-title">แยก Channel — <span class="grad-text">b, g, r = img[y, x]</span></h2>
+            <p class="slide-subtitle">ดึงช่องสีแต่ละช่องของพิกเซลออกมา — ดัชนี 0 = B · 1 = G · 2 = R</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">วิธีที่ 1: destructure</span>
+                <pre class="code-block">b, g, r = img[100, 200]
+print(b, g, r)   # 50 120 200</pre>
+                <span class="vb-label mt-3">วิธีที่ 2: ระบุดัชนี</span>
+                <pre class="code-block">b = img[100, 200, 0]   # ช่อง 0 = Blue
+r = img[100, 200, 2]   # ช่อง 2 = Red</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>แผนผังช่องสี</h3>
+                  <div class="ch-row mt-2">
+                    <div class="ch-chip" style="background:#3b82f6">0 · B</div>
+                    <div class="ch-chip" style="background:#22c55e">1 · G</div>
+                    <div class="ch-chip" style="background:#ef4444">2 · R</div>
+                  </div>
+                  <p class="card-text mt-2" style="margin-top:10px">จำจาก BGR: 0=B, 1=G, 2=R</p>
+                </div>
+                <div class="tip-box tip-note">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>นำไปใช้</b>ดึงช่องสีเดียวทั้งภาพ: <code>blue = img[:, :, 0]</code> — ไว้ทำ mask/แยกวัตถุด้วยสี</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 15 · SET PIXEL ============ -->
+        <section class="slide-view" data-title="เปลี่ยนค่าพิกเซล — img[y, x] = [B, G, R]" aria-label="สไลด์ 15: เปลี่ยนพิกเซล">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">PIXEL WRITE</p>
+            <h2 class="slide-title">เปลี่ยนค่าพิกเซล — <span class="grad-text">img[y, x] = [B, G, R]</span></h2>
+            <p class="slide-subtitle">กำหนดค่าใหม่ให้พิกเซล — จำลำดับ BGR ให้แม่น (แดง = [0, 0, 255] ไม่ใช่ [255, 0, 0]!)</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โค้ด: เปลี่ยนพิกเซล (100, 200) เป็นแดง</span>
+                <pre class="code-block">img[100, 200] = [0, 0, 255]   # B=0, G=0, R=255</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>สีแดงใน RGB = [255, 0, 0]</span></div>
+                  <div class="step-box"><b>2</b><span>แต่ OpenCV เรียง BGR → สลับเป็น [0, 0, 255]</span></div>
+                  <div class="step-box"><b>3</b><span>แทนค่าลงพิกเซล: img[100, 200] = [0, 0, 255]</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="palette" class="cyan"></i>สีที่ใช้บ่อย (BGR)</h3>
+                  <div class="ch-row mt-2">
+                    <div class="ch-chip" style="background:#ef4444">แดง [0,0,255]</div>
+                    <div class="ch-chip" style="background:#22c55e">เขียว [0,255,0]</div>
+                    <div class="ch-chip" style="background:#3b82f6">น้ำเงิน [255,0,0]</div>
+                    <div class="ch-chip" style="background:#f8fafc;color:#111">ขาว [255,255,255]</div>
+                    <div class="ch-chip" style="background:#0f172a">ดำ [0,0,0]</div>
+                  </div>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>แดงใน OpenCV = <code>[0, 0, 255]</code> (BGR!) — สอบติดประจำ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 16 · SET REGION ============ -->
+        <section class="slide-view" data-title="เปลี่ยนทั้งโซน — img[y1:y2, x1:x2]" aria-label="สไลด์ 16: เปลี่ยนทั้งโซน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">REGION WRITE</p>
+            <h2 class="slide-title">เปลี่ยนทั้งโซน — <span class="grad-text">img[y1:y2, x1:x2]</span></h2>
+            <p class="slide-subtitle">กำหนดค่าทีละพิกเซลช้าเกินไป — ใช้ slicing เปลี่ยนทั้งบล็อกในครั้งเดียว</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โค้ด: ย้อมสีแดงทั้งสี่เหลี่ยม</span>
+                <pre class="code-block"># y = 100–200, x = 100–300
+img[100:200, 100:300] = [0, 0, 255]
+
+# ตรวจ: พิกเซลกลางโซน
+print(img[150, 200])   # [0 0 255]</pre>
+                <div class="tip-box tip-note mt-3">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>หมายเหตุ</b><code>y1:y2</code> ไม่รวม y2 — <code>100:200</code> ครอบแถว 100–199</div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="crop" class="cyan"></i>ใช้ทำอะไร?</h3>
+                  <p class="card-text">ปิดบังใบหน้า/ทะเบียน (privacy), ใส่ watermark สี่เหลี่ยม, ทดสอบ mask — พื้นฐานก่อนเรียน ROI</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="grid-3x3" class="cyan"></i>ความหมายของช่วง</h3>
+                  <p class="card-text"><code>img[100:200, 100:300]</code> = แถว 100–199, คอลัมน์ 100–299 — เริ่ม 100 จนถึงก่อน 200</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ช่วงสุดท้ายไม่รวมค่า — เหมือน Python slicing ทั่วไป</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 17 · ROI คืออะไร ============ -->
+        <section class="slide-view" data-title="ROI คืออะไร (Region Of Interest)" aria-label="สไลด์ 17: ROI คืออะไร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">ROI</p>
+            <h2 class="slide-title">ROI คืออะไร — <span class="grad-text">Region Of Interest</span></h2>
+            <p class="slide-subtitle">ROI = บริเวณที่เราสนใจในภาพ — ตัดเฉพาะส่วนนั้นมา ไปประมวลผลต่อ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ตัวอย่าง: สนใจแค่ป้ายทะเบียนรถ</span>
+                <div class="roi-stage mt-3" style="height:180px;max-width:340px;margin:0 auto">
+                  <div style="position:absolute;left:12%;top:24%;width:40%;height:34%;border-radius:10px;background:linear-gradient(135deg,#f43f5e,#f59e0b)"></div>
+                  <div style="position:absolute;left:30%;top:64%;width:55%;height:20%;border-radius:8px;background:#64748b"></div>
+                  <div class="roi-box" style="left:26%;top:58%;width:62%;height:32%">ROI — ป้ายทะเบียน</div>
+                </div>
+                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">ประมวลผลเฉพาะ ROI = เร็วขึ้น แม่นขึ้น ไม่ต้องดูทั้งภาพ</p>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="target" class="cyan"></i>ทำไมต้อง ROI?</h3>
+                  <p class="card-text">1. เร็วขึ้น (คำนวณน้อยลง)<br />2. แม่นขึ้น (ไม่โดนส่วนอื่นรบกวน)<br />3. ง่ายต่อการวิเคราะห์เฉพาะจุด</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="mouse-pointer-click" class="cyan"></i>ได้มาอย่างไร?</h3>
+                  <p class="card-text">ลากด้วยมือ, ตรวจจับอัตโนมัติ (เช่น หาใบหน้าก่อน), หรือจากโมเดล — สไลด์ถัดไปคือวิธีตัด</p>
+                </div>
+                <div class="tip-box tip-remember">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>จำแบบนี้</b>ROI = Region Of Interest = บริเวณที่สนใจ = ตัดแล้วประมวลผลเฉพาะส่วน</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 18 · ตัด ROI ============ -->
+        <section class="slide-view" data-title="ตัด ROI — roi = img[y1:y2, x1:x2]" aria-label="สไลด์ 18: ตัด ROI">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">ROI · CROP</p>
+            <h2 class="slide-title">ตัด ROI — <span class="grad-text">roi = img[y1:y2, x1:x2]</span></h2>
+            <p class="slide-subtitle">ใช้ slicing เดียวกับสไลด์ 16 — แต่คราวนี้ <b class="cyan">เก็บผลลัพธ์</b>ไว้ใช้ต่อ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โจทย์: y = 100–300, x = 200–500</span>
+                <pre class="code-block">roi = img[100:300, 200:500]
+
+# ตรวจขนาด ROI
+print(roi.shape)
+# (200, 300, 3)</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>y1:y2 = 100:300 → สูง 200 แถว</span></div>
+                  <div class="step-box"><b>2</b><span>x1:x2 = 200:500 → กว้าง 300 คอลัมน์</span></div>
+                  <div class="step-box"><b>3</b><span>roi.shape = (200, 300, 3) ✓</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="ruler" class="cyan"></i>อ่านสูตรให้ขาด</h3>
+                  <p class="card-text"><code>img[y1:y2, x1:x2]</code> — y มาก่อน x เสมอ · y1 = แถวเริ่ม · y2 = แถวสุดท้าย (ไม่รวม)</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="copy" class="cyan"></i>view หรือ copy?</h3>
+                  <p class="card-text">slicing เป็น <b class="cyan">view</b> — แก้ roi แล้วภาพต้นฉบับเปลี่ยนตาม อยากได้สำเนาใช้ <code>.copy()</code></p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>roi = img[100:300, 200:500] → y = 100–300, x = 200–500</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 19 · แสดง/บันทึก ROI ============ -->
+        <section class="slide-view" data-title="แสดง + บันทึก ROI" aria-label="สไลด์ 19: แสดง/บันทึก ROI">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">ROI · SHOW & SAVE</p>
+            <h2 class="slide-title">แสดง + บันทึก ROI</h2>
+            <p class="slide-subtitle">ตัดมาแล้ว → แสดงให้ดู และบันทึกลงไฟล์เพื่อใช้ต่อ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">แสดง ROI</span>
+                <pre class="code-block">cv2.imshow("ROI", roi)
+cv2.waitKey(0)</pre>
+                <span class="vb-label mt-3">บันทึก ROI</span>
+                <pre class="code-block">cv2.imwrite("roi.jpg", roi)</pre>
+                <div class="tip-box tip-note mt-3">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>จำ</b>นามสกุลไฟล์ (jpg/png/bmp) เป็นตัวกำหนดรูปแบบไฟล์ที่บันทึก</div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="save" class="cyan"></i>imwrite(path, ภาพ)</h3>
+                  <p class="card-text">อาร์กิวเมนต์แรก = ที่อยู่ไฟล์ใหม่ · ตัวที่สอง = ภาพ (array) ที่จะบันทึก</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="file-check" class="cyan"></i>เช็คผลสำเร็จ</h3>
+                  <p class="card-text"><code>ok = cv2.imwrite(...)</code> — คืน True/False ว่าบันทึกสำเร็จไหม</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>บันทึก = <code>cv2.imwrite()</code> · อ่าน = <code>cv2.imread()</code> · แสดง = <code>cv2.imshow()</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 20 · โค้ดเต็ม ============ -->
+        <section class="slide-view" data-title="รวมโค้ดตัวอย่างเต็ม (อ่าน → ROI → แสดง → บันทึก)" aria-label="สไลด์ 20: โค้ดเต็ม">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FULL EXAMPLE</p>
+            <h2 class="slide-title">รวมโค้ดตัวอย่างเต็ม</h2>
+            <p class="slide-subtitle">ตั้งแต่ต้นจนจบ: อ่านภาพ → ตัด ROI → แสดง → บันทึก — ลองไล่ทีละบรรทัด</p>
+
+            <div class="visual-box">
+              <span class="vb-label">โจทย์: ตัดป้ายทะเบียน (y 100–300, x 200–500) ออกจากภาพ</span>
+              <pre class="code-block">import cv2
+
+img = cv2.imread("image.jpg")          # 1. อ่านภาพ
+print(img.shape)                         # 2. ตรวจขนาด
+
+roi = img[100:300, 200:500]             # 3. ตัด ROI
+
+cv2.imshow("Original", img)             # 4. แสดงภาพเดิม
+cv2.imshow("ROI", roi)                  # 5. แสดง ROI
+cv2.waitKey(0)                           # 6. รอคีย์บอร์ด
+cv2.destroyAllWindows()                  # 7. ปิดหน้าต่าง
+
+cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>1</b><span>อ่านภาพ → array</span></div>
+                <div class="step-box"><b>2</b><span>ตัด ROI ด้วย slicing</span></div>
+                <div class="step-box"><b>3</b><span>แสดง + รอ + ปิด</span></div>
+                <div class="step-box"><b>4</b><span>บันทึกเป็นไฟล์ใหม่</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 21 · ROI งานจริง ============ -->
+        <section class="slide-view" data-title="ROI ในงานจริง — OCR · ทะเบียนรถ · ใบหน้า" aria-label="สไลด์ 21: ROI งานจริง">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">ROI · APPLICATIONS</p>
+            <h2 class="slide-title">ROI ในงานจริง</h2>
+            <p class="slide-subtitle">ROI เป็นขั้นแรกของระบบจริงเกือบทุกระบบ — 3 ตัวอย่างจาก PDF</p>
+
+            <div class="grid-3 mt-6">
+              <div class="card hoverable">
+                <h3 class="card-title"><i data-lucide="file-text" class="cyan"></i>1. OCR</h3>
+                <p class="card-text small">หาตำแหน่งข้อความ → ตัด ROI → ส่งให้ OCR อ่าน → ได้ตัวหนังสือ</p>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>หาว่าข้อความอยู่ตรงไหน</span></div>
+                  <div class="step-box"><b>2</b><span>ตัด ROI รอบข้อความ</span></div>
+                  <div class="step-box"><b>3</b><span>ส่งเข้าอัลกอริทึม OCR</span></div>
+                </div>
+              </div>
+              <div class="card hoverable">
+                <h3 class="card-title"><i data-lucide="car" class="cyan"></i>2. ป้ายทะเบียนรถ</h3>
+                <p class="card-text small">กล้องจับภาพรถ → หา ROI ของป้ายทะเบียน → อ่านตัวเลขป้าย</p>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>หาป้ายทะเบียนในภาพ</span></div>
+                  <div class="step-box"><b>2</b><span>ตัด ROI เฉพาะป้าย</span></div>
+                  <div class="step-box"><b>3</b><span>อ่านตัวเลข (OCR)</span></div>
+                </div>
+              </div>
+              <div class="card hoverable">
+                <h3 class="card-title"><i data-lucide="scan-face" class="cyan"></i>3. ตรวจจับใบหน้า</h3>
+                <p class="card-text small">หาใบหน้า → ตัด ROI รอบหน้า → วิเคราะห์/เปรียบเทียบใบหน้า</p>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>detect ใบหน้า (bounding box)</span></div>
+                  <div class="step-box"><b>2</b><span>ตัด ROI รอบใบหน้า</span></div>
+                  <div class="step-box"><b>3</b><span>ส่งเข้าขั้นถัดไป</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tip-box tip-remember mt-4">
+              <i data-lucide="lightbulb"></i>
+              <div><b>จำแบบนี้</b>ระบบจริง = หาของ (detect) → ตัด ROI → วิเคราะห์เฉพาะ ROI — ROI ลดงานทั้งการคำนวณและ noise</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 22 · ROI ลดงาน ============ -->
+        <section class="slide-view" data-title="ROI ลดงานประมวลผล — 1920×1080 → 300×300" aria-label="สไลด์ 22: ROI ลดงาน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">ROI · PERFORMANCE</p>
+            <h2 class="slide-title">ROI ลดงานประมวลผล</h2>
+            <p class="slide-subtitle">ตัวอย่าง: ภาพ Full HD 1920×1080 แต่เราสนใจแค่ 300×300 — ประหยัดขนาดไหน?</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">คำนวณด้วยเครื่องคิดเลข</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>ทั้งภาพ: 1920 × 1080 = <b class="cyan">2,073,600</b> พิกเซล</span></div>
+                  <div class="step-box"><b>2</b><span>ROI: 300 × 300 = <b class="cyan">90,000</b> พิกเซล</span></div>
+                  <div class="step-box"><b>3</b><span>คิดเป็น %: 90,000 ÷ 2,073,600 ≈ <b class="cyan">4.3%</b></span></div>
+                  <div class="step-box"><b>4</b><span>ประมวลผลแค่ 4% ของข้อมูล — เร็ว ~23 เท่า!</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="zap" class="cyan"></i>ทำไมเร็วขนาดนี้?</h3>
+                  <p class="card-text">งานประมวลผลภาพ (กรอง, หาขอบ, OCR) คิดต่อพิกเซล — พิกเซลน้อย = เวลาน้อยตามสัดส่วน</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="shield-check" class="cyan"></i>ได้ความแม่นด้วย</h3>
+                  <p class="card-text">ตัดส่วนที่ไม่เกี่ยวข้องออก → อัลกอริทึมไม่โดนรบกวนจากพื้นหลัง/noise</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ถ้าถาม % ที่ประมวลผล = พิกเซล ROI ÷ พิกเซลทั้งหมด × 100</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 23 · SUMMARY ============ -->
         <section class="slide-view" data-title="Chapter Summary — สรุปบทเรียน" aria-label="สไลด์ 23: สรุปบทเรียน">
           <div class="slide-inner">
             <p class="slide-eyebrow">CHAPTER SUMMARY</p>
             <h2 class="slide-title">สรุปบทเรียน</h2>
             <p class="slide-subtitle">เก็บทุกประเด็นสำคัญของบทนี้ไว้ในหน้าเดียว</p>
-            <div class="grid-3 mt-6">
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="palette" class="cyan"></i>ทำไมต้องสี</h3><p class="card-text small">Powerful descriptor · แยกวัตถุ (face detection ด้วยสีผิว) · คนแยกสีได้หลายพันเฉด vs เทา 2 โหลกว่า</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="sun" class="cyan"></i>แสงกับสี</h3><p class="card-text small">Visible = 400–700 nm · สีที่เห็น = แสงสะท้อน · Radiance (W) · Luminance (lm) · Brightness (subjective)</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="eye" class="cyan"></i>ตา + CIE</h3><p class="card-text small">Cones 6–7M (แดง 65/เขียว 33/น้ำเงิน 2) · CIE 1931: B=435.8, G=546.1, R=700 · ทุติยภูมิ G+B=Cyan</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="monitor" class="cyan"></i>Color Models</h3><p class="card-text small">RGB → ฮาร์ดแวร์ · CMY/CMYK → งานพิมพ์ (C=1-R) · HSI → วิธีคนบรรยายสี · CIE XYZ: x+y+z=1</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="bitcoin" class="cyan"></i>Pixel Depth</h3><p class="card-text small">24-bit RGB = 8+8+8 บิต/พิกเซล (full-color) · Safe RGB = 6³ = 216 สี</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="paintbrush" class="cyan"></i>Pseudo &amp; Full-color</h3><p class="card-text small">Slicing = แบ่งเทาเป็นช่วงย้อมสี · gray→color = ฟังก์ชันแปลง · Smoothing/Sharpening ทำที่ HSI intensity</p></div>
+            <div class="grid-2 mt-6">
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="folder-open" class="cyan"></i>อ่าน/แสดง/บันทึก</h3><p class="card-text small">imread อ่านเป็น NumPy array · imshow + waitKey(0) · imwrite บันทึก</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="shape" class="cyan"></i>shape &amp; dtype</h3><p class="card-text small">(Height, Width, Channels) = (480, 640, 3) · uint8 = 0–255</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="palette" class="cyan"></i>BGR vs RGB</h3><p class="card-text small">OpenCV เก็บ BGR · Matplotlib แสดง RGB · cvtColor ใช้แปลง</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="square-dot" class="cyan"></i>พิกเซล</h3><p class="card-text small">img[y, x] · แยกช่อง b,g,r = img[y,x] · ตั้งค่า img[y,x] = [B,G,R]</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="crop" class="cyan"></i>ROI</h3><p class="card-text small">roi = img[y1:y2, x1:x2] — ตัดเฉพาะส่วนที่สนใจ (y มาก่อน x เสมอ)</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="scan" class="cyan"></i>ROI งานจริง</h3><p class="card-text small">OCR · ป้ายทะเบียน · ใบหน้า · ลดงาน 1920×1080 → 300×300</p></div>
             </div>
             <div class="tip-box tip-remember mt-6">
               <i data-lucide="lightbulb"></i>
-              <div><b>จำแบบนี้</b>RGB = ฮาร์ดแวร์ · CMY = พิมพ์ · HSI = คน · x+y+z=1 · 216 สี · 24 bit = 8+8+8 · สีที่เห็น = แสงสะท้อน</div>
+              <div><b>จำแบบนี้</b>y มาก่อน x เสมอ (img[y, x]) · BGR ใน OpenCV · uint8 0–255 · ROI = slicing</div>
             </div>
           </div>
         </section>
 
-        <!-- ============ SLIDE 23 · CHEAT SHEET ============ -->
+        <!-- ============ SLIDE 24 · CHEAT SHEET ============ -->
         <section class="slide-view" data-title="Exam Cheat Sheet — สูตรจำก่อนสอบ" aria-label="สไลด์ 24: สูตรจำก่อนสอบ">
           <div class="slide-inner">
             <p class="slide-eyebrow">EXAM CHEAT SHEET</p>
             <h2 class="slide-title">สูตรจำก่อนสอบ</h2>
-            <p class="slide-subtitle">รวมคำศัพท์และสูตรสำคัญแบบกระชับ — ทบทวนก่อนสอบในเวลาไม่กี่นาที</p>
+            <p class="slide-subtitle">รวมคำสั่ง OpenCV ที่ต้องจำ — ทบทวนก่อนสอบในเวลาไม่กี่นาที</p>
             <div class="cheat-grid mt-6" id="cheatGrid"></div>
           </div>
         </section>
 
-        <!-- ============ SLIDE 24 · QUIZ 1 ============ -->
+        <!-- ============ SLIDE 25 · QUIZ 1 ============ -->
         <section class="slide-view quiz-slide" data-title="Quiz 1 (ข้อ 1–5)" aria-label="สไลด์ 25: แบบทดสอบชุดที่ 1">
           <div class="slide-inner">
             <p class="slide-eyebrow">QUIZ MODE · PART 1</p>
@@ -954,7 +917,7 @@
           </div>
         </section>
 
-        <!-- ============ SLIDE 25 · QUIZ 2 ============ -->
+        <!-- ============ SLIDE 26 · QUIZ 2 ============ -->
         <section class="slide-view quiz-slide" data-title="Quiz 2 (ข้อ 6–10)" aria-label="สไลด์ 26: แบบทดสอบชุดที่ 2">
           <div class="slide-inner">
             <p class="slide-eyebrow">QUIZ MODE · PART 2</p>
@@ -963,7 +926,7 @@
           </div>
         </section>
 
-        <!-- ============ SLIDE 26 · FLASHCARDS ============ -->
+        <!-- ============ SLIDE 27 · FLASHCARDS ============ -->
         <section class="slide-view" data-title="Flashcards — ทบทวนการ์ด" aria-label="สไลด์ 27: การ์ดทบทวน">
           <div class="slide-inner">
             <p class="slide-eyebrow">REVIEW</p>
@@ -988,14 +951,14 @@
 
             <div class="flex items-center gap-3 mt-5 wrap" style="justify-content:center">
               <button class="btn btn-ghost" id="fcPrev"><i data-lucide="chevron-left"></i> Previous</button>
-              <span class="chip" id="fcCounter">1 / 20</span>
+              <span class="chip" id="fcCounter">1 / 16</span>
               <button class="btn btn-ghost" id="fcNext">Next <i data-lucide="chevron-right"></i></button>
               <button class="btn btn-cyan" id="fcShuffle"><i data-lucide="shuffle"></i> Shuffle</button>
             </div>
           </div>
         </section>
 
-        <!-- ============ SLIDE 27 · GLOSSARY ============ -->
+        <!-- ============ SLIDE 28 · GLOSSARY ============ -->
         <section class="slide-view" data-title="Glossary — คำศัพท์" aria-label="สไลด์ 28: คำศัพท์">
           <div class="slide-inner">
             <p class="slide-eyebrow">GLOSSARY</p>
@@ -1005,7 +968,7 @@
             <div class="glossary-wrap mt-6">
               <div class="glossary-search">
                 <i data-lucide="search"></i>
-                <input type="text" id="glossarySearch" placeholder="ค้นหาคำศัพท์ เช่น RGB, HSI, gamut..." aria-label="ค้นหาคำศัพท์" />
+                <input type="text" id="glossarySearch" placeholder="ค้นหาคำศัพท์ เช่น imread, ROI, BGR..." aria-label="ค้นหาคำศัพท์" />
               </div>
               <div class="glossary-count" id="glossaryCount">0 คำศัพท์</div>
               <div class="glossary-list" id="glossaryList"></div>
@@ -1013,13 +976,13 @@
           </div>
         </section>
 
-        <!-- ============ SLIDE 28 · POST-LESSON EXAM ============ -->
+        <!-- ============ SLIDE 29 · POST-LESSON EXAM ============ -->
         <section class="slide-view quiz-slide" data-title="ข้อสอบหลังเรียน — แบบทดสอบท้ายบท 20 ข้อ" aria-label="สไลด์ 29: ข้อสอบหลังเรียน">
           <div class="slide-inner">
             <p class="slide-eyebrow">POST-LESSON EXAM</p>
             <div id="examHeadTitle"><h2 class="slide-title">ข้อสอบหลังเรียน <span class="grad-text">20 ข้อ</span></h2></div>
-            <p class="slide-subtitle" id="examHeadSub">Color fundamentals · Color models (RGB/CMY/HSI) · Pseudo-color · Full-color processing — เรียนครบทุกสไลด์เพื่อปลดล็อก ดูเฉลยได้ทันทีหลังตอบ</p>
-            <div id="quizExam2" class="mt-4"></div>
+            <p class="slide-subtitle" id="examHeadSub">imread/shape/dtype · imshow/Matplotlib · BGR vs RGB · pixel &amp; ROI — เรียนครบทุกสไลด์เพื่อปลดล็อก ดูเฉลยได้ทันทีหลังตอบ</p>
+            <div id="quizExam" class="mt-4"></div>
           </div>
         </section>
 
@@ -1032,7 +995,7 @@
         </button>
 
         <div class="bb-center">
-          สไลด์ <b id="bbCounter">1</b> / <b id="bbTotal">28</b>
+          สไลด์ <b id="bbCounter">1</b> / <b id="bbTotal">29</b>
         </div>
 
         <div class="bb-tools">
@@ -1068,7 +1031,7 @@
     </div>
     <button class="icon-btn" id="notesCloseBtn" aria-label="ปิดบันทึกย่อ"><i data-lucide="x"></i></button>
   </div>
-  <textarea id="notesTextarea" placeholder="เขียนสิ่งที่ต้องจำจากสไลด์นี้...&#10;เช่น:&#10;- Visible light = 400–700 nm&#10;- RGB = ฮาร์ดแวร์ · CMY/CMYK = งานพิมพ์ · HSI = วิธีคนบรรยายสี&#10;- Safe RGB = 6³ = 216 สี · 24-bit = 8+8+8 บิต/พิกเซล" aria-label="บันทึกย่อ"></textarea>
+  <textarea id="notesTextarea" placeholder="เขียนสิ่งที่ต้องจำจากสไลด์นี้...&#10;เช่น:&#10;- img.shape = (Height, Width, Channels)&#10;- OpenCV เก็บ BGR&#10;- roi = img[y1:y2, x1:x2]" aria-label="บันทึกย่อ"></textarea>
   <div class="text-3" style="padding:10px 20px 14px;font-size:12px;border-top:1px solid var(--border)">
     💾 บันทึกอัตโนมัติลงในเครื่องของคุณ (localStorage)
   </div>
@@ -1084,7 +1047,7 @@
     <h2 class="slide-title mt-4" style="font-size:28px">Chapter Complete!</h2>
     <p class="text-2 mt-2" id="completionMsg">คุณเรียนครบทุกสไลด์แล้ว — ยอดเยี่ยมมาก! <b class="grad-text">Keep Learning!</b></p>
     <div class="grid-3 mt-5" style="grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneSlides">28</b><p class="text-3" style="font-size:12px">สไลด์</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneSlides">29</b><p class="text-3" style="font-size:12px">สไลด์</p></div>
       <div class="card" style="padding:14px"><b style="font-size:20px" id="doneScore">–</b><p class="text-3" style="font-size:12px">คะแนน Quiz</p></div>
       <div class="card" style="padding:14px"><b style="font-size:20px">100%</b><p class="text-3" style="font-size:12px">ความคืบหน้า</p></div>
     </div>
@@ -1102,45 +1065,19 @@
 <script src="data.js"></script>
 <script src="app.js"></script>
 
-<!-- Color cube + swatch demos -->
+<!-- Pixel coordinate demo (สไลด์ 13) -->
 <script>
   (function () {
-    /* RGB color cube — 8 สีหลักจากมุมลูกบาศก์ */
-    var rgb = document.getElementById('swGrid');
-    if (rgb) {
-      var colors = ['#000000', '#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff', '#ffffff'];
-      colors.forEach(function (c, i) {
-        var s = document.createElement('div');
-        s.className = 'sw';
-        s.style.background = c;
-        s.style.animationDelay = (i * 0.08) + 's';
-        s.title = c;
-        rgb.appendChild(s);
-      });
-      setTimeout(function () {
-        for (var k = 0; k < rgb.children.length; k++) rgb.children[k].classList.add('on');
-      }, 100);
-    }
-
-    /* Safe RGB cube — 6 × 6 × 6 ตัวอย่าง 36 สี (6×6) */
-    var safe = document.getElementById('safeGrid');
-    if (safe) {
-      var vals = [0, 51, 102, 153, 204, 255];
-      var n = 0;
-      for (var r = 0; r < 6; r++) {
-        for (var g = 0; g < 6; g++) {
-          var s2 = document.createElement('div');
-          s2.className = 'sw';
-          var b = 255;
-          s2.style.background = 'rgb(' + vals[r] + ',' + vals[g] + ',' + b + ')';
-          s2.style.animationDelay = (n * 0.015) + 's';
-          safe.appendChild(s2);
-          n++;
+    var grid = document.getElementById('coordGrid');
+    if (grid) {
+      for (var r = 0; r < 4; r++) {
+        for (var c = 0; c < 6; c++) {
+          var d = document.createElement('div');
+          d.className = 'coord-cell' + (r === 2 && c === 2 ? ' hl' : '');
+          d.textContent = '(' + r + ',' + c + ')';
+          grid.appendChild(d);
         }
       }
-      setTimeout(function () {
-        for (var m = 0; m < safe.children.length; m++) safe.children[m].classList.add('on');
-      }, 100);
     }
   })();
 </script>

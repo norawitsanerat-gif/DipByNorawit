@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Interactive Digital Textbook — Digital Image Processing / Segmentation ถึง Computer Vision (Thresholding · Morphology · Contour · YOLO)" />
+  <title>DIP · บทที่ 6 — Segmentation ถึง Computer Vision</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* brightness/contrast slider visual */
+    .be-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .be-box { flex: 1; height: 44px; border-radius: 10px; background: linear-gradient(90deg, #0f172a, #334155, #64748b, #94a3b8, #cbd5e1, #f8fafc); transition: filter .4s; }
+    .be-tag { width: 130px; font-size: 13px; font-weight: 800; color: var(--text-2); flex-shrink: 0; }
+
+    /* gamma curves */
+    .g-curve { position: relative; height: 150px; border-radius: 12px; background: var(--card-2); border: 1px solid var(--border); overflow: hidden; }
+    .g-svg { position: absolute; inset: 0; }
+
+    /* histogram bars */
+    .hist-box { display: flex; align-items: flex-end; gap: 2px; height: 90px; border-radius: 10px; background: var(--card-2); border: 1px solid var(--border); padding: 8px; }
+    .hist-bar { flex: 1; border-radius: 2px 2px 0 0; background: linear-gradient(180deg, var(--cyan), rgba(56,189,248,.2)); }
+
+    @media (max-width: 640px) {
+      .be-tag { width: 96px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body data-page="chapter" data-chapter="6">
+
+  <!-- ================= TOP HEADER ================= -->
+  <header id="topbar">
+    <button class="icon-btn" id="menuBtn" aria-label="เปิดเมนูบทเรียน" title="เมนู">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <div class="brand">
+      <div class="cn-logo" aria-hidden="true">DIP</div>
+      <div class="brand-titles">
+        <h1>การประมวลผลภาพดิจิทัล</h1>
+        <p id="headerChapterLabel">Segmentation ถึง Computer Vision · บทที่ 6</p>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" id="homeBtn" aria-label="กลับไปเมนูหลัก" title="เมนูหลัก">
+        <i data-lucide="home"></i>
+      </button>
+      <button class="icon-btn" id="notesBtn" aria-label="เปิดบันทึกย่อ" title="บันทึกย่อ (Notes)">
+        <i data-lucide="notebook-pen"></i>
+      </button>
+
+      <div class="header-progress" aria-label="ความคืบหน้า">
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="headerProgressBar">
+          <div class="progress-fill" id="headerProgressFill"></div>
+        </div>
+        <span class="progress-count" id="headerProgressCount">1 / 33</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SHELL ================= -->
+  <div class="shell">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside id="sidebar" aria-label="เมนูบทเรียน">
+      <div class="sidebar-head">
+        <div class="sidebar-head-title">
+          <h2 id="sidebarChapterTitle">เมนูบทที่ 6</h2>
+          <p id="sidebarChapterSub">หัวข้อในสัปดาห์นี้ · 33 หัวข้อ</p>
+        </div>
+        <button class="icon-btn sidebar-close" id="sidebarCloseBtn" aria-label="ปิดเมนูบทเรียน" title="ปิดเมนู">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="sidebar-info">
+        <i data-lucide="info"></i>
+        <span>คลิกหัวข้อหรือสไลด์เพื่อข้ามไปได้เลย<br />เรียนทีละสไลด์เพื่อเก็บเนื้อหาให้ครบ</span>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav" aria-label="สารบัญสไลด์"></nav>
+      <div class="sidebar-foot">
+        <div class="sf-top"><span>ความคืบหน้า</span><b id="sidebarPct">0%</b></div>
+        <div class="progress-track"><div class="progress-fill" id="sidebarProgressFill"></div></div>
+        <p class="mt-2 text-3" style="font-size:12px" id="sidebarDone">ยังไม่ได้เรียนสไลด์ใดเลย — เริ่มที่ Cover ได้เลย!</p>
+      </div>
+    </aside>
+
+    <!-- ================= STAGE ================= -->
+    <main class="stage">
+
+      <div class="slide-viewport" id="viewport">
+
+        <!-- ============ SLIDE 1 · COVER ============ -->
+        <section class="slide-view" data-title="Cover — Segmentation ถึง Computer Vision" aria-label="สไลด์ 1: เปิดบทเรียน">
+          <div class="slide-inner">
+            <div class="center">
+              <div class="cn-logo float-y" style="width:74px;height:74px;font-size:28px;border-radius:22px;margin:0 auto 18px;background:linear-gradient(135deg,#f59e0b,#22d3ee)">DIP</div>
+              <p class="slide-eyebrow" style="justify-content:center">DIGITAL IMAGE PROCESSING · CHAPTER 6</p>
+              <h2 class="slide-title" style="font-size:clamp(30px,5vw,54px);text-align:center">
+                Segmentation ถึง <span class="grad-text">Computer Vision</span>
+              </h2>
+              <p class="slide-subtitle" style="text-align:center;margin:6px auto 0;max-width:660px">
+                Threshold · Adaptive · Otsu · Morphology · Contour · Feature · YOLO
+                — จากภาพพิกเซล ถึงระบบที่ "มองเห็น" วัตถุ
+              </p>
+
+              <div class="stat-chips" style="justify-content:center;margin-top:24px">
+                <span class="stat-chip"><i data-lucide="layers"></i> 33 Slides</span>
+                <span class="stat-chip"><i data-lucide="help-circle"></i> 10 Quiz</span>
+                <span class="stat-chip"><i data-lucide="square-stack"></i> 18 Flashcards</span>
+                <span class="stat-chip"><i data-lucide="book-marked"></i> 24 Glossary</span>
+              </div>
+
+              <button class="btn btn-primary mt-6" id="startBtn" style="font-size:16px;padding:14px 30px">
+                Start Learning <i data-lucide="arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 2 · SEGMENTATION ============ -->
+        <section class="slide-view" data-title="Segmentation คืออะไร" aria-label="สไลด์ 2: Segmentation คืออะไร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">SEGMENTATION</p>
+            <h2 class="slide-title">Segmentation <span class="grad-text">คืออะไร?</span></h2>
+            <p class="slide-subtitle">แบ่งภาพออกเป็นส่วน ๆ — แยก "วัตถุ" (object) ออกจาก "พื้นหลัง" (background)</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ก่อน → หลัง Segmentation</span>
+                <div class="flex mt-3" style="gap:14px;align-items:center">
+                  <div style="flex:1;text-align:center">
+                    <div style="height:110px;border-radius:10px;background:linear-gradient(135deg,#334155 60%,#94a3b8 60%)"></div>
+                    <p class="text-3 mt-2" style="font-size:12px">ภาพ grayscale (พิกเซล)</p>
+                  </div>
+                  <div style="color:var(--cyan);font-size:20px">→</div>
+                  <div style="flex:1;text-align:center">
+                    <div style="height:110px;border-radius:10px;background:#0f172a;position:relative;overflow:hidden">
+                      <div style="position:absolute;inset:0;clip-path:polygon(0 0,40% 0,40% 100%,0 100%);background:#fff"></div>
+                    </div>
+                    <p class="text-3 mt-2" style="font-size:12px">binary: ขาว = object, ดำ = background</p>
+                  </div>
+                </div>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>Object</b><span>สิ่งที่สนใจ — เช่น วัตถุชิ้นงาน, ตัวหนังสือ, เซลล์</span></div>
+                  <div class="step-box"><b>Background</b><span>ส่วนที่เหลือรอบ ๆ</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="git-branch" class="cyan"></i>อยู่ตรงไหนของ Pipeline?</h3>
+                  <p class="card-text">Camera → Enhancement (บท 4) → Filter (บท 5) → <b class="cyan">Threshold/Segmentation (บทนี้)</b> → Contour → Detection</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="target" class="cyan"></i>ทำไมต้องแยก?</h3>
+                  <p class="card-text">ก่อนจะนับ/วัด/ตรวจจับอะไร ต้องรู้ก่อนว่า "ตรงไหนคือตัววัตถุ" — segmentation คือก้าวแรก</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Segmentation = แยก object/background · วิธีง่ายสุด = Threshold (แบ่งด้วยค่าความเข้ม)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 3 · GLOBAL THRESHOLD ============ -->
+        <section class="slide-view" data-title="Global Threshold — cv2.threshold()" aria-label="สไลด์ 3: Global Threshold">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">GLOBAL THRESHOLD</p>
+            <h2 class="slide-title">Global Threshold <span class="grad-text">— ขีดค่าเดียวทั้งภาพ</span></h2>
+            <p class="slide-subtitle">เลือกค่าขีด (threshold) หนึ่งค่า — พิกเซลต่ำกว่าค่าขีดไปฝั่งหนึ่ง สูงกว่าไปอีกฝั่ง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ตัวอย่าง: threshold = 128</span>
+                <pre class="code-block">ret, binary = cv2.threshold(
+    gray, 128, 255, cv2.THRESH_BINARY)
+
+# พิกเซล 0–128    → 0   (ดำ)
+# พิกเซล 129–255  → 255 (ขาว)</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>thresh</b><span>ค่าขีด (ที่นี่ 128) — ตัวเลขเดียวใช้ทั้งภาพ = "Global"</span></div>
+                  <div class="step-box"><b>maxval</b><span>ค่าที่ให้เมื่อผ่าน (255 = ขาว)</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>ผลลัพธ์</h3>
+                  <p class="card-text">ภาพ binary (2 ค่า: 0 กับ 255) — ง่ายสุด เหมาะกับภาพแสงสม่ำเสมอ พื้นหลังชัด</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>จุดอ่อน</h3>
+                  <p class="card-text">ภาพแสงไม่สม่ำเสมอ → ขีดเดียวตัดไม่ได้ทุกส่วน (เจอในสไลด์ 7)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Global = 1 ค่าขีดทั้งภาพ · <code>cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY)</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 4 · BINARY / BINARY_INV ============ -->
+        <section class="slide-view" data-title="THRESH_BINARY / THRESH_BINARY_INV" aria-label="สไลด์ 4: BINARY / BINARY_INV">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">THRESHOLD MODES 1–2</p>
+            <h2 class="slide-title">THRESH_BINARY / <span class="grad-text">THRESH_BINARY_INV</span></h2>
+            <p class="slide-subtitle">สองโหมดที่เจอบ่อยสุด — ต่างกันแค่ "กลับด้าน" สีขาว-ดำ</p>
+
+            <div class="tbl-wrap mt-4">
+              <table class="tbl">
+                <tr><th>โหมด</th><th>ต่ำกว่า threshold</th><th>สูงกว่า threshold</th><th>ผล</th></tr>
+                <tr><td><b>THRESH_BINARY</b></td><td>0 (ดำ)</td><td>maxval (ขาว)</td><td>วัตถุสว่าง → ขาว</td></tr>
+                <tr><td><b>THRESH_BINARY_INV</b></td><td>maxval (ขาว)</td><td>0 (ดำ)</td><td>กลับด้าน: วัตถุสว่าง → ดำ</td></tr>
+              </table>
+            </div>
+
+            <div class="visual-box mt-4">
+              <span class="vb-label">ตัวอย่าง: พิกเซล 100 กับ 150 (thresh 128)</span>
+              <pre class="code-block">BINARY      : 100 → 0 · 150 → 255
+BINARY_INV  : 100 → 255 · 150 → 0</pre>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>INV</b><span>ใช้เมื่อวัตถุ "มืดกว่า" พื้นหลัง — กลับให้วัตถุเป็นขาวก่อนทำงานต่อ</span></div>
+                <div class="step-box"><b>จำ</b><span>INV = INVerse = เอาสีสลับกัน</span></div>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-4">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>เทคนิคสอบ</b>ถาม "object มืด background สว่าง" → ใช้ BINARY_INV เพื่อให้ object เป็นขาว</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 5 · TRUNC / TOZERO ============ -->
+        <section class="slide-view" data-title="THRESH_TRUNC / TOZERO / TOZERO_INV" aria-label="สไลด์ 5: TRUNC / TOZERO">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">THRESHOLD MODES 3–5</p>
+            <h2 class="slide-title">TRUNC / TOZERO / <span class="grad-text">TOZERO_INV</span></h2>
+            <p class="slide-subtitle">อีก 3 โหมดที่ไม่ได้ให้แค่ 0/255 — เก็บค่าความเข้มเดิมไว้บางส่วน</p>
+
+            <div class="tbl-wrap mt-4">
+              <table class="tbl">
+                <tr><th>โหมด</th><th>ต่ำกว่า thresh</th><th>สูงกว่า thresh</th></tr>
+                <tr><td><b>THRESH_TRUNC</b></td><td>ค่าเดิม</td><td>ถูก "ตัด" ให้เท่ากับ thresh (ล็อกค่าบน)</td></tr>
+                <tr><td><b>THRESH_TOZERO</b></td><td>กลายเป็น 0</td><td>ค่าเดิม (คงไว้)</td></tr>
+                <tr><td><b>THRESH_TOZERO_INV</b></td><td>ค่าเดิม (คงไว้)</td><td>กลายเป็น 0</td></tr>
+              </table>
+            </div>
+
+            <div class="visual-box mt-4">
+              <span class="vb-label">ตัวอย่าง thresh = 128</span>
+              <pre class="code-block">ค่าเดิม 100 / 150  →
+TRUNC        : 100 → 100 · 150 → 128 (ตัดลง)
+TOZERO       : 100 → 0   · 150 → 150
+TOZERO_INV   : 100 → 100 · 150 → 0</pre>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>TRUNC</b><span>"ตัด" ค่าสูงเกินให้เท่ากับขีด — ใช้ลบ highlight</span></div>
+                <div class="step-box"><b>TOZERO</b><span>"เก็บของที่ผ่านขีด โละของที่ต่ำกว่า" → เป็น 0</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 6 · 5 MODES CODE ============ -->
+        <section class="slide-view" data-title="ตัวอย่างโค้ด — 5 โหมดในภาพแสงไล่ระดับ" aria-label="สไลด์ 6: 5 โหมดจริง">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WORKED EXAMPLE</p>
+            <h2 class="slide-title">5 โหมด <span class="grad-text">ในภาพแสงไล่ระดับ</span></h2>
+            <p class="slide-subtitle">ตัวอย่างจาก PDF — ภาพพื้นขาว + ตัวหนังสือดำ + แสงไล่ระดับ (gradient) ทดสอบทุกโหมด</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">สร้างภาพทดสอบ</span>
+                <pre class="code-block">import cv2, numpy as np
+h, w = 400, 600
+img = np.ones((h, w), np.uint8) * 255
+cv2.putText(img, "IMAGE PROCESSING", (80, 180),
+    cv2.FONT_HERSHEY_SIMPLEX, 1.5, 0, 3)
+gradient = np.tile(np.linspace(1.0, 0.4, w), (h, 1))
+img_bad = (img * gradient).astype(np.uint8)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="sun" class="cyan"></i>ปัญหา</h3>
+                  <p class="card-text">ฝั่งซ้ายสว่าง ฝั่งขวามืด (แสงไม่สม่ำเสมอ) — ขีดเดียว (global) ตัดไม่ได้ทั้งภาพ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="code" class="cyan"></i>ลองทุกโหมด</h3>
+                  <pre class="code-block" style="font-size:12.5px">for t in [128, 192, 220]:
+    _, b  = cv2.threshold(img_bad, t, 255,
+                          cv2.THRESH_BINARY)
+    _, bi = cv2.threshold(img_bad, t, 255,
+                          cv2.THRESH_BINARY_INV)
+adaptive = cv2.adaptiveThreshold(img_bad, 255,
+    cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+    cv2.THRESH_BINARY, 11, 2)</pre>
+                </div>
+                <div class="tip-box tip-note">
+                  <i data-lucide="lightbulb"></i>
+                  <div>ผล: global ตัดฝั่งขวาพัง (มืดเกิน) · adaptive ผ่านทุกตำแหน่ง — ไปดูสไลด์ถัดไป</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 7 · GLOBAL PROBLEM ============ -->
+        <section class="slide-view" data-title="ปัญหาของ Global Threshold — แสงไม่สม่ำเสมอ" aria-label="สไลด์ 7: ปัญหา Global">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WHY ADAPTIVE?</p>
+            <h2 class="slide-title">ปัญหาของ <span class="grad-text">Global Threshold</span></h2>
+            <p class="slide-subtitle">ภาพแสงไม่สม่ำเสมอ — ขีดเดียวไม่พอ จะตัดพลาดบางส่วนของภาพเสมอ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ภาพแสงไล่ระดับ: สว่างซ้าย → มืดขวา</span>
+                <div style="height:120px;border-radius:10px;background:linear-gradient(90deg,#f8fafc,#0f172a);margin-top:12px"></div>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>ขีดสูง (220)</b><span>ฝั่งซ้ายตัดถูก แต่ฝั่งขวา (มืดกว่า 220 ทั้งหมด) กลายเป็นดำหมด</span></div>
+                  <div class="step-box"><b>ขีดต่ำ (128)</b><span>ฝั่งขวาตัดได้ แต่ฝั่งซ้าย (สว่าง) ตัวหนังสือหายไปกับพื้นขาว</span></div>
+                  <div class="step-box"><b>ขีดกลาง (192)</b><span>ทั้งสองฝั่งพังครึ่ง ๆ — ไม่มีค่าไหนใช้ได้ทั้งภาพ</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>เกิดขึ้นจริงที่ไหน?</h3>
+                  <p class="card-text">สแกนเอกสารเงาตก · ถ่ายรูปมุมห้อง · ภาพกลางแจ้งแดดส่องบางส่วน — แสงไม่เท่ากันทั่วภาพ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="wrench" class="cyan"></i>ทางออก</h3>
+                  <p class="card-text"><b class="cyan">Adaptive Threshold</b> (ขีดเปลี่ยนตามตำแหน่ง) หรือ <b class="cyan">Otsu</b> (หาขีดที่ดีที่สุดอัตโนมัติ)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>โจทย์ "แสงไม่สม่ำเสมอ / gradient / เงา" → ต้อง Adaptive — global จะตัดพลาด</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 8 · ADAPTIVE ============ -->
+        <section class="slide-view" data-title="Adaptive Threshold — Threshold แบบ Local" aria-label="สไลด์ 8: Adaptive Threshold">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">ADAPTIVE THRESHOLD</p>
+            <h2 class="slide-title">Adaptive Threshold <span class="grad-text">— ขีดแบบ Local</span></h2>
+            <p class="slide-subtitle">ไม่ใช้ขีดเดียว — คำนวณขีดใหม่ทุกตำแหน่งจาก neighborhood (sliding window) รอบพิกเซล</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">หลักการ</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>เลื่อน window (kernel) ไปทุกพิกเซลเหมือน filter</span></div>
+                  <div class="step-box"><b>2</b><span>หาค่า threshold ของจุดนั้นจากค่าภายใน window (เฉลี่ย/Gaussian)</span></div>
+                  <div class="step-box"><b>3</b><span>เปรียบเทียบพิกเซลกลางกับขีดเฉพาะที่ → 0 หรือ 255</span></div>
+                </div>
+                <pre class="code-block mt-3">adaptive = cv2.adaptiveThreshold(
+    img_bad, 255,
+    cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+    cv2.THRESH_BINARY, 11, 2)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="map" class="cyan"></i>ขีดปรับตามแสง</h3>
+                  <p class="card-text">ฝั่งสว่างได้ขีดสูง ฝั่งมืดได้ขีดต่ำ — ทุกตำแหน่งตัดถูกต้องแม้แสงไม่เท่ากัน</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="file-text" class="cyan"></i>ใช้กับงาน</h3>
+                  <p class="card-text">สแกนเอกสาร, OCR, ภาพถ่ายแสงไม่สม่ำเสมอ — งานที่ global ตัดไม่ได้</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Adaptive = threshold เปลี่ยนตาม neighborhood (local) · ใช้ ADAPTIVE_THRESH_GAUSSIAN_C</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 9 · PARAMETERS ============ -->
+        <section class="slide-view" data-title="อ่านพารามิเตอร์ — adaptiveThreshold(…, 11, 2)" aria-label="สไลด์ 9: อ่านพารามิเตอร์">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">PARAMETERS</p>
+            <h2 class="slide-title">อ่านพารามิเตอร์ <span class="grad-text">— 11 และ 2</span></h2>
+            <p class="slide-subtitle">ตัวเลข 2 ตัวสุดท้ายในโค้ดคืออะไร — อ่านทีละตัว (จากตัวอย่างใน PDF)</p>
+
+            <div class="visual-box">
+              <span class="vb-label">โค้ดเต็ม</span>
+              <pre class="code-block">cv2.adaptiveThreshold(gray, 255,
+    cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+    cv2.THRESH_BINARY, 11, 2)</pre>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>gray</b><span>ภาพ grayscale อินพุต</span></div>
+                <div class="step-box"><b>255</b><span>maxValue — พิกเซลที่ผ่านจะได้ 255 (ขาว)</span></div>
+                <div class="step-box"><b>GAUSSIAN_C</b><span>วิธีคำนวณขีด: ถ่วงน้ำหนักแบบ Gaussian (ไม่ใช่ค่าเฉลี่ยธรรมดา)</span></div>
+                <div class="step-box"><b>THRESH_BINARY</b><span>โหมดผลลัพธ์ (ผ่าน = 255, ไม่ผ่าน = 0)</span></div>
+                <div class="step-box"><b>11</b><span>blockSize — ขนาด window (11×11 พิกเซล) ใช้คำนวณขีดเฉพาะที่</span></div>
+                <div class="step-box"><b>2</b><span>C — ค่าคงที่ลบออกจากขีด (ปรับความไว: ยิ่งมาก ยิ่งตัดง่าย)</span></div>
+              </div>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="grid" class="cyan"></i>blockSize = 11</h3>
+                <p class="card-text small">ยิ่งใหญ่ ยิ่ง "มองไกล" (ขีดเนียน) แต่ช้า · ต้องเป็นเลขคี่</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="sliders" class="cyan"></i>C = 2</h3>
+                <p class="card-text small">ลบออกจากค่าเฉลี่ยของ window — กัน noise ถูกตัดเป็นขาวทั้งที่จริงไม่ใช่</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-4">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>เทคนิคสอบ</b>จำคู่ท้าย: 11 = window 11×11 (เลขคี่) · 2 = ค่าคงที่ C ที่ลบจาก threshold</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 10 · OTSU ============ -->
+        <section class="slide-view" data-title="Otsu — Threshold อัตโนมัติ" aria-label="สไลด์ 10: Otsu">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">OTSU THRESHOLD</p>
+            <h2 class="slide-title">Otsu — <span class="grad-text">Threshold อัตโนมัติ</span></h2>
+            <p class="slide-subtitle">ให้คอมพิวเตอร์หาค่าขีด "ที่ดีที่สุด" ให้เอง — ไม่ต้องเดา threshold ด้วยมือ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">หลักการ</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>ดู histogram ของภาพ (การกระจายค่าพิกเซล)</span></div>
+                  <div class="step-box"><b>2</b><span>ลองทุกค่าขีดที่เป็นไปได้ 0–255</span></div>
+                  <div class="step-box"><b>3</b><span>เลือกค่าที่แยก 2 กลุ่ม (object/background) ได้ "ห่างกันที่สุด"</span></div>
+                </div>
+                <pre class="code-block mt-3">ret, binary = cv2.threshold(gray, 0, 255,
+    cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+print("Threshold =", ret)   # ค่าขีดที่หาได้</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="wand-2" class="cyan"></i>ไม่ต้องเดา thresh</h3>
+                  <p class="card-text">ส่ง 0 ไปแทน threshold ได้เลย — Otsu คำนวณให้ แล้วคืนค่าผ่านตัวแปร ret</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="bar-chart-3" class="cyan"></i>histogram แยก 2 กลุ่ม</h3>
+                  <p class="card-text">Otsu เก่งเมื่อ histogram มี 2 ยอด (bimodal) — object กับ background คนละช่วงค่า</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Otsu = หา threshold อัตโนมัติ · ใช้ <code>cv2.THRESH_BINARY + cv2.THRESH_OTSU</code> · เหมาะ histogram 2 ยอด</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 11 · COMPARE 3 ============ -->
+        <section class="slide-view" data-title="เปรียบเทียบ 3 วิธี (Global · Adaptive · Otsu)" aria-label="สไลด์ 11: เปรียบเทียบ 3 วิธี">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">COMPARISON</p>
+            <h2 class="slide-title">เปรียบเทียบ 3 วิธี</h2>
+            <p class="slide-subtitle">Global vs Adaptive vs Otsu — เลือกให้ถูกกับสภาพภาพ</p>
+
+            <div class="tbl-wrap mt-4">
+              <table class="tbl">
+                <tr><th>วิธี</th><th>ขีด</th><th>เหมาะกับ</th><th>จุดอ่อน</th></tr>
+                <tr><td><b>Global</b></td><td>1 ค่าทั้งภาพ</td><td>แสงสม่ำเสมอ พื้นหลังชัด</td><td>แสงไม่เท่ากัน → ตัดพลาด</td></tr>
+                <tr><td><b>Adaptive</b></td><td>เปลี่ยนตามตำแหน่ง (local)</td><td>แสงไม่สม่ำเสมอ, OCR, สแกน</td><td>ช้ากว่า, มี parameter</td></tr>
+                <tr><td><b>Otsu</b></td><td>หาอัตโนมัติ 1 ค่า</td><td>histogram 2 ยอดชัดเจน</td><td>แสงไม่สม่ำเสมอ ยังพัง</td></tr>
+              </table>
+            </div>
+
+            <div class="tip-box tip-remember mt-4">
+              <i data-lucide="lightbulb"></i>
+              <div><b>เลือกยังไง?</b>แสงดี → Global · แสงไม่เท่ากัน → Adaptive · ไม่รู้จะใช้ค่าอะไร + histogram 2 ยอด → Otsu</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 12 · MORPHOLOGY ============ -->
+        <section class="slide-view" data-title="Morphology คืออะไร — ทำงานกับ Binary Image" aria-label="สไลด์ 12: Morphology">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">MORPHOLOGICAL PROCESSING</p>
+            <h2 class="slide-title">Morphology <span class="grad-text">คืออะไร?</span></h2>
+            <p class="slide-subtitle">ปรับ "รูปร่าง" ของวัตถุในภาพ binary — ขยาย/หด/ลบจุดรบกวน ด้วย kernel (structuring element)</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ใช้กับภาพอะไร?</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>Binary image</b><span>ภาพขาว-ดำ (0/255) ที่ได้จาก threshold — morphology ทำงานบนภาพแบบนี้</span></div>
+                  <div class="step-box"><b>Structuring element</b><span>kernel เล็ก ๆ (3×3) กำหนด "ย่านที่มอง" — เหมือน filter</span></div>
+                  <div class="step-box"><b>เลื่อน+เปรียบเทียบ</b><span>ดูว่าวัตถุชนกับ kernel หรือไม่ → ขยาย/หด</span></div>
+                </div>
+                <pre class="code-block mt-3">kernel = np.ones((3, 3), np.uint8)
+res = cv2.morphologyEx(bin_img, cv2.MORPH_OPEN, kernel)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="shapes" class="cyan"></i>ได้อะไรจากการปรับรูปร่าง?</h3>
+                  <p class="card-text">ลบจุด noise เล็ก ๆ · ปิดรู/รอยขาด · แยกวัตถุที่ติดกัน · ทำให้ contour สวยขึ้น</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>2 คำสั่งหลัก</h3>
+                  <p class="card-text"><b class="cyan">Erosion</b> หด · <b class="cyan">Dilation</b> ขยาย — เอามาประกอบกันเป็น Opening/Closing (สไลด์ถัดไป)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Morphology = ปรับรูปร่างภาพ binary · เครื่องมือ: erode (หด) / dilate (ขยาย)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 13 · EROSION ============ -->
+        <section class="slide-view" data-title="Erosion — cv2.erode()" aria-label="สไลด์ 13: Erosion">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EROSION</p>
+            <h2 class="slide-title">Erosion — <span class="grad-text">กร่อน ขอบหด</span></h2>
+            <p class="slide-subtitle">ขอบของวัตถุถูก "กร่อน" ออก — จุดขาวเล็ก ๆ (noise) หายไป วัตถุบางลง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">หลักการ</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>วาง kernel บนพิกเซลขาวทุกจุด</span></div>
+                  <div class="step-box"><b>2</b><span>ถ้าทุกช่องใต้ kernel เป็นขาว → เก็บไว้</span></div>
+                  <div class="step-box"><b>3</b><span>ถ้ามีดำปน (ติดขอบ/จุดโดด) → ลบออก (กลายเป็นดำ)</span></div>
+                </div>
+                <pre class="code-block mt-3">eroded = cv2.erode(binary, kernel, iterations=1)
+# kernel = np.ones((3,3), np.uint8)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="shrink" class="cyan"></i>ผลลัพธ์</h3>
+                  <p class="card-text">วัตถุหดเล็กลงรอบด้าน · จุด noise ขนาดเล็ก (เล็กกว่า kernel) หายไปทั้งจุด</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>ระวัง</h3>
+                  <p class="card-text">ทำหลายครั้ง (iterations) → วัตถุเล็กอาจหายทั้งชิ้น — ใช้พอประมาณ</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Erosion = หดขอบ + ลบจุดขาว noise · <code>cv2.erode(img, kernel)</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 14 · DILATION ============ -->
+        <section class="slide-view" data-title="Dilation — cv2.dilate()" aria-label="สไลด์ 14: Dilation">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">DILATION</p>
+            <h2 class="slide-title">Dilation — <span class="grad-text">ขยาย ขอบโต</span></h2>
+            <p class="slide-subtitle">ตรงข้ามกับ erosion — ขอบวัตถุขยายออก เอาไว้ปิดรู/รอยขาด หรือต่อวัตถุที่ขาด</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">หลักการ</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>วาง kernel บนพิกเซลขาวทุกจุด</span></div>
+                  <div class="step-box"><b>2</b><span>ถ้ามีพิกเซลขาวอย่างน้อย 1 จุดใต้ kernel → จุดกลางกลายเป็นขาว</span></div>
+                  <div class="step-box"><b>3</b><span>ผล: ขอบขยายออกทุกทิศ</span></div>
+                </div>
+                <pre class="code-block mt-3">dilated = cv2.dilate(binary, kernel, iterations=1)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="expand" class="cyan"></i>ใช้ทำอะไร</h3>
+                  <p class="card-text">ปิดรูเล็ก ๆ ในวัตถุ · เชื่อมรอยขาดของเส้น · ทำให้ contour ไม่ขาดตอน</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="git-compare" class="cyan"></i>เทียบ Erosion</h3>
+                  <p class="card-text">Erosion: ทุกช่องต้องขาว (AND) · Dilation: มีขาวแค่จุดเดียวพอ (OR) — จำจาก AND/OR</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Dilation = ขยายขอบ + ปิดรู · <code>cv2.dilate(img, kernel)</code> · erode หด / dilate ขยาย</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 15 · OPENING / CLOSING ============ -->
+        <section class="slide-view" data-title="Opening / Closing" aria-label="สไลด์ 15: Opening / Closing">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">OPENING · CLOSING</p>
+            <h2 class="slide-title">Opening / <span class="grad-text">Closing</span></h2>
+            <p class="slide-subtitle">เอา erode กับ dilate มาต่อกัน — ได้ผลลัพธ์ที่ใช้จริงในงาน</p>
+
+            <div class="tbl-wrap mt-4">
+              <table class="tbl">
+                <tr><th>การดำเนินการ</th><th>ลำดับ</th><th>ผล</th></tr>
+                <tr><td><b>Opening</b></td><td>Erosion → Dilation</td><td>ลบจุด noise ขาวเล็ก ๆ โดยไม่หดวัตถุใหญ่</td></tr>
+                <tr><td><b>Closing</b></td><td>Dilation → Erosion</td><td>ปิดรู/รอยขาดในวัตถุ โดยไม่ขยายวัตถุใหญ่</td></tr>
+              </table>
+            </div>
+
+            <div class="visual-box mt-4">
+              <span class="vb-label">จำยังไงไม่สลับ</span>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>Opening</b><span>เริ่มด้วย Erosion (ลบจุดเล็กก่อน) → กลับมาขยาย → เหลือแต่วัตถุจริง</span></div>
+                <div class="step-box"><b>Closing</b><span>เริ่มด้วย Dilation (ปิดรู) → กลับมาหด → วัตถุสมบูรณ์</span></div>
+              </div>
+              <pre class="code-block mt-3">opening = cv2.morphologyEx(b, cv2.MORPH_OPEN, k)
+closing = cv2.morphologyEx(b, cv2.MORPH_CLOSE, k)</pre>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="eraser" class="cyan"></i>Opening ใช้ตอนไหน</h3>
+                <p class="card-text small">ภาพ binary มีจุด noise กระจาย (จาก threshold) — ลบทิ้งก่อนนับวัตถุ</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="plug" class="cyan"></i>Closing ใช้ตอนไหน</h3>
+                <p class="card-text small">วัตถุมีรู/รอยขาด (เช่น ตัวหนังสือขาดเส้น) — ปิดให้ต่อเนื่องก่อน contour</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-4">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>เทคนิคสอบ</b>Opening = erode→dilate (ลบจุดขาว) · Closing = dilate→erode (ปิดรูดำ) — เริ่มจากตัวแรกเป็นตัวหลัก</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 16 · CONTOUR ============ -->
+        <section class="slide-view" data-title="Object Detection — Contour คืออะไร" aria-label="สไลด์ 16: Contour คืออะไร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">OBJECT DETECTION</p>
+            <h2 class="slide-title">Contour <span class="grad-text">คืออะไร?</span></h2>
+            <p class="slide-subtitle">เส้นขอบที่ลากรอบวัตถุ (เส้นโค้งเชื่อมจุดขอบเดียวกัน) — ใช้บอกตำแหน่ง/รูปร่างของวัตถุ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">จาก binary → contour</span>
+                <div class="flex mt-3" style="gap:14px;align-items:center">
+                  <div style="flex:1;text-align:center">
+                    <div style="height:110px;border-radius:10px;background:#0f172a;position:relative;overflow:hidden">
+                      <div style="position:absolute;left:20%;top:15%;width:60%;height:70%;border-radius:20px;background:#fff"></div>
+                    </div>
+                    <p class="text-3 mt-2" style="font-size:12px">binary: วัตถุขาว</p>
+                  </div>
+                  <div style="color:var(--cyan);font-size:20px">→</div>
+                  <div style="flex:1;text-align:center">
+                    <div style="height:110px;border-radius:10px;background:#0f172a;position:relative;overflow:hidden">
+                      <div style="position:absolute;left:20%;top:15%;width:60%;height:70%;border-radius:20px;border:4px solid #22d3ee;background:transparent"></div>
+                    </div>
+                    <p class="text-3 mt-2" style="font-size:12px">contour: เส้นรอบวัตถุ</p>
+                  </div>
+                </div>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>Contour</b><span>เส้นโค้งที่เชื่อมจุดขอบของวัตถุเดียวกัน</span></div>
+                  <div class="step-box"><b>ใช้คำนวณ</b><span>Area (พื้นที่) · Perimeter (เส้นรอบรูป) · Shape (รูปร่าง)</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="target" class="cyan"></i>Pipeline จริง</h3>
+                  <p class="card-text">Threshold (แยกวัตถุ) → Morphology (ลบ noise) → <b class="cyan">findContours (หาวัตถุ)</b> → นับ/วัด/ตรวจจับ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>Contour vs Edge</h3>
+                  <p class="card-text">Edge = จุดที่ความเข้มเปลี่ยน (พิกเซล) · Contour = เส้นปิดรอบวัตถุทั้งชิ้น (โครงสร้าง)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Contour = เส้นรอบวัตถุ · หาได้จากภาพ binary (ผ่าน threshold) · <code>cv2.findContours()</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 17 · FINDCONTOURS ============ -->
+        <section class="slide-view" data-title="cv2.findContours()" aria-label="สไลด์ 17: findContours">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">OPENCV CODE</p>
+            <h2 class="slide-title">cv2.findContours() <span class="grad-text">— หาวัตถุ</span></h2>
+            <p class="slide-subtitle">คำสั่งหาขอบวัตถุทั้งหมดในภาพ binary — คืนค่ารายการ contours</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โค้ดมาตรฐาน</span>
+                <pre class="code-block"># 1. เตรียมภาพ binary
+ret, binary = cv2.threshold(
+    gray, 128, 255, cv2.THRESH_BINARY)
+
+# 2. หา contours
+contours, hierarchy = cv2.findContours(
+    binary, cv2.RETR_EXTERNAL,
+    cv2.CHAIN_APPROX_SIMPLE)
+
+# 3. วาดลงภาพ
+cv2.drawContours(img, contours, -1,
+                 (0, 255, 0), 2)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="list" class="cyan"></i>พารามิเตอร์</h3>
+                  <p class="card-text"><b>RETR_EXTERNAL</b> = เอาเฉพาะขอบนอกสุด · <b>CHAIN_APPROX_SIMPLE</b> = เก็บเฉพาะมุม (ประหยัดหน่วยความจำ)</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="hash" class="cyan"></i>นับวัตถุ</h3>
+                  <pre class="code-block" style="font-size:12.5px">print("พบวัตถุ", len(contours), "ชิ้น")
+# แต่ละ contour = อาร์เรย์ของจุด (x, y)</pre>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>findContours รับ binary · RETR_EXTERNAL = ขอบนอกสุด · CHAIN_APPROX_SIMPLE = เก็บมุม</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 18 · BOUNDING BOX ============ -->
+        <section class="slide-view" data-title="Bounding Box — cv2.boundingRect()" aria-label="สไลด์ 18: Bounding Box">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">BOUNDING BOX</p>
+            <h2 class="slide-title">Bounding Box <span class="grad-text">— กล่องครอบวัตถุ</span></h2>
+            <p class="slide-subtitle">สี่เหลี่ยมที่เล็กที่สุดที่ครอบ contour ได้ — ใช้บอกตำแหน่งและขนาดของวัตถุ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โค้ด</span>
+                <pre class="code-block">x, y, w, h = cv2.boundingRect(cnt)
+
+# x, y = ตำแหน่งมุมซ้ายบน
+# w    = ความกว้าง
+# h    = ความสูง
+
+cv2.rectangle(img, (x, y),
+              (x + w, y + h),
+              (0, 255, 0), 2)</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>หาวัตถุด้วย contour</span></div>
+                  <div class="step-box"><b>2</b><span>ครอบด้วย bounding box (x, y, w, h)</span></div>
+                  <div class="step-box"><b>3</b><span>ใช้ตำแหน่งนั้นลากกรอบ/ตัดภาพ/ตรวจจับต่อ</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="crop" class="cyan"></i>เอาไปใช้ต่อ</h3>
+                  <p class="card-text">ตัดภาพเฉพาะวัตถุ (crop) · วาดกรอบรอบชิ้นงาน · วัดขนาดจริงในหน่วย mm (เทียบสเกล)</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="ruler" class="cyan"></i>วัดขนาด</h3>
+                  <p class="card-text">จาก w, h (พิกเซล) + อัตราส่วนพิกเซลต่อมิลลิเมตร → คำนวณขนาดจริงของวัตถุได้</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>boundingRect → (x, y, w, h) · สี่เหลี่ยมครอบ contour ที่เล็กสุด (axis-aligned)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 19 · FEATURE EXTRACTION ============ -->
+        <section class="slide-view" data-title="Feature Extraction — Shape · Moments" aria-label="สไลด์ 19: Feature Extraction">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FEATURE EXTRACTION</p>
+            <h2 class="slide-title">Feature Extraction <span class="grad-text">— Shape · Moments</span></h2>
+            <p class="slide-subtitle">แปลง "รูปร่างของวัตถุ" ให้เป็นตัวเลข (features) ที่เครื่องคำนวณ/เปรียบเทียบได้</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">Feature จาก Contour</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>Shape Features</b><span>Area (พื้นที่) · Perimeter (เส้นรอบรูป) — วัดจาก contour</span></div>
+                  <div class="step-box"><b>Moments</b><span>ค่าทางคณิตศาสตร์ของรูปร่าง — บอกจุดศูนย์ถ่วง, พื้นที่, การกระจาย</span></div>
+                  <div class="step-box"><b>ใช้แยกประเภท</b><span>วงกลม vs สี่เหลี่ยม vs สามเหลี่ยม — ดูจากอัตราส่วนของ feature</span></div>
+                </div>
+                <pre class="code-block mt-3">area = cv2.contourArea(cnt)
+peri = cv2.arcLength(cnt, True)
+moments = cv2.moments(cnt)
+cx = moments["m10"] / moments["m00"]  # centroid x
+cy = moments["m01"] / moments["m00"]  # centroid y</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="shapes" class="cyan"></i>แยกวงกลม vs สี่เหลี่ยม</h3>
+                  <p class="card-text">วงกลม: area ≈ π·r² และ perimeter ≈ 2π·r · สี่เหลี่ยม: area = w·h — อัตราส่วน area/perimeter ต่างกัน</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="cpu" class="cyan"></i>ทำไมต้องเป็นตัวเลข?</h3>
+                  <p class="card-text">เครื่องเปรียบเทียบตัวเลขได้ — feature เหล่านี้คือ input ของ ML/การจำแนก (บทท้าย)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Feature = ตัวเลขจากรูปร่าง · contourArea = พื้นที่ · arcLength = เส้นรอบรูป · moments = จุดศูนย์ถ่วง</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 20 · CORNER DETECTION ============ -->
+        <section class="slide-view" data-title="Corner Detection — Harris / Shi-Tomasi" aria-label="สไลด์ 20: Corner Detection">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">CORNER DETECTION</p>
+            <h2 class="slide-title">Corner Detection <span class="grad-text">— Harris / Shi-Tomasi</span></h2>
+            <p class="slide-subtitle">หาจุด "มุม" ของภาพ — จุดที่มองจากทิศไหนก็เห็นการเปลี่ยนแปลง (โดดเด่น ไม่ซ้ำ)</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ทำไมมุมถึงพิเศษ?</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>มุม (Corner)</b><span>เลื่อนนิดเดียว ค่าพิกเซลเปลี่ยนทุกทิศ → จดจำง่าย ไม่กำกวม</span></div>
+                  <div class="step-box"><b>ขอบ (Edge)</b><span>เปลี่ยนแค่ทิศเดียว — เลื่อนตามขอบแล้วเหมือนเดิม</span></div>
+                  <div class="step-box"><b>พื้นที่เรียบ</b><span>เลื่อนยังไงก็เหมือนเดิม — ไม่มีข้อมูล</span></div>
+                </div>
+                <pre class="code-block mt-3"># Harris
+corners = cv2.cornerHarris(gray, 2, 3, 0.04)
+# Shi-Tomasi (ดีที่สุด N จุด)
+pts = cv2.goodFeaturesToTrack(gray, 50, 0.01, 10)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="map" class="cyan"></i>ใช้กับงานไหน</h3>
+                  <p class="card-text">ติดตามวัตถุ (tracking) · จับคู่ภาพ (matching) · หาจุดอ้างอิงในภาพ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="git-compare" class="cyan"></i>Harris vs Shi-Tomasi</h3>
+                  <p class="card-text">Harris ให้คะแนนมุมทุกจุด · Shi-Tomasi (goodFeaturesToTrack) คืนเฉพาะ N จุดที่ดีที่สุด</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Corner = จุดที่เปลี่ยนทุกทิศ · Harris (<code>cornerHarris</code>) / Shi-Tomasi (<code>goodFeaturesToTrack</code>)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 21 · DESCRIPTOR ============ -->
+        <section class="slide-view" data-title="Feature Descriptor — SIFT / SURF / ORB" aria-label="สไลด์ 21: Feature Descriptor">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FEATURE DESCRIPTOR</p>
+            <h2 class="slide-title">Feature Descriptor <span class="grad-text">— SIFT / SURF / ORB</span></h2>
+            <p class="slide-subtitle">เลขชุดหนึ่งที่อธิบาย "หน้าตา" รอบจุดเด่น — ใช้อ่านตรงไหนในภาพ 2 ใบว่าเหมือนกัน</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">Descriptor คืออะไร</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>หาจุดเด่น (keypoint) — มุม/จุดที่น่าสนใจ</span></div>
+                  <div class="step-box"><b>2</b><span>บันทึกรูปแบบรอบจุดนั้นเป็น "เลขบรรยาย" (vector)</span></div>
+                  <div class="step-box"><b>3</b><span>ภาพอื่นเจอเลขใกล้เคียงกัน → เจอจุดเดียวกัน</span></div>
+                </div>
+                <pre class="code-block mt-3">orb = cv2.ORB_create()
+kp, des = orb.detectAndCompute(gray, None)
+# des = descriptor ของแต่ละ keypoint</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="git-compare" class="cyan"></i>3 ตัวหลัก</h3>
+                  <p class="card-text"><b>SIFT</b> = แม่นยำสูง (แต่ช้า, จดสิทธิบัตร) · <b>SURF</b> = SIFT เวอร์ชันเร็ว · <b>ORB</b> = ฟรี เร็ว เหมาะมือถือ/เรียลไทม์</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="link" class="cyan"></i>ใช้กับงาน</h3>
+                  <p class="card-text">จับคู่ภาพ (image matching) · สร้าง panorama (stitching) · หาวัตถุในภาพ 2 ใบ</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>SIFT (แม่น/ช้า) · SURF (เร็ว) · ORB (ฟรี+เร็ว) · ใช้ detectAndCompute → kp, des</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 22 · GEOMETRIC TRANSFORM ============ -->
+        <section class="slide-view" data-title="Geometric Transform — Resize · Rotate · Translate" aria-label="สไลด์ 22: Geometric Transform">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">IMAGE TRANSFORMATION</p>
+            <h2 class="slide-title">Geometric Transform <span class="grad-text">— Resize · Rotate · Translate</span></h2>
+            <p class="slide-subtitle">เปลี่ยนตำแหน่ง/ขนาด/ทิศของภาพ — ย่อ-ขยาย หมุน เลื่อน ด้วยเมทริกซ์แปลง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">3 คำสั่งหลัก</span>
+                <pre class="code-block"># Resize — ย่อ/ขยาย
+resized = cv2.resize(img, (640, 480))
+
+# Rotate — หมุน (90° ทวีคูณ)
+rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+
+# Translate — เลื่อน (เมทริกซ์)
+M = np.float32([[1, 0, 50], [0, 1, 30]])
+shifted = cv2.warpAffine(img, M, (w, h))</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>warpAffine</b><span>แปลงแบบเลื่อน/หมุน/ย่อ (affine — เส้นขนานยังขนาน)</span></div>
+                  <div class="step-box"><b>warpPerspective</b><span>แปลงมุมมอง 4 จุด (ไปดูสไลด์ถัดไป)</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="scan" class="cyan"></i>ใช้กับงาน</h3>
+                  <p class="card-text">ปรับขนาดภาพก่อนเข้าโมเดล (resize) · จัดแนวภาพก่อน compare · เลื่อนกรอบ ROI</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="grid" class="cyan"></i>Resize สำคัญกับ AI</h3>
+                  <p class="card-text">โมเดล CNN รับขนาดคงที่ (เช่น 224×224) — ต้อง resize ทุกภาพให้ขนาดเดียวกันก่อน</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>resize = ย่อ/ขยาย · rotate = หมุน · warpAffine = เลื่อน/หมุน/ย่อ (affine)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 23 · PERSPECTIVE ============ -->
+        <section class="slide-view" data-title="Perspective Transform — สแกนเอกสาร" aria-label="สไลด์ 23: Perspective Transform">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">PERSPECTIVE TRANSFORM</p>
+            <h2 class="slide-title">Perspective Transform <span class="grad-text">— สแกนเอกสาร</span></h2>
+            <p class="slide-subtitle">แก้ภาพที่ถ่ายเอียง/เบี้ยวให้ตรง — เอา 4 มุมของเอกสารมายืดให้เป็นสี่เหลี่ยม</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ขั้นตอน</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1</b><span>หาตำแหน่ง 4 มุมของเอกสารในภาพ (เช่น ใช้ contour)</span></div>
+                  <div class="step-box"><b>2</b><span>กำหนดจุดปลายทาง (สี่เหลี่ยมตรง ๆ)</span></div>
+                  <div class="step-box"><b>3</b><span>คำนวณเมทริกซ์ + warp → ได้ภาพตรง เหมือนสแกน</span></div>
+                </div>
+                <pre class="code-block mt-3">pts_src = np.float32([
+    [x1, y1], [x2, y2], [x3, y3], [x4, y4]])
+pts_dst = np.float32([
+    [0, 0], [w, 0], [w, h], [0, h]])
+M = cv2.getPerspectiveTransform(pts_src, pts_dst)
+scanned = cv2.warpPerspective(img, M, (w, h))</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="file-text" class="cyan"></i>ตัวอย่างการใช้งาน</h3>
+                  <p class="card-text">แอพสแกนเอกสาร (CamScanner) · ถ่ายป้าย/บอร์ดเอียง ๆ ให้ตรงก่อน OCR · ถ่ายเมนู</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="git-compare" class="cyan"></i>Affine vs Perspective</h3>
+                  <p class="card-text">Affine = เลื่อน/หมุน/ย่อ (เส้นขนานคงขนาน) · Perspective = เปลี่ยนมุมมอง 4 จุด (เส้นอาจไม่ขนาน)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Perspective = แก้เอียงด้วย 4 มุม · <code>getPerspectiveTransform</code> + <code>warpPerspective</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 24 · ADVANCED ============ -->
+        <section class="slide-view" data-title="Advanced — Restoration · Stitching" aria-label="สไลด์ 24: Advanced">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">ADVANCED IMAGE PROCESSING</p>
+            <h2 class="slide-title">Advanced <span class="grad-text">— Restoration · Stitching</span></h2>
+            <p class="slide-subtitle">งานขั้นสูงที่ต่อยอดจากทุกบทที่เรียนมา — ฟื้นฟูภาพ และต่อภาพพาโนรามา</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">Image Restoration</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>Deblur</b><span>แก้ภาพเบลอ (จากมือสั่น/โฟกัสพลาด) — ใช้ความรู้เรื่อง kernel/convolve</span></div>
+                  <div class="step-box"><b>Denoising</b><span>ลบ noise — ต่อยอดจากบท 5 (median/gaussian/bilateral)</span></div>
+                  <div class="step-box"><b>Frequency domain</b><span>ใช้ Fourier (บท 5) กรอง/ซ่อมภาพแบบความถี่</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="photo" class="cyan"></i>Image Stitching</h3>
+                  <p class="card-text">ต่อภาพถ่ายหลายใบเป็นภาพพาโนรามา — ใช้ feature matching (SIFT/ORB จากสไลด์ 21) หาจุดที่ตรงกันแล้วต่อ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="link" class="cyan"></i>เชื่อมกับบทก่อนหน้า</h3>
+                  <p class="card-text">Restoration ใช้ filter (บท 5) + Fourier · Stitching ใช้ feature (บทนี้) + perspective (สไลด์ 23)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Restoration = deblur + denoising · Stitching = ต่อภาพ panorama ด้วย feature matching</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 25 · CV + AI ============ -->
+        <section class="slide-view" data-title="Computer Vision + AI — ML · DL · CNN" aria-label="สไลด์ 25: CV + AI">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">COMPUTER VISION + AI</p>
+            <h2 class="slide-title">Computer Vision + AI <span class="grad-text">— ML · DL · CNN</span></h2>
+            <p class="slide-subtitle">จากกฎที่เขียนด้วยมือ (threshold/contour) ไปถึงระบบที่ "เรียนรู้" เองจากข้อมูล</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">วิวัฒนาการ</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>Classic CV</b><span>กฎเขียนด้วยมือ: threshold + contour + feature (ที่เรียนมา)</span></div>
+                  <div class="step-box"><b>Machine Learning</b><span>Feature extraction (ด้วยมือ) → Classification (SVM, Random Forest)</span></div>
+                  <div class="step-box"><b>Deep Learning</b><span>CNN เรียนรู้ feature เองจากภาพตรง ๆ — ไม่ต้องออกแบบ feature</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="cpu" class="cyan"></i>CNN คืออะไร</h3>
+                  <p class="card-text">Convolutional Neural Network — โครงข่ายที่ใช้ convolution (kernel!) หลายชั้น เรียนรู้ค่าถ่วงน้ำหนักเองจากข้อมูล</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>Framework</h3>
+                  <p class="card-text">PyTorch · TensorFlow · Model Zoo (โมเดลสำเร็จ) · Transfer Learning (เอาความรู้เดิมมาต่อยอด)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ML = feature ด้วยมือ + classifier · DL/CNN = เรียนรู้ feature เอง · Framework: PyTorch/TensorFlow</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 26 · YOLO ============ -->
+        <section class="slide-view" data-title="Object Detection Models — YOLO · SSD · Faster R-CNN" aria-label="สไลด์ 26: Object Detection Models">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">OBJECT DETECTION MODELS</p>
+            <h2 class="slide-title">Object Detection <span class="grad-text">— YOLO · SSD · Faster R-CNN</span></h2>
+            <p class="slide-subtitle">โมเดลที่บอกทั้ง "อะไร" (class) และ "อยู่ตรงไหน" (bounding box) ในภาพเดียว</p>
+
+            <div class="tbl-wrap mt-4">
+              <table class="tbl">
+                <tr><th>โมเดล</th><th>แนวคิด</th><th>จุดเด่น</th></tr>
+                <tr><td><b>YOLO</b></td><td>ดูทั้งภาพครั้งเดียว (one-stage) — เร็วมาก</td><td>เรียลไทม์ (วิดีโอ/กล้อง)</td></tr>
+                <tr><td><b>SSD</b></td><td>Single Shot — ตรวจจับหลายขนาดในครั้งเดียว</td><td>เร็ว + แม่นยำสมดุล</td></tr>
+                <tr><td><b>Faster R-CNN</b></td><td>สองขั้นตอน: เสนอพื้นที่ → จำแนก (two-stage)</td><td>แม่นยำสูงสุด แต่ช้า</td></tr>
+              </table>
+            </div>
+
+            <div class="visual-box mt-4">
+              <span class="vb-label">Output ของ object detection</span>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>Bounding box</b><span>(x, y, w, h) — ตำแหน่งวัตถุ (เหมือน boundingRect ที่เรียนมา)</span></div>
+                <div class="step-box"><b>Class + Confidence</b><span>เช่น "person 0.95" — เป็นคน 95%</span></div>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-4">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>เทคนิคสอบ</b>YOLO = เร็ว (หนึ่งรอบ) · Faster R-CNN = แม่น (สองขั้นตอน) · SSD = กลาง ๆ — จำความสัมพันธ์เร็ว↔แม่น</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 27 · SUMMARY ============ -->
+        <section class="slide-view" data-title="Chapter Summary — สรุปบทเรียน" aria-label="สไลด์ 27: สรุปบทเรียน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">CHAPTER SUMMARY</p>
+            <h2 class="slide-title">สรุปบทเรียน</h2>
+            <p class="slide-subtitle">เก็บทุกประเด็นสำคัญของบทนี้ไว้ในหน้าเดียว</p>
+            <div class="grid-2 mt-6">
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="scissors" class="cyan"></i>Threshold</h3><p class="card-text small">Global (ขีดเดียว) · Adaptive (ตามแสง) · Otsu (อัตโนมัติ) · BINARY/INV · TRUNC · TOZERO</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="shapes" class="cyan"></i>Morphology</h3><p class="card-text small">Erosion (หด) · Dilation (ขยาย) · Opening (erode→dilate) · Closing (dilate→erode)</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="route" class="cyan"></i>Contour</h3><p class="card-text small">findContours → contourArea/arcLength → boundingRect (x, y, w, h)</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="star" class="cyan"></i>Feature</h3><p class="card-text small">Shape/Moments · Corner (Harris/Shi-Tomasi) · Descriptor (SIFT/SURF/ORB)</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="crop" class="cyan"></i>Transform</h3><p class="card-text small">Resize · Rotate · warpAffine (affine) · warpPerspective (แก้เอียง 4 มุม)</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="bot" class="cyan"></i>CV + AI</h3><p class="card-text small">ML → DL/CNN (เรียนรู้ feature เอง) · YOLO เร็ว · Faster R-CNN แม่น</p></div>
+            </div>
+            <div class="tip-box tip-remember mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>จำแบบนี้</b>Pipeline: Threshold → Morphology → Contour → Feature → (AI) Detection — จากพิกเซลถึง "มองเห็น"</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 28 · CHEAT SHEET ============ -->
+        <section class="slide-view" data-title="Exam Cheat Sheet — สูตรจำก่อนสอบ" aria-label="สไลด์ 28: สูตรจำก่อนสอบ">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXAM CHEAT SHEET</p>
+            <h2 class="slide-title">สูตรจำก่อนสอบ</h2>
+            <p class="slide-subtitle">รวมสูตรและคำสั่งสำคัญ — ทบทวนก่อนสอบในเวลาไม่กี่นาที</p>
+            <div class="cheat-grid mt-6" id="cheatGrid"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 29 · QUIZ 1 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 1 (ข้อ 1–5)" aria-label="สไลด์ 29: แบบทดสอบชุดที่ 1">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 1</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 1</h2>
+            <div id="quiz1" class="mt-4"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 30 · QUIZ 2 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 2 (ข้อ 6–10)" aria-label="สไลด์ 30: แบบทดสอบชุดที่ 2">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 2</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 2</h2>
+            <div id="quiz2" class="mt-4"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 31 · FLASHCARDS ============ -->
+        <section class="slide-view" data-title="Flashcards — ทบทวนการ์ด" aria-label="สไลด์ 31: การ์ดทบทวน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">REVIEW</p>
+            <h2 class="slide-title">Flashcards — <span class="grad-text">ทบทวนการ์ด</span></h2>
+            <p class="slide-subtitle">คลิกการ์ดเพื่อพลิกดูคำตอบ — ใช้ปุ่มซ้าย/ขวาเพื่อสลับใบ</p>
+
+            <div class="split mt-6" style="grid-template-columns:1fr">
+              <div class="flashcard-wrap">
+                <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-label="การ์ดคำถาม — คลิกเพื่อพลิก">
+                  <div class="flashcard-face flashcard-front">
+                    <span class="fc-eyebrow">QUESTION</span>
+                    <p class="fc-q" id="fcQ">—</p>
+                    <span class="flashcard-hint">คลิกเพื่อพลิกการ์ด 🔄</span>
+                  </div>
+                  <div class="flashcard-face flashcard-back">
+                    <span class="fc-eyebrow">ANSWER</span>
+                    <p class="fc-a" id="fcA">—</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-5 wrap" style="justify-content:center">
+              <button class="btn btn-ghost" id="fcPrev"><i data-lucide="chevron-left"></i> Previous</button>
+              <span class="chip" id="fcCounter">1 / 18</span>
+              <button class="btn btn-ghost" id="fcNext">Next <i data-lucide="chevron-right"></i></button>
+              <button class="btn btn-cyan" id="fcShuffle"><i data-lucide="shuffle"></i> Shuffle</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 32 · GLOSSARY ============ -->
+        <section class="slide-view" data-title="Glossary — คำศัพท์" aria-label="สไลด์ 32: คำศัพท์">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">GLOSSARY</p>
+            <h2 class="slide-title">Glossary — <span class="grad-text">คำศัพท์</span></h2>
+            <p class="slide-subtitle">คำศัพท์สำคัญของบทนี้ — ค้นหาได้ด้วยช่องด้านล่าง</p>
+
+            <div class="glossary-wrap mt-6">
+              <div class="glossary-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="glossarySearch" placeholder="ค้นหาคำศัพท์ เช่น threshold, morphology, contour, yolo..." aria-label="ค้นหาคำศัพท์" />
+              </div>
+              <div class="glossary-count" id="glossaryCount">0 คำศัพท์</div>
+              <div class="glossary-list" id="glossaryList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 33 · POST-LESSON EXAM ============ -->
+        <section class="slide-view quiz-slide" data-title="ข้อสอบหลังเรียน — แบบทดสอบท้ายบท 20 ข้อ" aria-label="สไลด์ 33: ข้อสอบหลังเรียน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">POST-LESSON EXAM</p>
+            <div id="examHeadTitle"><h2 class="slide-title">ข้อสอบหลังเรียน <span class="grad-text">20 ข้อ</span></h2></div>
+            <p class="slide-subtitle" id="examHeadSub">Threshold (Global/Adaptive/Otsu) · Morphology · Contour · Feature · YOLO — เรียนครบทุกสไลด์เพื่อปลดล็อก ดูเฉลยได้ทันทีหลังตอบ</p>
+            <div id="quizExam" class="mt-4"></div>
+          </div>
+        </section>
+
+      </div><!-- /viewport -->
+
+      <!-- ================= BOTTOM BAR ================= -->
+      <footer class="bottombar">
+        <button class="bb-nav-btn" id="prevBtn" aria-label="สไลด์ก่อนหน้า">
+          <i data-lucide="chevron-left"></i><span class="bb-label">ก่อนหน้า</span>
+        </button>
+
+        <div class="bb-center">
+          สไลด์ <b id="bbCounter">1</b> / <b id="bbTotal">33</b>
+        </div>
+
+        <div class="bb-tools">
+          <button class="icon-btn" id="fullscreenBtn" aria-label="ขยายสไลด์เต็มจอ" title="ขยายสไลด์">
+            <i data-lucide="maximize-2"></i>
+          </button>
+          <button class="icon-btn" id="printSlidesBtn" aria-label="พิมพ์สไลด์ทั้งหมด" title="พิมพ์สไลด์ทั้งหมด">
+            <i data-lucide="printer"></i>
+          </button>
+          <button class="icon-btn" id="printCardsBtn" aria-label="พิมพ์การ์ดสรุป" title="พิมพ์การ์ดสรุป">
+            <i data-lucide="file-output"></i>
+          </button>
+        </div>
+
+        <button class="bb-nav-btn next" id="nextBtn" aria-label="สไลด์ถัดไป">
+          <span class="bb-label">ถัดไป</span><i data-lucide="chevron-right"></i>
+        </button>
+      </footer>
+
+    </main>
+  </div><!-- /shell -->
+</div><!-- /app -->
+
+<!-- ================= DRAWER BACKDROP ================= -->
+<div id="drawerBackdrop" aria-hidden="true"></div>
+
+<!-- ================= NOTES PANEL ================= -->
+<aside class="notes-panel" id="notesPanel" aria-label="บันทึกย่อ">
+  <div class="flex items-center justify-between" style="padding:16px 20px;border-bottom:1px solid var(--border)">
+    <div>
+      <b style="font-size:15px">📝 บันทึกย่อ (Notes)</b>
+      <p class="text-3" style="font-size:12px" id="notesLabel">สไลด์ที่กำลังเรียน</p>
+    </div>
+    <button class="icon-btn" id="notesCloseBtn" aria-label="ปิดบันทึกย่อ"><i data-lucide="x"></i></button>
+  </div>
+  <textarea id="notesTextarea" placeholder="เขียนสิ่งที่ต้องจำจากสไลด์นี้...&#10;เช่น:&#10;- new = (alpha × pixel) + beta&#10;- γ<1 สว่าง · γ>1 มืด&#10;- equalizeHist ใช้กับ grayscale" aria-label="บันทึกย่อ"></textarea>
+  <div class="text-3" style="padding:10px 20px 14px;font-size:12px;border-top:1px solid var(--border)">
+    💾 บันทึกอัตโนมัติลงในเครื่องของคุณ (localStorage)
+  </div>
+</aside>
+
+<!-- ================= TOAST ================= -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================= COMPLETION OVERLAY ================= -->
+<div id="completionOverlay" role="dialog" aria-modal="true" aria-label="จบบทเรียน">
+  <div class="card center" style="max-width:440px;position:relative;padding:40px 32px;z-index:1">
+    <div style="font-size:56px" class="float-y">🎉</div>
+    <h2 class="slide-title mt-4" style="font-size:28px">Chapter Complete!</h2>
+    <p class="text-2 mt-2" id="completionMsg">คุณเรียนครบทุกสไลด์แล้ว — ยอดเยี่ยมมาก! <b class="grad-text">Keep Learning!</b></p>
+    <div class="grid-3 mt-5" style="grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneSlides">33</b><p class="text-3" style="font-size:12px">สไลด์</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneScore">–</b><p class="text-3" style="font-size:12px">คะแนน Quiz</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px">100%</b><p class="text-3" style="font-size:12px">ความคืบหน้า</p></div>
+    </div>
+    <div class="flex items-center gap-3 mt-6 wrap" style="justify-content:center">
+      <button class="btn btn-ghost" id="completionCloseBtn">ปิด 🎊</button>
+      <button class="btn btn-primary" id="completionRestartBtn"><i data-lucide="rotate-ccw"></i> เรียนใหม่อีกครั้ง</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PRINT AREA ================= -->
+<div id="printArea" aria-hidden="true"></div>
+
+<!-- App scripts -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+<!-- Histogram demo bars -->
+<script>
+  (function () {
+    var boxes = document.querySelectorAll('.hist-bar-set');
+    boxes.forEach(function (box) {
+      var data = box.getAttribute('data-bars');
+      if (!data) return;
+      var vals = data.split(',').map(Number);
+      vals.forEach(function (v) {
+        var b = document.createElement('div');
+        b.className = 'hist-bar';
+        b.style.height = v + '%';
+        box.appendChild(b);
+      });
+    });
+  })();
+</script>
+</body>
+</html>

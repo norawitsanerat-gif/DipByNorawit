@@ -17,7 +17,9 @@
     1: { start: 0, count: D.slides.length, sections: D.sections, slides: D.slides, cheat: D.cheat, flashcards: D.flashcards, glossary: D.glossary, exam: D.quick, thai: "ภาพดิจิทัลคืออะไร", en: "Digital Image Processing" },
     2: { start: 0, count: D.ch2.slides.length, sections: D.ch2.sections, slides: D.ch2.slides, cheat: D.ch2.cheat, flashcards: D.ch2.flashcards, glossary: D.ch2.glossary, quiz: D.ch2.quiz, exam: D.ch2.exam, thai: "การประมวลผลภาพสี", en: "Color Image Processing" },
     3: { start: 0, count: D.ch3.slides.length, sections: D.ch3.sections, slides: D.ch3.slides, cheat: D.ch3.cheat, flashcards: D.ch3.flashcards, glossary: D.ch3.glossary, quiz: D.ch3.quiz, exam: D.ch3.exam, thai: "การทดลองประมวลผลภาพด้วย MATLAB", en: "Image Processing Lab with MATLAB" },
-    4: { start: 0, count: D.ch4.slides.length, sections: D.ch4.sections, slides: D.ch4.slides, cheat: D.ch4.cheat, flashcards: D.ch4.flashcards, glossary: D.ch4.glossary, quiz: D.ch4.quiz, exam: D.ch4.exam, thai: "การปรับปรุงภาพด้วย Spatial Filtering", en: "Image Enhancement by Spatial Filtering" }
+    4: { start: 0, count: D.ch4.slides.length, sections: D.ch4.sections, slides: D.ch4.slides, cheat: D.ch4.cheat, flashcards: D.ch4.flashcards, glossary: D.ch4.glossary, quiz: D.ch4.quiz, exam: D.ch4.exam, thai: "การปรับปรุงภาพด้วย Spatial Filtering", en: "Image Enhancement by Spatial Filtering" },
+    5: { start: 0, count: D.ch5.slides.length, sections: D.ch5.sections, slides: D.ch5.slides, cheat: D.ch5.cheat, flashcards: D.ch5.flashcards, glossary: D.ch5.glossary, quiz: D.ch5.quiz, exam: D.ch5.exam, thai: "การกรองภาพและตรวจจับขอบ", en: "Image Filtering & Edge Detection" },
+    6: { start: 0, count: D.ch6.slides.length, sections: D.ch6.sections, slides: D.ch6.slides, cheat: D.ch6.cheat, flashcards: D.ch6.flashcards, glossary: D.ch6.glossary, quiz: D.ch6.quiz, exam: D.ch6.exam, thai: "Segmentation ถึง Computer Vision", en: "Segmentation to Computer Vision" }
   };
   function ch() { return CHS[state.chapter]; }
   var TOTAL = 0;
@@ -48,10 +50,14 @@
     quiz2: LS.get("dip_quiz2", { answers: {} }),
     quiz3: LS.get("dip_quiz3", { answers: {} }),
     quiz4: LS.get("dip_quiz4", { answers: {} }),
+    quiz5: LS.get("dip_quiz5", { answers: {} }),
+    quiz6: LS.get("dip_quiz6", { answers: {} }),
     exam: LS.get("dip_exam") || { answers: {}, best: null },
     exam2: LS.get("dip_exam2") || { answers: {}, best: null },
     exam3: LS.get("dip_exam3") || { answers: {}, best: null },
     exam4: LS.get("dip_exam4") || { answers: {}, best: null },
+    exam5: LS.get("dip_exam5") || { answers: {}, best: null },
+    exam6: LS.get("dip_exam6") || { answers: {}, best: null },
     best: null,
     celebrated: false
   };
@@ -79,7 +85,7 @@
      ========================================================================== */
   function renderMenuProgress() {
     var doneTotal = 0, slideTotal = 0, doneChapters = 0;
-    [1, 2, 3, 4].forEach(function (n) {
+    [1, 2, 3, 4, 5, 6].forEach(function (n) {
       var el = $("ch" + n + "Pct");
       var comp = LS.get("dip_completed_" + n, []);
       var count = CHS[n].count;
@@ -102,7 +108,7 @@
     var ob = $("courseBar");
     if (ob) ob.style.setProperty("--pct", coursePct + "%");
     var od = $("courseDone");
-    if (od) od.textContent = "เรียนแล้ว " + doneTotal + " / " + slideTotal + " สไลด์ · จบแล้ว " + doneChapters + " / 4 บท";
+    if (od) od.textContent = "เรียนแล้ว " + doneTotal + " / " + slideTotal + " สไลด์ · จบแล้ว " + doneChapters + " / 6 บท";
   }
   function goHome() { location.href = "index.html"; }
   function openChapter(n) {
@@ -551,7 +557,7 @@
   function examState() { return state["exam" + (state.chapter === 1 ? "" : state.chapter)]; }
   function examStoreKey() { return "dip_exam" + (state.chapter === 1 ? "" : state.chapter); }
   function examData() { return (ch().exam) || []; }
-  function examElId() { return "quizExam" + (state.chapter === 1 ? "" : state.chapter); }
+  function examElId() { return "quizExam"; }
   function normText(s) {
     return String(s == null ? "" : s).trim().toLowerCase().replace(/\s+/g, " ");
   }
@@ -588,13 +594,17 @@
       1: "ลองนึกถึงภาพที่ประกอบด้วยพิกเซล, ระดับการประมวลผล Low/Mid/Higher, Fundamental Steps และความลึกของสี (1/8/24/32 bit) ประกอบคำตอบ",
       2: "ลองนึกถึงทำไมต้องใช้สี, สีปฐมภูมิ/ทุติยภูมิ, RGB→CMY, pixel depth, Safe RGB และ HSI ประกอบคำตอบ",
       3: "ลองนึกถึงคำสั่ง MATLAB (imread/imshow/fft2), Sampling/Quantization, Negative/Gamma/Log, Histogram, Spatial/Frequency filter และ Morphology ประกอบคำตอบ",
-      4: "ลองนึกถึง Spatial Filtering (mean/median), Padding 3 แบบ, Finite Difference, Sobel (Sobel_x/y), Laplacian (center 4/5/9), sharpening g=f−∇²f และ Morphology ประกอบคำตอบ"
+      4: "ลองนึกถึง Spatial Filtering (mean/median), Padding 3 แบบ, Finite Difference, Sobel (Sobel_x/y), Laplacian (center 4/5/9), sharpening g=f−∇²f และ Morphology ประกอบคำตอบ",
+      5: "ลองนึกถึง Mean/Gaussian/Median/Bilateral, Linear vs Non-linear, Sobel (Sobel_x/y), Laplacian (center 4/8), sharpening g=f−∇²f, Canny, FFT/fftshift/IFFT, Magnitude/Phase และ Walsh/Hadamard ประกอบคำตอบ",
+      6: "ลองนึกถึง Threshold 5 โหมด (BINARY/INV/TRUNC/TOZERO), Adaptive (blockSize/C), Otsu, Morphology (Erosion/Dilation/Opening/Closing), Contour (findContours/boundingRect), Feature (Moments/Harris/SIFT) และ YOLO ประกอบคำตอบ"
     };
     var he = {
       1: "Think about pixels, the Low/Mid/Higher processing levels, the Fundamental Steps, and color depth (1/8/24/32 bit) to answer",
       2: "Think about why we use color, primary/secondary colors, RGB→CMY, pixel depth, Safe RGB, and HSI to answer",
       3: "Think about MATLAB commands (imread/imshow/fft2), Sampling/Quantization, Negative/Gamma/Log, Histogram, Spatial/Frequency filters, and Morphology to answer",
-      4: "Think about spatial filtering (mean/median), the 3 paddings, finite differences, Sobel (Sobel_x/y), Laplacian (center 4/5/9), sharpening g=f−∇²f, and morphology to answer"
+      4: "Think about spatial filtering (mean/median), the 3 paddings, finite differences, Sobel (Sobel_x/y), Laplacian (center 4/5/9), sharpening g=f−∇²f, and morphology to answer",
+      5: "Think about Mean/Gaussian/Median/Bilateral, Linear vs Non-linear, Sobel (Sobel_x/y), Laplacian (center 4/8), sharpening g=f−∇²f, Canny, FFT/fftshift/IFFT, Magnitude/Phase, and Walsh/Hadamard to answer",
+      6: "Think about the 5 threshold modes (BINARY/INV/TRUNC/TOZERO), Adaptive (blockSize/C), Otsu, Morphology (Erosion/Dilation/Opening/Closing), Contour (findContours/boundingRect), Features (Moments/Harris/SIFT), and YOLO to answer"
     };
     return EXAM_EN ? (he[state.chapter] || he[1]) : (h[state.chapter] || h[1]);
   }
@@ -622,7 +632,9 @@
     1: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Digital images, processing levels, fundamental steps & color depth — finish all slides to unlock; see the solution right after answering" },
     2: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Color fundamentals, color models (RGB/CMY/HSI), pseudo-color & full-color processing — finish all slides to unlock; see the solution right after answering" },
     3: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "MATLAB commands, sampling/quantization, intensity transforms, DFT/transforms, histogram, spatial & frequency filtering, morphology, thresholding — finish all slides to unlock" },
-    4: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Spatial filtering, mean/median, padding, finite differences, Sobel, Laplacian & sharpening, morphology, Otsu threshold — finish all slides to unlock" }
+    4: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Spatial filtering, mean/median, padding, finite differences, Sobel, Laplacian & sharpening, morphology, Otsu threshold — finish all slides to unlock" },
+    5: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Smoothing (mean/gaussian/median/bilateral), edge detection (Sobel/Laplacian/Canny), Fourier (FFT/magnitude/phase), Walsh-Hadamard — finish all slides to unlock; see the solution right after answering" },
+    6: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Thresholding (global/adaptive/otsu), morphology, contour & bounding box, features, transforms, object detection (YOLO) — finish all slides to unlock; see the solution right after answering" }
   };
   function applyExamHeaderLang() {
     var h = EXAM_HEAD[state.chapter];
