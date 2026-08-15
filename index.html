@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Interactive Digital Textbook — Digital Image Processing" />
+  <title>DIP · Interactive Digital Textbook — เมนูหลัก</title>
+
+  <!-- App styles — โหลดก่อนเสมอ (สำคัญต่อการแสดงผล) -->
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS (Play CDN) — defer: ไม่บล็อกการโหลดหน้าและ app.js -->
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide icons — defer: ไม่บล็อกการโหลดหน้าและ app.js -->
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body data-page="menu">
+
+<!-- ================= CHAPTER MENU (เมนูหลัก) ================= -->
+<div id="chapterMenu" aria-label="เมนูหลัก — เลือกบทเรียน">
+  <!-- พื้นหลังเคลื่อนไหว -->
+  <div class="menu-bg" aria-hidden="true">
+    <div class="menu-bg-grid"></div>
+    <div class="menu-orb orb-1"></div>
+    <div class="menu-orb orb-2"></div>
+    <div class="menu-orb orb-3"></div>
+    <div class="menu-bg-ring"></div>
+  </div>
+
+  <div class="menu-inner">
+    <!-- Hero -->
+    <header class="menu-hero">
+      <div class="menu-logo-wrap">
+        <div class="cn-logo menu-logo">DIP</div>
+        <div class="menu-logo-ping" aria-hidden="true"></div>
+      </div>
+      <p class="menu-kicker">INTERACTIVE DIGITAL TEXTBOOK · DIGITAL IMAGE PROCESSING</p>
+      <h1 class="menu-title">การประมวลผล<span class="grad-text">ภาพดิจิทัล</span></h1>
+      <p class="menu-sub">จากพิกเซลและภาพดิจิทัล ไปจนถึงการประมวลผลภาพสี และการทดลอง 12 Experiments ด้วย MATLAB — อธิบายใกล้ตัวแบบจับมือ เข้าใจง่ายแม้ไม่เคยเรียนมาก่อน</p>
+
+      <div class="menu-hero-stats">
+        <div class="stat"><b data-count="4">0</b><span>บทเรียน</span></div>
+        <div class="stat"><b data-count="123">0</b><span>สไลด์</span></div>
+        <div class="stat"><b data-count="80">0</b><span>ข้อสอบ</span></div>
+        <div class="stat"><b data-count="92">0</b><span>คำศัพท์</span></div>
+      </div>
+
+      <div class="flex items-center gap-3 mt-5 wrap" style="justify-content:center">
+        <button class="btn btn-primary" id="menuCtaBtn" style="font-size:15.5px;padding:13px 26px">
+          เริ่มเรียนเลย <i data-lucide="arrow-down"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- ระดับความคืบหน้าของวิชา -->
+    <div class="card center mt-6" style="max-width:560px;margin-left:auto;margin-right:auto;padding:20px 26px">
+      <div class="flex items-center justify-between w-full" style="gap:12px">
+        <span style="font-size:13.5px;font-weight:700">ความคืบหน้าของวิชา</span>
+        <b class="cyan" id="coursePct">0%</b>
+      </div>
+      <div class="progress-track mt-3" style="width:100%"><div class="progress-fill" id="courseBar" style="width:0%"></div></div>
+      <p class="text-3 mt-2" style="font-size:12.5px" id="courseDone">เรียนแล้ว 0 / 123 สไลด์ · จบแล้ว 0 / 4 บท</p>
+    </div>
+
+    <!-- Chapter cards -->
+    <div class="chapter-grid" id="chapterGrid" style="margin-top:38px">        <button class="chapter-card unlocked" data-chapter="1" role="listitem">
+        <span class="ch-top"><span class="ch-num">1</span><span class="ch-icon"><i data-lucide="image"></i></span></span>
+        <div class="ch-body">
+          <span class="ch-en">Digital Image Processing</span>
+          <b class="ch-title">ภาพดิจิทัลคืออะไร</b>
+          <p class="ch-desc">ภาพดิจิทัล f(x,y) · พิกเซล · DIP · Vision &amp; EM Spectrum · ระดับ Low/Mid/Higher · ประวัติ Bartlane · Fundamental Steps · Components ระบบ · Bitmap &amp; Color Depth</p>
+          <div class="ch-meta">
+            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="1">31</b> สไลด์</span>
+            <span class="chip-sm"><i data-lucide="file-question"></i>ข้อสอบ 20 ข้อ</span>
+          </div>
+          <div class="ch-progress">
+            <div class="ch-bar"><div class="ch-bar-fill"></div></div>
+            <span class="ch-status"><i data-lucide="play"></i>เรียนต่อ <b class="ch-pct" id="ch1Pct">0%</b></span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="ch-go" aria-hidden="true"></i>
+      </button>
+
+      <button class="chapter-card unlocked" data-chapter="2" role="listitem">
+        <span class="ch-top"><span class="ch-num">2</span><span class="ch-icon"><i data-lucide="palette"></i></span></span>
+        <div class="ch-body">
+          <span class="ch-en">Color Image Processing</span>
+          <b class="ch-title">การประมวลผลภาพสี</b>
+          <p class="ch-desc">ทำไมต้องใช้สี · Color Fundamentals (แสง 400–700 nm, Cones, CIE) · Color Models RGB/CMY/HSI · Pixel Depth &amp; Safe RGB · Pseudo-color (Intensity Slicing) · Full-color &amp; Smoothing/Sharpening</p>
+          <div class="ch-meta">
+            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="2">29</b> สไลด์</span>
+            <span class="chip-sm"><i data-lucide="file-question"></i>ข้อสอบ 20 ข้อ</span>
+          </div>
+          <div class="ch-progress">
+            <div class="ch-bar"><div class="ch-bar-fill"></div></div>
+            <span class="ch-status"><i data-lucide="play"></i>เรียนต่อ <b class="ch-pct" id="ch2Pct">0%</b></span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="ch-go" aria-hidden="true"></i>
+      </button>
+
+      <button class="chapter-card unlocked" data-chapter="3" role="listitem">
+        <span class="ch-top"><span class="ch-num">3</span><span class="ch-icon"><i data-lucide="flask-conical"></i></span></span>
+        <div class="ch-body">
+          <span class="ch-en">Image Processing Lab · MATLAB</span>
+          <b class="ch-title">การทดลองประมวลผลภาพด้วย MATLAB</b>
+          <p class="ch-desc">Sampling/Quantization · Spatial &amp; Intensity Resolution · Negative/Gamma/Log/Contrast · DFT &amp; Transforms (Walsh/Hadamard/DCT/Haar) · Histogram &amp; Equalization · Spatial &amp; Frequency Filtering · Edge/Line/Point Detection · Morphology · Thresholding &amp; Otsu · Color Models</p>
+          <div class="ch-meta">
+            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="3">34</b> สไลด์</span>
+            <span class="chip-sm"><i data-lucide="file-question"></i>ข้อสอบ 20 ข้อ</span>
+          </div>
+          <div class="ch-progress">
+            <div class="ch-bar"><div class="ch-bar-fill"></div></div>
+            <span class="ch-status"><i data-lucide="play"></i>เรียนต่อ <b class="ch-pct" id="ch3Pct">0%</b></span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="ch-go" aria-hidden="true"></i>
+      </button>
+
+      <button class="chapter-card unlocked" data-chapter="4" role="listitem">
+        <span class="ch-top"><span class="ch-num">4</span><span class="ch-icon"><i data-lucide="sparkles"></i></span></span>
+        <div class="ch-body">
+          <span class="ch-en">Image Enhancement by Spatial Filtering</span>
+          <b class="ch-title">การปรับปรุงภาพด้วยตัวกรองเชิงพื้นที่</b>
+          <p class="ch-desc">Spatial Filtering (linear/median) · Correlation vs Convolution · Mean/Median Filters · Finite Differences (Gradient) · Sobel/Prewitt · Laplacian &amp; Unsharp Masking · Morphology (Erosion/Dilation)</p>
+          <div class="ch-meta">
+            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="4">29</b> สไลด์</span>
+            <span class="chip-sm"><i data-lucide="file-question"></i>ข้อสอบ 20 ข้อ</span>
+          </div>
+          <div class="ch-progress">
+            <div class="ch-bar"><div class="ch-bar-fill"></div></div>
+            <span class="ch-status"><i data-lucide="play"></i>เรียนต่อ <b class="ch-pct" id="ch4Pct">0%</b></span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="ch-go" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <footer class="menu-foot">
+      <div class="menu-foot-badge"><i data-lucide="sparkles"></i> 4 บทเรียน · ONLINE</div>
+      <span>Designed &amp; Developed by นายนรวิชญ์ แสงรัตน์</span>
+    </footer>
+  </div>
+</div>
+
+<!-- ================= TOAST ================= -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- App scripts -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+<!-- Animated counters -->
+<script>
+  (function () {
+    function animateCount(el, target) {
+      var start = 0, dur = 1200, t0 = null;
+      function step(ts) {
+        if (!t0) t0 = ts;
+        var k = Math.min(1, (ts - t0) / dur);
+        k = 1 - Math.pow(1 - k, 3);
+        el.textContent = Math.round(start + (target - start) * k);
+        if (k < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    document.querySelectorAll("[data-count]").forEach(function (el) {
+      animateCount(el, parseInt(el.dataset.count, 10));
+    });
+  })();
+</script>
+</body>
+</html>

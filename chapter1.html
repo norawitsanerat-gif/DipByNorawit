@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Interactive Digital Textbook — Digital Image Processing / ภาพดิจิทัลคืออะไร" />
+  <title>DIP · บทที่ 1 — ภาพดิจิทัลคืออะไร</title>
+
+  <!-- App styles — โหลดก่อนเสมอ (สำคัญต่อการแสดงผล) -->
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS (Play CDN) — defer: ไม่บล็อกการโหลดหน้าและ app.js -->
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide icons — defer: ไม่บล็อกการโหลดหน้าและ app.js -->
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- ส่วนประกอบเคลื่อนไหวเฉพาะ DIP -->
+  <style>
+    /* pixel grid — เปิดทีละช่อง */
+    .px-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; max-width: 360px; margin: 0 auto; }
+    .px { aspect-ratio: 1; border-radius: 4px; background: #1e293b; border: 1px solid rgba(255,255,255,.06); transition: background .35s, transform .35s, box-shadow .35s; }
+    .px.on { background: linear-gradient(135deg, #60a5fa, #22d3ee); box-shadow: 0 0 10px rgba(56,189,248,.5); transform: scale(1.06); }
+
+    /* color depth bars */
+    .cd-row { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+    .cd-label { width: 150px; flex-shrink: 0; font-size: 13.5px; font-weight: 700; }
+    .cd-track { flex: 1; height: 30px; border-radius: 8px; overflow: hidden; display: flex; }
+    .cd-seg { height: 100%; transition: flex .8s cubic-bezier(.2,.8,.2,1); }
+    .cd-note { font-size: 12.5px; color: var(--text-3); margin-top: 4px; }
+    .cd-1 { background: repeating-linear-gradient(90deg, #0f172a 0 50%, #f8fafc 50% 100%); }
+    .cd-8 { background: linear-gradient(90deg, #0a0a0a, #444, #999, #eee, #fff); }
+    .cd-24 { background: linear-gradient(90deg, #f43f5e 0 33%, #22c55e 33% 66%, #3b82f6 66% 100%); }
+    .cd-32 { background: linear-gradient(90deg, #f43f5e 0 25%, #22c55e 25% 50%, #3b82f6 50% 75%, rgba(255,255,255,.25) 75% 100%); }
+
+    /* pipeline steps — อ่านตัวอักษร */
+    .pipe { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+    .pipe-step {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--cyan);
+      padding: 11px 16px; border-radius: 12px; font-size: 14.5px;
+      animation: dipStepIn .5s ease both;
+    }
+    .pipe-step:nth-child(2) { animation-delay: .15s; } .pipe-step:nth-child(3) { animation-delay: .3s; }
+    .pipe-step:nth-child(4) { animation-delay: .45s; } .pipe-step:nth-child(5) { animation-delay: .6s; }
+    .pipe-step .p-no {
+      width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px;
+      display: grid; place-items: center; font-weight: 800; font-size: 13px;
+      background: linear-gradient(135deg, var(--primary), var(--cyan)); color: #fff;
+    }
+    @keyframes dipStepIn { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+
+    /* levels — 3 ระดับ */
+    .lvl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .lvl-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px 18px;
+      transition: transform .25s, border-color .25s, box-shadow .25s; position: relative; overflow: hidden;
+    }
+    .lvl-card:hover { transform: translateY(-6px); border-color: var(--cyan); box-shadow: var(--glow-blue); }
+    .lvl-card .lvl-tag {
+      position: absolute; top: 12px; right: 14px; font-size: 12px; font-weight: 800;
+      padding: 3px 10px; border-radius: 999px; letter-spacing: .04em;
+    }
+    .lvl-card:nth-child(1) { border-top: 3px solid var(--success); }
+    .lvl-card:nth-child(2) { border-top: 3px solid var(--warning); }
+    .lvl-card:nth-child(3) { border-top: 3px solid var(--danger); }
+    .lvl-card h4 { font-size: 16px; font-weight: 800; margin-top: 10px; }
+    .lvl-card p { font-size: 13px; color: var(--text-3); line-height: 1.7; margin-top: 8px; }
+
+    /* fundamental steps — 6 ขั้น */
+    .fstep { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .fstep-item {
+      background: var(--card-2); border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+      text-align: center; transition: transform .25s, border-color .25s;
+    }
+    .fstep-item:hover { transform: translateY(-4px); border-color: rgba(56,189,248,.5); }
+    .fstep-item .fs-i {
+      width: 40px; height: 40px; margin: 0 auto 8px; border-radius: 12px;
+      display: grid; place-items: center; color: var(--cyan);
+      background: rgba(56,189,248,.12); border: 1px solid rgba(56,189,248,.25);
+    }
+    .fstep-item b { font-size: 13.5px; display: block; }
+    .fstep-item small { color: var(--text-3); font-size: 11.5px; display: block; margin-top: 4px; line-height: 1.5; }
+
+    /* timeline history */
+    .tl2 { display: flex; flex-direction: column; gap: 14px; }
+    .tl2-item {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px;
+      animation: dipStepIn .5s ease both;
+    }
+    .tl2-item:nth-child(2) { animation-delay: .2s; }
+    .tl2-item .tl-year {
+      flex-shrink: 0; font-family: Inter, monospace; font-weight: 800; font-size: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .tl2-item p { font-size: 14px; color: var(--text-2); line-height: 1.7; margin-top: 2px; }
+
+    /* camera eye diagram */
+    .spec-band { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .spec-chip {
+      font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 999px;
+      background: rgba(56,189,248,.1); border: 1px solid rgba(56,189,248,.3); color: var(--cyan);
+      animation: dipPulse 2.4s ease-in-out infinite;
+    }
+    .spec-chip:nth-child(2) { animation-delay: .3s; } .spec-chip:nth-child(3) { animation-delay: .6s; }
+    .spec-chip:nth-child(4) { animation-delay: .9s; } .spec-chip:nth-child(5) { animation-delay: 1.2s; }
+    @keyframes dipPulse { 0%,100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.07); opacity: 1; } }
+
+    @media (max-width: 640px) {
+      .lvl { grid-template-columns: 1fr; }
+      .fstep { grid-template-columns: 1fr 1fr; }
+      .cd-label { width: 120px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body data-page="chapter" data-chapter="1">
+
+  <!-- ================= TOP HEADER ================= -->
+  <header id="topbar">
+    <button class="icon-btn" id="menuBtn" aria-label="เปิดเมนูบทเรียน" title="เมนู">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <div class="brand">
+      <div class="cn-logo" aria-hidden="true">DIP</div>
+      <div class="brand-titles">
+        <h1>การประมวลผลภาพดิจิทัล</h1>
+        <p id="headerChapterLabel">ภาพดิจิทัลคืออะไร · บทที่ 1</p>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" id="homeBtn" aria-label="กลับไปเมนูหลัก" title="เมนูหลัก">
+        <i data-lucide="home"></i>
+      </button>
+      <button class="icon-btn" id="notesBtn" aria-label="เปิดบันทึกย่อ" title="บันทึกย่อ (Notes)">
+        <i data-lucide="notebook-pen"></i>
+      </button>
+
+      <div class="header-progress" aria-label="ความคืบหน้า">
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="headerProgressBar">
+          <div class="progress-fill" id="headerProgressFill"></div>
+        </div>
+        <span class="progress-count" id="headerProgressCount">1 / 28</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SHELL ================= -->
+  <div class="shell">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside id="sidebar" aria-label="เมนูบทเรียน">
+      <div class="sidebar-head">
+        <div class="sidebar-head-title">
+          <h2 id="sidebarChapterTitle">เมนูบทที่ 1</h2>
+          <p id="sidebarChapterSub">หัวข้อในสัปดาห์นี้ · 28 หัวข้อ</p>
+        </div>
+        <button class="icon-btn sidebar-close" id="sidebarCloseBtn" aria-label="ปิดเมนูบทเรียน" title="ปิดเมนู">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="sidebar-info">
+        <i data-lucide="info"></i>
+        <span>คลิกหัวข้อหรือสไลด์เพื่อข้ามไปได้เลย<br />เรียนทีละสไลด์เพื่อเก็บเนื้อหาให้ครบ</span>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav" aria-label="สารบัญสไลด์"></nav>
+      <div class="sidebar-foot">
+        <div class="sf-top"><span>ความคืบหน้า</span><b id="sidebarPct">0%</b></div>
+        <div class="progress-track"><div class="progress-fill" id="sidebarProgressFill"></div></div>
+        <p class="mt-2 text-3" style="font-size:12px" id="sidebarDone">ยังไม่ได้เรียนสไลด์ใดเลย — เริ่มที่ Cover ได้เลย!</p>
+      </div>
+    </aside>
+
+    <!-- ================= STAGE ================= -->
+    <main class="stage">
+
+      <div class="slide-viewport" id="viewport">
+
+        <!-- ============ SLIDE 1 · COVER ============ -->
+        <section class="slide-view" data-title="Cover — ภาพดิจิทัล (Digital Image)" aria-label="สไลด์ 1: เปิดบทเรียน">
+          <div class="slide-inner">
+            <div class="center">
+              <div class="cn-logo float-y" style="width:74px;height:74px;font-size:28px;border-radius:22px;margin:0 auto 18px">DIP</div>
+              <p class="slide-eyebrow" style="justify-content:center">DIGITAL IMAGE PROCESSING · CHAPTER 1</p>
+              <h2 class="slide-title" style="font-size:clamp(30px,5vw,54px);text-align:center">
+                ภาพดิจิทัล <span class="grad-text">คืออะไร?</span>
+              </h2>
+              <p class="slide-subtitle" style="text-align:center;margin:6px auto 0;max-width:640px">
+                จากจุดเล็ก ๆ ที่เรียกว่า พิกเซล ไปจนถึงขั้นตอนการประมวลผลภาพและความลึกของสี
+                เข้าใจง่ายด้วยภาพเคลื่อนไหวและตัวอย่างใกล้ตัว
+              </p>
+
+              <div class="stat-chips" style="justify-content:center;margin-top:24px">
+                <span class="stat-chip"><i data-lucide="layers"></i> 28 Slides</span>
+                <span class="stat-chip"><i data-lucide="help-circle"></i> 10 Quiz</span>
+                <span class="stat-chip"><i data-lucide="square-stack"></i> 18 Flashcards</span>
+                <span class="stat-chip"><i data-lucide="book-marked"></i> 20 Glossary</span>
+              </div>
+
+              <button class="btn btn-primary mt-6" id="startBtn" style="font-size:16px;padding:14px 30px">
+                Start Learning <i data-lucide="arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 2 · ROADMAP ============ -->
+        <section class="slide-view" data-title="เราจะเรียนอะไรบ้าง" aria-label="สไลด์ 2: สิ่งที่จะเรียน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">CHAPTER OVERVIEW</p>
+            <h2 class="slide-title">เราจะเรียนอะไรบ้างในบทนี้?</h2>
+            <p class="slide-subtitle">บทนี้ปูพื้นฐานของ Digital Image Processing — ตั้งแต่ภาพดิจิทัลคืออะไร ไปจนถึงความลึกของสี</p>
+            <div class="grid-2 mt-6" id="roadmapGrid"></div>
+            <div class="tip-box tip-note mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>วิธีเรียนที่แนะนำ</b>กด Next ไปทีละสไลด์ ลองกดปุ่มใน Diagram ดู และอย่าลืมทำ Quiz ตอนท้ายเพื่อตรวจความเข้าใจ</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 3 · ภาพดิจิทัลคืออะไร ============ -->
+        <section class="slide-view" data-title="ภาพดิจิทัลคืออะไร?" aria-label="สไลด์ 3: ภาพดิจิทัลคืออะไร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL CONCEPTS</p>
+            <h2 class="slide-title">ภาพดิจิทัล <span class="grad-text">คืออะไร?</span></h2>
+            <p class="slide-subtitle">นิยามจริงจากตำรา: ภาพ คือฟังก์ชัน 2 มิติ <b class="cyan">f(x, y)</b> — ฟังดูยากแต่จริง ๆ แค่ 2 อย่าง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">อ่านสูตร f(x, y) แบบจับมือ</span>
+                <div class="center mt-2" style="flex-direction:column;gap:8px">
+                  <div style="font-size:34px;font-weight:800;font-family:Inter,monospace;background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:12px 28px">f(<span class="cyan">x</span>, <span class="cyan">y</span>)</div>
+                  <p class="text-3" style="font-size:13px">อ่านว่า: "ภาพ = ค่าความเข้ม ณ ตำแหน่ง (x, y)"</p>
+                </div>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>📍 x, y = ตำแหน่ง</b> — พิกัด (แกน x แนวนอน, แกน y แนวตั้ง) บอกว่าจุดนี้อยู่ตรงไหนของภาพ</div>
+                  <div class="step-box"><b>🎨 ค่าของ f = ความเข้ม</b> — ตรงตำแหน่งนั้นมีความสว่าง/ระดับเทา (intensity / gray level) เท่าไร</div>
+                </div>
+                <div class="px-grid mt-3" id="pxGrid"></div>
+                <p class="text-3 mt-3" style="font-size:13px;text-align:center">แต่ละช่อง = 1 ตำแหน่ง (x, y) ที่มีค่าความเข้มของตัวเอง — นี่คือภาพดิจิทัล</p>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="scan" class="cyan"></i>เมื่อไหร่ถึงเรียกว่า "ดิจิทัล"</h3>
+                  <p class="card-text">เมื่อทั้ง <b class="cyan">x, y (ตำแหน่ง)</b> และ <b class="cyan">ค่าความเข้ม</b> ถูกแบ่งเป็นค่าจำกัด (discrete / finite) — ไม่ต่อเนื่องเป็นเส้นเรียบอีกต่อไป → เรียกว่า <b class="cyan">ภาพดิจิทัล</b></p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="grid-3x3" class="cyan"></i>ประกอบด้วยอะไร?</h3>
+                  <p class="card-text">องค์ประกอบจำนวนจำกัด (finite number of elements) — แต่ละตัวมี <b class="cyan">ตำแหน่ง (location)</b> และ <b class="cyan">ค่า (value)</b> ของตัวเอง เรียกว่า <b class="cyan">พิกเซล (pixel)</b></p>
+                </div>
+                <div class="tip-box tip-remember">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>จำแบบนี้</b>ภาพ = f(x, y) · x, y = ตำแหน่ง · f = ความเข้ม · ค่าไม่ต่อเนื่อง = ดิจิทัล</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 4 · PIXEL ============ -->
+        <section class="slide-view" data-title="พิกเซล (Pixel)" aria-label="สไลด์ 4: พิกเซลคืออะไร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL CONCEPTS</p>
+            <h2 class="slide-title">พิกเซล <span class="grad-text">(Pixel)</span></h2>
+            <p class="slide-subtitle">องค์ประกอบของภาพดิจิทัล — มีหลายชื่อเรียก แต่ที่ใช้กันแพร่หลายที่สุดคือ <b class="cyan">Pixel</b></p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">พิกเซลเดียว เก็บข้อมูล 2 อย่าง</span>
+                <div class="center mt-3" style="gap:14px">
+                  <div class="px" style="width:110px;height:110px;border-radius:16px;background:linear-gradient(135deg,#60a5fa,#22d3ee);box-shadow:0 0 24px rgba(56,189,248,.45);border:none"></div>
+                </div>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>📍 ตำแหน่ง (location)</b> — พิกเซลอยู่ตรงไหนของภาพ (พิกัด x, y)</div>
+                  <div class="step-box"><b>🎨 ค่า (value)</b> — ตรงจุดนี้มีความเข้ม/สีเท่าไร</div>
+                </div>
+                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">ภาพดิจิทัล = องค์ประกอบจำนวนจำกัด (finite elements) — แต่ละตัวมีตำแหน่ง + ค่า</p>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="tags" class="cyan"></i>ชื่อเรียกเดียวกัน 4 แบบ</h3>
+                  <p class="card-text small" style="line-height:2">
+                    • Picture elements<br />
+                    • Image elements<br />
+                    • Pels<br />
+                    • <b class="cyan">Pixels</b> ← คำที่ใช้กันแพร่หลายที่สุด
+                  </p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="zoom-in" class="cyan"></i>ซูมเข้าไปดู</h3>
+                  <p class="card-text">ถ้าซูมภาพดิจิทัลเข้าไปเรื่อย ๆ จะเห็นตารางสี่เหลี่ยมเล็ก ๆ เรียงกันเป็นแถวและหลัก — นั่นคือพิกเซล</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>Exam Tip</b>จำชื่อเรียกทั้ง 4: picture elements · image elements · pels · pixels — ข้อสอบอาจถามว่าคำไหนใช้บ่อยที่สุด → Pixel</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 5 · DIP คืออะไร ============ -->
+        <section class="slide-view" data-title="Digital Image Processing คืออะไร?" aria-label="สไลด์ 5: DIP คืออะไร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL CONCEPTS</p>
+            <h2 class="slide-title">Digital Image Processing <span class="grad-text">คืออะไร?</span></h2>
+            <p class="slide-subtitle">นิยามจากตำรา: DIP = การประมวลผลภาพดิจิทัล <b class="cyan">โดยใช้คอมพิวเตอร์ดิจิทัล</b></p>
+
+            <div class="visual-box mt-6">
+              <span class="vb-label">อ่านนิยามแบบจับมือ</span>
+              <div class="center mt-2" style="flex-direction:column;gap:10px">
+                <div style="font-size:20px;font-weight:800;background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:16px 24px;text-align:center;line-height:1.7">
+                  "Digital Image Processing = การประมวลผล<br /><span class="cyan">ภาพดิจิทัล</span> ด้วย <span class="cyan">คอมพิวเตอร์ดิจิทัล</span>"
+                </div>
+              </div>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>1.</b> ภาพต้องเป็น <b class="cyan">ดิจิทัล</b> ก่อน (ประกอบด้วยพิกเซลจำนวนจำกัด)</div>
+                <div class="step-box"><b>2.</b> เอามาให้ <b class="cyan">คอมพิวเตอร์</b> จัดการ/แก้ไข/วิเคราะห์</div>
+              </div>
+            </div>
+
+            <div class="grid-3 mt-6">
+              <div class="card hoverable center" style="padding:22px 18px">
+                <i data-lucide="wand-2" style="width:26px;height:26px;color:var(--cyan);margin-bottom:10px"></i>
+                <b style="font-size:15px">จัดการ</b>
+                <p class="card-text small mt-2">ปรับแต่งภาพ เช่น หมุน ขยาย ย่อ ครอบตัด</p>
+              </div>
+              <div class="card hoverable center" style="padding:22px 18px">
+                <i data-lucide="sliders-horizontal" style="width:26px;height:26px;color:var(--cyan);margin-bottom:10px"></i>
+                <b style="font-size:15px">แก้ไข</b>
+                <p class="card-text small mt-2">ปรับคุณภาพ เช่น ความสว่าง ความคมชัด ลด noise</p>
+              </div>
+              <div class="card hoverable center" style="padding:22px 18px">
+                <i data-lucide="search" style="width:26px;height:26px;color:var(--cyan);margin-bottom:10px"></i>
+                <b style="font-size:15px">วิเคราะห์</b>
+                <p class="card-text small mt-2">ดึงข้อมูลจากภาพ เช่น หาวัตถุ อ่านตัวอักษร นับจำนวน</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-note mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>พูดง่าย ๆ</b>DIP คือการเอา "ภาพ" มาให้คอมพิวเตอร์ช่วยทำให้ดีขึ้น หรือช่วย "เข้าใจ" ว่าภาพมีอะไรอยู่</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 6 · VISION & EM SPECTRUM ============ -->
+        <section class="slide-view" data-title="Vision กับคลื่นแม่เหล็กไฟฟ้า (EM Spectrum)" aria-label="สไลด์ 6: Vision กับ EM Spectrum">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WHY DIP?</p>
+            <h2 class="slide-title">Vision กับ <span class="grad-text">EM Spectrum</span></h2>
+            <p class="slide-subtitle">การมองเห็นเป็นประสาทสัมผัสที่ล้ำที่สุดของมนุษย์ — แต่ตาคนก็ยังเห็นได้จำกัด</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ตาคน vs เครื่องจักร</span>
+                <div class="center mt-3" style="flex-direction:column;gap:10px">
+                  <div class="spec-chip" style="background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:var(--success)">👁️ ตาคน — จำกัดอยู่ที่แถบแสงที่มองเห็น (visual band)</div>
+                  <div class="spec-band mt-2" style="justify-content:center">
+                    <span class="spec-chip" style="font-weight:800">รังสีแกมมา</span>
+                    <span class="spec-chip" style="font-weight:800">เอกซเรย์</span>
+                    <span class="spec-chip" style="font-weight:800">UV</span>
+                    <span class="spec-chip" style="font-weight:800">อินฟราเรด</span>
+                    <span class="spec-chip" style="font-weight:800">คลื่นวิทยุ</span>
+                  </div>
+                  <p class="text-3" style="font-size:12.5px">เครื่องจักร (imaging machines) ครอบคลุม EM spectrum เกือบทั้งหมด — ตั้งแต่รังสีแกมมา → คลื่นวิทยุ</p>
+                </div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="eye" class="cyan"></i>ภาพสำคัญที่สุดต่อการรับรู้</h3>
+                  <p class="card-text">Vision เป็นประสาทสัมผัสที่ล้ำที่สุดของมนุษย์ — ภาพจึงมีบทบาทสำคัญที่สุดในการรับรู้ของคนเรา</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="scan" class="cyan"></i>ภาพจากแหล่งที่ตาคนมองไม่เห็น</h3>
+                  <p class="card-text small" style="line-height:1.9">
+                    • ภาพอัลตราซาวด์ (Ultrasound)<br />
+                    • ภาพจากกล้องจุลทรรศน์อิเล็กตรอน<br />
+                    • ภาพที่คอมพิวเตอร์สร้างขึ้น (computer-generated)
+                  </p>
+                </div>
+                <div class="tip-box tip-remember">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>จำแบบนี้</b>ตาเห็นแค่ visual band แต่เครื่องจักรเห็นได้เกือบทั้ง EM spectrum → DIP จึงใช้งานได้กว้างมาก</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 7 · ตัวอย่าง field ที่ใช้ DIP (1) ============ -->
+        <section class="slide-view" data-title="สาขาที่ใช้ DIP 1 — คลื่นแม่เหล็กไฟฟ้า" aria-label="สไลด์ 7: สาขา DIP คลื่น EM">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">APPLICATIONS</p>
+            <h2 class="slide-title">สาขาที่ใช้ DIP <span class="grad-text">1 — คลื่น EM</span></h2>
+            <p class="slide-subtitle">จากตำรา Gonzalez — เครื่องจักร "มองเห็น" คลื่นได้ตั้งแต่แกมมาไปจนถึงวิทยุ</p>
+
+            <div class="grid-2 mt-6">
+              <div class="card hoverable flex gap-3" style="align-items:flex-start;padding:16px">
+                <i data-lucide="zap" style="width:20px;height:20px;color:var(--cyan);flex-shrink:0;margin-top:2px"></i>
+                <div><b style="font-size:14px">รังสีแกมมา (Gamma-ray)</b><p class="card-text small mt-1">ภาพจากนิวเคลียร์/การแพทย์นิวเคลียร์</p></div>
+              </div>
+              <div class="card hoverable flex gap-3" style="align-items:flex-start;padding:16px">
+                <i data-lucide="activity" style="width:20px;height:20px;color:var(--cyan);flex-shrink:0;margin-top:2px"></i>
+                <div><b style="font-size:14px">เอกซเรย์ (X-ray)</b><p class="card-text small mt-1">การแพทย์ · ตรวจสอบสินค้า (baggage)</p></div>
+              </div>
+              <div class="card hoverable flex gap-3" style="align-items:flex-start;padding:16px">
+                <i data-lucide="sun" style="width:20px;height:20px;color:var(--cyan);flex-shrink:0;margin-top:2px"></i>
+                <div><b style="font-size:14px">UV / Visible / IR</b><p class="card-text small mt-1">ภาพถ่าย กล้องวงจรปิด ภาพอินฟราเรดจากดาวเทียม</p></div>
+              </div>
+              <div class="card hoverable flex gap-3" style="align-items:flex-start;padding:16px">
+                <i data-lucide="satellite" style="width:20px;height:20px;color:var(--cyan);flex-shrink:0;margin-top:2px"></i>
+                <div><b style="font-size:14px">Multi-spectral / Microwave</b><p class="card-text small mt-1">ภาพพายุเฮอร์ริเคนจากดาวเทียม · สำรวจธรณี/น้ำมัน</p></div>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>ลำดับแถบคลื่น: Gamma → X-ray → UV → Visible → IR → Microwave → Radio — ยิ่งเลขความถี่สูง (แกมมา) ยิ่งเป็นคลื่นสั้น พลังงานสูง</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 8 · ตัวอย่าง field ที่ใช้ DIP (2) ============ -->
+        <section class="slide-view" data-title="สาขาที่ใช้ DIP 2 — เสียง/อิเล็กตรอน/วงการจริง" aria-label="สไลด์ 8: สาขา DIP อื่น ๆ">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">APPLICATIONS</p>
+            <h2 class="slide-title">สาขาที่ใช้ DIP <span class="grad-text">2 — นอก EM spectrum</span></h2>
+            <p class="slide-subtitle">นอกจากคลื่น EM ยังมีเสียง อัลตราซาวด์ อิเล็กตรอน และภาพจากคอมพิวเตอร์</p>
+
+            <div class="grid-2 mt-6">
+              <div class="card hoverable flex gap-3" style="align-items:flex-start;padding:16px">
+                <i data-lucide="radio" style="width:20px;height:20px;color:var(--cyan);flex-shrink:0;margin-top:2px"></i>
+                <div><b style="font-size:14px">Radio / Acoustic / Ultrasound</b><p class="card-text small mt-1">ดาราศาสตร์วิทยุ · ภาพเสียงสำรวจธรณี/น้ำมัน (hundreds Hz → millions Hz) · อัลตราซาวด์การแพทย์</p></div>
+              </div>
+              <div class="card hoverable flex gap-3" style="align-items:flex-start;padding:16px">
+                <i data-lucide="microscope" style="width:20px;height:20px;color:var(--cyan);flex-shrink:0;margin-top:2px"></i>
+                <div><b style="font-size:14px">Electron microscopy</b><p class="card-text small mt-1">กล้องจุลทรรศน์อิเล็กตรอน — เห็นโครงสร้างระดับนาโน</p></div>
+              </div>
+              <div class="card hoverable flex gap-3" style="align-items:flex-start;padding:16px">
+                <i data-lucide="monitor" style="width:20px;height:20px;color:var(--cyan);flex-shrink:0;margin-top:2px"></i>
+                <div><b style="font-size:14px">Computer-generated images</b><p class="card-text small mt-1">ภาพที่สร้างจากคอมพิวเตอร์กราฟิก (ไม่ใช่กล้องถ่าย)</p></div>
+              </div>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="clapperboard" class="cyan"></i>บันเทิง & ความปลอดภัย</h3>
+                <p class="card-text small">ภาพยนตร์/เกม (CGI) · กล้องวงจรปิด · ภาพนิติวิทยาศาสตร์ (law enforcement)</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="factory" class="cyan"></i>อุตสาหกรรม</h3>
+                <p class="card-text small">ตรวจสอบชิ้นงานโรงงาน (manufacturing inspection) — หาชิ้นส่วนบกพร่องอัตโนมัติ</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>ภาพ 1 ภาพใน DIP มาจากได้หลายแหล่ง: กล้อง EM · เสียง/อัลตราซาวด์ · อิเล็กตรอน · คอมพิวเตอร์กราฟิก</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 9 · ระดับ Low ============ -->
+        <section class="slide-view" data-title="ระดับต่ำ (Low-level)" aria-label="สไลด์ 9: ระดับต่ำ Low-level">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">PROCESSING LEVELS · 1/3</p>
+            <h2 class="slide-title">ระดับต่ำ <span class="grad-text">(Low-level)</span></h2>
+            <p class="slide-subtitle">งานพื้นฐาน (primitive operations) — เตรียมภาพก่อนนำไปใช้ต่อ</p>
+
+            <div class="card mt-6">
+              <h3 class="card-title"><i data-lucide="sliders-horizontal" class="cyan"></i>ทำอะไร?</h3>
+              <p class="card-text">image preprocessing 3 งานหลัก (จากตำรา):</p>
+              <div class="step-list mt-3">
+                <div class="step-box"><b>🔇 ลด noise</b> — ลบจุดรบกวน (salt &amp; pepper, grain)</div>
+                <div class="step-box"><b>🌗 ปรับ contrast</b> — ทำให้ภาพมืด/สว่าง อ่านง่ายขึ้น</div>
+                <div class="step-box"><b>🪄 image sharpening</b> — ทำให้ขอบภาพคมชัดขึ้น</div>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>Low-level = preprocessing → จำ 3 คำ: <b class="cyan">ลด noise · ปรับ contrast · sharpening</b></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 10 · ระดับ Mid ============ -->
+        <section class="slide-view" data-title="ระดับกลาง (Mid-level)" aria-label="สไลด์ 10: ระดับกลาง Mid-level">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">PROCESSING LEVELS · 2/3</p>
+            <h2 class="slide-title">ระดับกลาง <span class="grad-text">(Mid-level)</span></h2>
+            <p class="slide-subtitle">เริ่มเข้าใจ "วัตถุ" ในภาพ — แบ่งส่วน อธิบาย และจำแนก</p>
+
+            <div class="step-list mt-6">
+              <div class="step-box"><b>✂️ Segmentation</b> — แบ่งภาพออกเป็นส่วน/วัตถุ (partitioning into regions or objects)</div>
+              <div class="step-box"><b>📋 Description</b> — อธิบายวัตถุให้อยู่ในรูปแบบที่คอมพิวเตอร์ประมวลผลต่อได้</div>
+              <div class="step-box"><b>🏷️ Classification / Recognition</b> — จำแนกว่าแต่ละวัตถุคืออะไร</div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>Mid-level = segmentation + description + classification — ข้อสอบถาม "งานใดเป็นระดับกลาง?" ให้ตอบกลุ่มนี้</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 11 · ระดับ Higher ============ -->
+        <section class="slide-view" data-title="ระดับสูง (Higher-level)" aria-label="สไลด์ 11: ระดับสูง Higher-level">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">PROCESSING LEVELS · 3/3</p>
+            <h2 class="slide-title">ระดับสูง <span class="grad-text">(Higher-level)</span></h2>
+            <p class="slide-subtitle">วิเคราะห์ภาพทั้งภาพรวม — ใกล้เคียง "การคิด" แบบที่มนุษย์ใช้ตอนมองเห็น</p>
+
+            <div class="card mt-6">
+              <h3 class="card-title"><i data-lucide="brain" class="cyan"></i>ทำอะไร?</h3>
+              <p class="card-text">รวมกลุ่มวัตถุที่จดจำได้ทั้งหมด (ensemble of recognized objects) มาวิเคราะห์ร่วมกัน — เรียกว่า <b class="cyan">image analysis</b></p>
+            </div>
+            <div class="card mt-4">
+              <h3 class="card-title"><i data-lucide="eye" class="cyan"></i>ตัวอย่าง</h3>
+              <p class="card-text">ภาพห้องหนึ่งห้อง → จดจำ "โต๊ะ เก้าอี้ คน" แล้วเข้าใจว่ากำลังเกิดอะไรขึ้น (cognitive functions)</p>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>Higher-level = image analysis / cognitive — สูงสุดของสายการประมวลผล</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 12 · ตัวอย่างอ่านตัวอักษร ============ -->
+        <section class="slide-view" data-title="ตัวอย่าง: การอ่านตัวอักษร" aria-label="สไลด์ 12: ตัวอย่างการอ่านตัวอักษร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">REAL EXAMPLE · THE COMPUTERIZED PROCESS</p>
+            <h2 class="slide-title">ตัวอย่าง: <span class="grad-text">การอ่านตัวอักษรจากภาพ</span></h2>
+            <p class="slide-subtitle">จากตำรา: automated analysis of text — งานเดียวแต่ต้องผ่านหลายระดับการประมวลผล</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">PIPELINE · 5 ขั้นตอน</span>
+                <div class="pipe mt-3">
+                  <div class="pipe-step"><span class="p-no">1</span>📷 Acquiring — ถ่ายภาพพื้นที่ที่มีข้อความ</div>
+                  <div class="pipe-step"><span class="p-no">2</span>✨ Preprocessing — ปรับภาพให้พร้อม</div>
+                  <div class="pipe-step"><span class="p-no">3</span>✂️ Segmenting — ตัดแยกตัวอักษรแต่ละตัว</div>
+                  <div class="pipe-step"><span class="p-no">4</span>🔤 Describing — อธิบายรูปร่างให้คอมพิวเตอร์เข้าใจ</div>
+                  <div class="pipe-step"><span class="p-no">5</span>🧠 Recognition — จดจำว่าตัวอักษรคือตัวอะไร</div>
+                </div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>ขั้นไหนเป็นระดับไหน</h3>
+                  <p class="card-text small" style="line-height:2">
+                    • ถ่ายภาพ + ปรับชัด → <b class="cyan">Low-level</b><br />
+                    • ตัดแยก + อธิบายรูปร่าง → <b class="cyan">Mid-level</b><br />
+                    • จดจำตัวอักษร → <b class="cyan">Higher-level</b>
+                  </p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="link" class="cyan"></i>ต่อเนื่องกัน</h3>
+                  <p class="card-text">งานจริงต้องใช้หลายระดับต่อกัน — ผลลัพธ์ของขั้นหนึ่งเป็น input ของขั้นถัดไป</p>
+                </div>
+                <div class="tip-box tip-remember">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>จำแบบนี้</b>อ่านตัวอักษร = acquire → preprocess → segment → describe → recognize</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 10 · ประวัติศาสตร์ ============ -->
+        <section class="slide-view" data-title="ประวัติศาสตร์คร่าว ๆ" aria-label="สไลด์ 13: ประวัติศาสตร์">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">HISTORY · THE ORIGINS</p>
+            <h2 class="slide-title">ประวัติศาสตร์ <span class="grad-text">คร่าว ๆ</span></h2>
+            <p class="slide-subtitle">จากภาพข่าวสายเคเบิลใต้น้ำในยุค 1920 จนถึงการใช้งานที่ระเบิดตัวในยุค 1980</p>
+
+            <div class="tl2 mt-6">
+              <div class="tl2-item">
+                <span class="tl-year">1920</span>
+                <div>
+                  <b>Bartlane cable picture transmission system</b>
+                  <p>ระบบส่งภาพข่าวผ่านสายเคเบิลใต้น้ำระหว่าง <b class="cyan">ลอนดอน–นิวยอร์ก</b> — ลดเวลาส่งภาพข้ามแอตแลนติกจาก <b class="cyan">มากกว่า 1 สัปดาห์ เหลือน้อยกว่า 3 ชั่วโมง</b></p>
+                </div>
+              </div>
+              <div class="tl2-item">
+                <span class="tl-year">1980s</span>
+                <div>
+                  <b>การใช้งานเทคนิค DIP ระเบิดตัว</b>
+                  <p>ใช้กับงานทุกประเภทในทุกวงการ — บันเทิง, ความปลอดภัย, การแพทย์, อุตสาหกรรม, ดาวเทียม ฯลฯ</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid-2 mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="cable" class="cyan"></i>เทคนิคในยุคแรก</h3>
+                <p class="card-text small">ภาพถูกแบ่งเป็นช่อง ๆ (still not fully digital) แล้วส่งเป็นรหัส — เป็นแนวคิดต้นทางของ DIP ที่พัฒนามาเรื่อย ๆ</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="rocket" class="cyan"></i>ทำไมยุค 1980 สำคัญ</h3>
+                <p class="card-text small">คอมพิวเตอร์มีพลังพอจะประมวลผลภาพได้จริงจัง + ราคาเครื่องมือถูกลง → ภาพดิจิทัลเข้าถึงทุกวงการ</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-4">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>จำตัวเลข: ต้นทศวรรษ 1920 · สายเคเบิลใต้น้ำ ลอนดอน-นิวยอร์ก · ลดเวลาจาก >1 สัปดาห์ เหลือ <3 ชั่วโมง</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 10 · FUNDAMENTAL STEPS ============ -->
+        <section class="slide-view" data-title="ขั้นตอนพื้นฐาน (Fundamental Steps)" aria-label="สไลด์ 14: ขั้นตอนพื้นฐาน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL STEPS</p>
+            <h2 class="slide-title">ขั้นตอนพื้นฐาน <span class="grad-text">(Fundamental Steps)</span></h2>
+            <p class="slide-subtitle">แต่ละหัวข้อคือขั้นตอนหนึ่งในสายการประมวลผลภาพ — จำ 6 ตัวนี้ให้ได้</p>
+
+            <div class="fstep mt-6">
+              <div class="fstep-item"><div class="fs-i"><i data-lucide="camera"></i></div><b>Acquisition</b><small>ถ่าย/รับภาพเข้าระบบ</small></div>
+              <div class="fstep-item"><div class="fs-i"><i data-lucide="wand-2"></i></div><b>Enhancement</b><small>ทำให้ภาพดูดีขึ้น</small></div>
+              <div class="fstep-item"><div class="fs-i"><i data-lucide="wrench"></i></div><b>Restoration</b><small>ซ่อมภาพที่เสียหาย</small></div>
+              <div class="fstep-item"><div class="fs-i"><i data-lucide="shapes"></i></div><b>Morphological</b><small>จัดการรูปร่างวัตถุ</small></div>
+              <div class="fstep-item"><div class="fs-i"><i data-lucide="file-archive"></i></div><b>Compression</b><small>บีบอัดไฟล์ภาพ</small></div>
+              <div class="fstep-item"><div class="fs-i"><i data-lucide="palette"></i></div><b>Colour</b><small>จัดการภาพสี</small></div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>จำคำขึ้นต้น 6 ตัว: Acquisition · Enhancement · Restoration · Morphological · Compression · Colour — ข้อสอบอาจถามว่า "ข้อใดไม่ใช่ขั้นตอนพื้นฐาน"</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 11 · ACQUISITION ============ -->
+        <section class="slide-view" data-title="Image Acquisition — รับภาพเข้าระบบ" aria-label="สไลด์ 15: Image Acquisition">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL STEP 1</p>
+            <h2 class="slide-title">Image <span class="grad-text">Acquisition</span></h2>
+            <p class="slide-subtitle">การถ่าย/รับภาพเข้าระบบ — เป็นขั้นแรกของทุกสายการประมวลผล</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ตัวอย่างแหล่งภาพ (Acquisition)</span>
+                <div class="grid-2 mt-3">
+                  <div class="card center" style="padding:16px"><i data-lucide="camera" style="width:24px;height:24px;color:var(--cyan);margin-bottom:8px"></i><b style="font-size:13.5px">กล้องดิจิทัล</b></div>
+                  <div class="card center" style="padding:16px"><i data-lucide="scan" style="width:24px;height:24px;color:var(--cyan);margin-bottom:8px"></i><b style="font-size:13.5px">เครื่องสแกน</b></div>
+                  <div class="card center" style="padding:16px"><i data-lucide="satellite" style="width:24px;height:24px;color:var(--cyan);margin-bottom:8px"></i><b style="font-size:13.5px">ดาวเทียม</b></div>
+                  <div class="card center" style="padding:16px"><i data-lucide="activity" style="width:24px;height:24px;color:var(--cyan);margin-bottom:8px"></i><b style="font-size:13.5px">เครื่องเอกซเรย์</b></div>
+                </div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="download" class="cyan"></i>ทำอะไรในขั้นนี้</h3>
+                  <p class="card-text">นำภาพจากแหล่งต่าง ๆ (กล้อง/สแกนเนอร์/เซนเซอร์) เข้ามาเป็นข้อมูลดิจิทัลในคอมพิวเตอร์ พร้อมจัดรูปแบบให้พร้อมประมวลผลต่อ</p>
+                </div>
+                <div class="tip-box tip-remember">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>จำแบบนี้</b>Acquisition = "ได้ภาพมา" — ขั้นแรกสุด ไม่มีภาพก็ทำอะไรต่อไม่ได้</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 12 · ENHANCEMENT ============ -->
+        <section class="slide-view" data-title="Image Enhancement — ทำให้ภาพดีขึ้น" aria-label="สไลด์ 16: Image Enhancement">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL STEP 2</p>
+            <h2 class="slide-title">Image <span class="grad-text">Enhancement</span></h2>
+            <p class="slide-subtitle">การทำให้ภาพ <b class="cyan">ดูดีขึ้น</b> — ตามการรับรู้ของคนดู (ไม่ได้แก้ "ความผิดพลาด" ของกล้อง)</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ปรับปรุงอะไรได้บ้าง</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>☀️ ความสว่าง</b> — ภาพมืดไป → ปรับให้สว่างขึ้น</div>
+                  <div class="step-box"><b>🎚️ Contrast</b> — สีดูจาง ๆ → เพิ่มความต่างให้ชัด</div>
+                  <div class="step-box"><b>🔍 ความคมชัด</b> — ภาพเบลอ → ทำให้ขอบชัดขึ้น</div>
+                  <div class="step-box"><b>🌊 ลด noise</b> — จุดเกรนรบกวน → ทำให้เรียบเนียนขึ้น</div>
+                </div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="user" class="cyan"></i>ขึ้นกับคนดู</h3>
+                  <p class="card-text">Enhancement ค่อนข้าง "อัตวิสัย" — ภาพแบบไหน "ดี" ขึ้นอยู่กับความชอบของคนดูแต่ละคน</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>Exam Tip</b>Enhancement = ทำให้ดูดีขึ้น · Restoration = ซ่อมภาพที่เสีย (ใช้แบบจำลอง) — ข้อสอบชอบเทียบสองตัวนี้</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 13 · RESTORATION ============ -->
+        <section class="slide-view" data-title="Image Restoration — ซ่อมภาพที่เสีย" aria-label="สไลด์ 17: Image Restoration">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL STEP 3</p>
+            <h2 class="slide-title">Image <span class="grad-text">Restoration</span></h2>
+            <p class="slide-subtitle">การ <b class="cyan">ซ่อมแซมภาพที่เสียหาย</b> — ใช้แบบจำลองความเสียหาย (model) มาช่วยกู้คืน</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ภาพเสียหายแบบไหน → ซ่อมยังไง</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>🌫️ เบลอ (blur)</b> — จากกล้องสั่น → ปรับให้คมกลับมา</div>
+                  <div class="step-box"><b>🌧️ มี noise</b> — จากเซนเซอร์ → ลดสัญญาณรบกวน</div>
+                  <div class="step-box"><b>✂️ ขาดหาย</b> — ภาพเก่าชำรุด → ฟื้นฟูส่วนที่เสีย</div>
+                </div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="equal" class="cyan"></i>ต่างจาก Enhancement ยังไง</h3>
+                  <p class="card-text">Restoration ใช้ <b>แบบจำลองความเสียหาย</b> เพื่อคืนภาพให้ใกล้ต้นฉบับ — เป็นการแก้ปัญหาที่มีหลักการชัดเจน ต่างจาก Enhancement ที่เน้นความสวยตามคนดู</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="landmark" class="cyan"></i>ใช้กับภาพเก่า</h3>
+                  <p class="card-text">ซ่อมภาพถ่ายเก่า ภาพประวัติศาสตร์ที่ซีดจาง/มีรอยขีดข่วน ให้กลับมาดูชัดอีกครั้ง</p>
+                </div>
+                <div class="tip-box tip-remember">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>จำแบบนี้</b>Restoration = ซ่อมของเสียให้กลับสภาพเดิม (ใช้ model) · Enhancement = ทำให้ดูดีขึ้น</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 14 · MORPHOLOGICAL ============ -->
+        <section class="slide-view" data-title="Morphological Processing — จัดการรูปร่าง" aria-label="สไลด์ 18: Morphological Processing">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL STEP 4</p>
+            <h2 class="slide-title">Morphological <span class="grad-text">Processing</span></h2>
+            <p class="slide-subtitle">การจัดการ <b class="cyan">รูปร่างของวัตถุ</b> ในภาพ — เช่น ทำให้โครงสร้างหนา/บางลง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ตัวอย่างการจัดการรูปร่าง</span>
+                <div class="grid-2 mt-3">
+                  <div class="card center" style="padding:18px"><b style="font-size:26px;color:var(--success)">⬛→🟪</b><p class="text-3 mt-1" style="font-size:12px">ขยายรูปร่าง (dilate)</p></div>
+                  <div class="card center" style="padding:18px"><b style="font-size:26px;color:var(--danger)">🟪→⬛</b><p class="text-3 mt-1" style="font-size:12px">ย่อรูปร่าง (erode)</p></div>
+                </div>
+                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">ใช้บ่อยกับภาพขาวดำเพื่อลบจุดเล็ก ๆ หรือเชื่อมรอยขาดของเส้น</p>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="shapes" class="cyan"></i>นำไปใช้ทำอะไร</h3>
+                  <p class="card-text small" style="line-height:1.9">
+                    • ลบจุดรบกวนเล็ก ๆ ในภาพขาวดำ<br />
+                    • เชื่อมเส้นที่ขาดให้ต่อกัน<br />
+                    • แยกวัตถุที่ติดกันออกจากกัน<br />
+                    • หาโครงร่าง (skeleton) ของวัตถุ
+                  </p>
+                </div>
+                <div class="tip-box tip-remember">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>จำแบบนี้</b>Morphological = เปลี่ยน "รูปร่าง" ของวัตถุในภาพ (หนา/บาง/ต่อ/ขาด)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 15 · COMPRESSION ============ -->
+        <section class="slide-view" data-title="Image Compression — บีบอัดภาพ" aria-label="สไลด์ 19: Image Compression">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL STEP 5</p>
+            <h2 class="slide-title">Image <span class="grad-text">Compression</span></h2>
+            <p class="slide-subtitle">การ <b class="cyan">บีบอัดขนาดไฟล์ภาพ</b> ให้เล็กลง — เพื่อประหยัดพื้นที่และแบนด์วิดท์</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">ทำไมต้องบีบอัด</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>💾 ประหยัดพื้นที่</b> — เก็บภาพได้มากขึ้นในดิสก์/คลาวด์</div>
+                  <div class="step-box"><b>🚀 ส่งเร็วขึ้น</b> — ไฟล์เล็กลง → โหลด/แชร์เร็วขึ้น</div>
+                  <div class="step-box"><b>📡 ใช้แบนด์วิดท์น้อยลง</b> — ส่งภาพผ่านเน็ตได้เยอะขึ้น</div>
+                </div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="scale" class="cyan"></i>แลกมาด้วยอะไร</h3>
+                  <p class="card-text">การบีบอัดอาจลดคุณภาพภาพลงบ้าง (โดยเฉพาะแบบ lossy) — ต้องหาจุดสมดุลระหว่างขนาดไฟล์กับคุณภาพ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="file-image" class="cyan"></i>ไฟล์ที่เจอบ่อย</h3>
+                  <p class="card-text">JPEG (lossy บีบอัดสูง), PNG (lossless คมชัด), GIF (เหมาะภาพกราฟิก/แอนิเมชัน)</p>
+                </div>
+                <div class="tip-box tip-remember">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>จำแบบนี้</b>Compression = ทำให้ไฟล์ภาพเล็กลง → ประหยัดพื้นที่ + ส่งเร็วขึ้น</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 16 · COLOUR ============ -->
+        <section class="slide-view" data-title="Colour Image Processing — ภาพสี" aria-label="สไลด์ 20: Colour Image Processing">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">FUNDAMENTAL STEP 6</p>
+            <h2 class="slide-title">Colour Image <span class="grad-text">Processing</span></h2>
+            <p class="slide-subtitle">การจัดการ <b class="cyan">ภาพสี</b> — เพราะสีคือข้อมูลสำคัญของภาพ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">งานเกี่ยวกับสี</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>🎨 ปรับสมดุลสี</b> — แก้ภาพเหลือง/เขียวผิดเพี้ยน</div>
+                  <div class="step-box"><b>🌗 แปลงสีเป็นเทา</b> — RGB → grayscale เพื่อลดข้อมูล</div>
+                  <div class="step-box"><b>🔍 แยกรายละเอียดด้วยสี</b> — หาวัตถุจากสี (เช่น หาใบหน้าจากสีผิว)</div>
+                </div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="palette" class="cyan"></i>สีที่คอมพิวเตอร์ใช้</h3>
+                  <p class="card-text">ระบบสี RGB (แดง-เขียว-น้ำเงิน) เป็นพื้นฐานของภาพดิจิทัลสี — จะเรียนลึกในสไลด์ถัดไป</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>Exam Tip</b>Colour Processing = เกี่ยวกับ "สี" ของภาพ ไม่ใช่ความคมชัดหรือขนาดไฟล์</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 18 · COMPONENTS OF AN IMAGE PROCESSING SYSTEM ============ -->
+        <section class="slide-view" data-title="Components of an Image Processing System" aria-label="สไลด์ 21: องค์ประกอบของระบบประมวลผลภาพ">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">SYSTEM COMPONENTS</p>
+            <h2 class="slide-title">Components of an Image Processing <span class="grad-text">System</span></h2>
+            <p class="slide-subtitle">ระบบประมวลผลภาพจริง ๆ ประกอบด้วยอะไรบ้าง — จากตำราสไลด์ Components</p>
+
+            <div class="visual-box mt-6">
+              <span class="vb-label">องค์ประกอบหลักของระบบ DIP</span>
+              <div class="fstep mt-3">
+                <div class="fstep-item"><div class="fs-i"><i data-lucide="camera"></i></div><b>Image Sensors</b><small>กล้อง/เซนเซอร์รับภาพ</small></div>
+                <div class="fstep-item"><div class="fs-i"><i data-lucide="monitor"></i></div><b>Display</b><small>จอแสดงผลภาพ</small></div>
+                <div class="fstep-item"><div class="fs-i"><i data-lucide="hard-drive"></i></div><b>Storage</b><small>จัดเก็บข้อมูลภาพ</small></div>
+                <div class="fstep-item"><div class="fs-i"><i data-lucide="cpu"></i></div><b>Computer</b><small>หน่วยประมวลผลหลัก</small></div>
+                <div class="fstep-item"><div class="fs-i"><i data-lucide="printer"></i></div><b>Hardcopy</b><small>พิมพ์ภาพออกมา</small></div>
+                <div class="fstep-item"><div class="fs-i"><i data-lucide="network"></i></div><b>Networking</b><small>เชื่อมต่อ/ส่งข้อมูล</small></div>
+              </div>
+            </div>
+
+            <div class="tip-box tip-note mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>เข้าใจง่าย ๆ</b>ระบบ DIP = มี "ตา" (sensor) รับภาพ → มี "สมอง" (computer) คิด → มี "ปาก/มือ" (display/print) แสดงผล → มี "ตู้เสื้อผ้า" (storage) เก็บภาพ → มี "ถนน" (network) ส่งต่อ</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 19 · BITMAP ============ -->
+        <section class="slide-view" data-title="Bitmap คืออะไร?" aria-label="สไลด์ 22: Bitmap">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">BITMAP</p>
+            <h2 class="slide-title">Bitmap <span class="grad-text">คืออะไร?</span></h2>
+            <p class="slide-subtitle">นิยามจากตำรา: <b class="cyan">ตารางสี่เหลี่ยม (rectangular mesh) ของเซลล์ที่เรียกว่าพิกเซล</b> — แต่ละพิกเซลเก็บค่าสี</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">คุณสมบัติหลัก 2 อย่าง (characterised by only two parameters)</span>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>1️⃣ จำนวนพิกเซล</b> — กว้าง × สูง เช่น <b class="cyan">397 × 294</b> จากตัวอย่างตำรา</div>
+                  <div class="step-box"><b>2️⃣ ความลึกของสี (color depth)</b> — ข้อมูลต่อพิกเซล เช่น แต่ละพิกเซลมีระดับเทาจาก 256 ค่าที่เป็นไปได้</div>
+                </div>
+                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">Bitmap เรียงตัวแนวนอน-แนวตั้งเสมอ และพิกเซลถือว่าเป็นสี่เหลี่ยมจัตุรัส (โดยทั่วไป)</p>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="grid-3x3" class="cyan"></i>ภาพแบบ Bitmap</h3>
+                  <p class="card-text">รูปถ่าย ภาพสแกน รูปจากอินเทอร์เน็ตส่วนใหญ่เป็น bitmap — ถ้าซูมเข้าไปจะเห็นช่องพิกเซลชัดเจน</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="ruler" class="cyan"></i>ตัวอย่างจากตำรา</h3>
+                  <p class="card-text small">Bitmap กว้าง <b class="cyan">397 พิกเซล</b> × สูง <b class="cyan">294 พิกเซล</b> — แต่ละพิกเซลเก็บค่าระดับเทาจาก 256 ระดับที่เป็นไปได้</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>Exam Tip</b>Bitmap มีคุณสมบัติหลัก 2 อย่าง = จำนวนพิกเซล + ความลึกของสี (color depth)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 18 · COLOR DEPTH ============ -->
+        <section class="slide-view" data-title="ความลึกของสี (Color Depth)" aria-label="สไลด์ 23: ความลึกของสี">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">COLOR DEPTH</p>
+            <h2 class="slide-title">ความลึกของสี <span class="grad-text">(Color Depth)</span></h2>
+            <p class="slide-subtitle">จำนวนบิตที่ใช้เก็บสีต่อ 1 พิกเซล — ยิ่งบิตเยอะ ยิ่งมีสีให้เลือกมาก</p>
+
+            <div class="visual-box mt-6">
+              <span class="vb-label">1 bit vs 8 bit — ตัวอย่างจากตำรา</span>
+              <div class="cd-row">
+                <span class="cd-label">1 bit</span>
+                <div class="cd-track"><div class="cd-seg cd-1" style="flex:1"></div></div>
+              </div>
+              <p class="cd-note">ข้อมูลน้อยที่สุดต่อพิกเซล — 2 ค่า: <b>0 = ดำ, 1 = ขาว</b> · ภาพขาวดำ (monochrome)</p>
+              <div class="cd-row">
+                <span class="cd-label">8 bit grayscale</span>
+                <div class="cd-track"><div class="cd-seg cd-8" style="flex:1"></div></div>
+              </div>
+              <p class="cd-note">1 ไบต์ต่อพิกเซล = <b class="cyan">256 ระดับ</b> (2<sup>8</sup>) — โดยธรรมเนียม <b>0 = ดำ, 255 = ขาว, 127 = เทา 50%</b></p>
+            </div>
+
+            <div class="grid-2 mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="contrast" class="cyan"></i>ระดับเทา (Grayscale)</h3>
+                <p class="card-text small">ภาพ 8 bit โทนเทา เก็บระดับความเข้ม 0–255 — เหมาะกับเอกซเรย์ ภาพสแกนเอกสาร</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="grid-3x3" class="cyan"></i>คำนวณจำนวนสี</h3>
+                <p class="card-text small"><b>จำนวนสี = 2<sup>บิตต่อพิกเซล</sup></b> — 1 bit → 2 สี · 8 bit → 256 สี · 24 bit → 16.7 ล้านสี</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>1 bit = ขาวดำล้วน (0=ดำ, 1=ขาว) · 8 bit = เทา 256 ระดับ (0=ดำ, 255=ขาว) — จำตัวเลข 2 ตัวนี้ให้แม่น</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 19 · RGB / INDEXED ============ -->
+        <section class="slide-view" data-title="24/32 bit RGB และ Indexed Color" aria-label="สไลด์ 24: 24/32 bit RGB และ Indexed">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">COLOR DEPTH · RGB</p>
+            <h2 class="slide-title">24/32 bit RGB และ <span class="grad-text">Indexed Color</span></h2>
+            <p class="slide-subtitle">จากสีจริง 16.7 ล้านสี ไปจนถึงการประหยัดพื้นที่ด้วยตารางสี</p>
+
+            <div class="visual-box mt-6">
+              <span class="vb-label">RGB 24 bit · 32 bit — ช่องสี</span>
+              <div class="cd-row">
+                <span class="cd-label">24 bit RGB</span>
+                <div class="cd-track">
+                  <div class="cd-seg cd-24" style="flex:1"></div>
+                </div>
+              </div>
+              <p class="cd-note">แดง (R) + เขียว (G) + น้ำเงิน (B) อย่างละ 8 bit = 24 bit → 2<sup>24</sup> ≈ 16.7 ล้านสี (สีจริง)</p>
+              <div class="cd-row">
+                <span class="cd-label">32 bit RGBA</span>
+                <div class="cd-track">
+                  <div class="cd-seg cd-32" style="flex:1"></div>
+                </div>
+              </div>
+              <p class="cd-note">24 bit RGB + ช่อง Alpha (A) 8 bit สำหรับความโปร่งใส = 32 bit</p>
+            </div>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">RGB COLOR CUBE · สีทุกสีคือจุดในลูกบาศก์</span>
+                <div class="center mt-3">
+                  <div style="width:130px;height:130px;border-radius:22px;background:linear-gradient(135deg,#f43f5e 0 33%,#22c55e 33% 66%,#3b82f6 66% 100%);box-shadow:0 0 30px rgba(59,130,246,.4);opacity:.9"></div>
+                </div>
+                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">RGB space: สีใด ๆ = จุดใน color cube ที่มีแกน r, g, b — พื้นฐานของ computer graphics</p>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>Indexed Color (8 bit / 4 bit)</h3>
+                  <p class="card-text small">วิธีเก็บภาพสีที่ประหยัดกว่า (ไม่ต้องใช้ 3 ไบต์ต่อพิกเซล) — ใช้ <b>ตารางสี (color palette / color table)</b> พิกเซลเก็บแค่ดัชนีชี้ในตาราง</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="palette" class="cyan"></i>สรุปความลึกสีที่พบบ่อย</h3>
+                  <p class="card-text small" style="line-height:2">
+                    • <b class="cyan">1 bit</b> — ขาวดำล้วน<br />
+                    • <b class="cyan">8 bit</b> — เทา 256 ระดับ<br />
+                    • <b class="cyan">16 bit RGB</b> — 5-5-5 + Alpha 1 บิต<br />
+                    • <b class="cyan">24 bit</b> — RGB สีจริง 16.7 ล้านสี<br />
+                    • <b class="cyan">32 bit</b> — RGB + Alpha โปร่งใส<br />
+                    • <b class="cyan">8/4 bit indexed</b> — ใช้ palette
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid-2 mt-4">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="box" class="cyan"></i>16 bit RGB</h3>
+                <p class="card-text small">ระบบตรง: แดง/เขียว/น้ำเงิน <b class="cyan">อย่างละ 5 บิต</b> + Alpha <b class="cyan">1 บิต</b> = 16 บิต</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>32 bit RGB</h3>
+                <p class="card-text small">เหมือน 24 bit + ช่อง Alpha 8 บิต — ใช้ทำ masked areas / ความโปร่งใส</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>24 bit = 3 ช่อง × 8 bit · 32 bit = 24 bit + Alpha · 16 bit = 5-5-5 + Alpha 1 · Indexed = ใช้ palette ประหยัดพื้นที่</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 20 · SUMMARY ============ -->
+        <section class="slide-view" data-title="Chapter Summary — สรุปบทเรียน" aria-label="สไลด์ 25: สรุปบทเรียน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">CHAPTER SUMMARY</p>
+            <h2 class="slide-title">สรุปบทเรียน</h2>
+            <p class="slide-subtitle">เก็บทุกประเด็นสำคัญของบทนี้ไว้ในหน้าเดียว</p>
+            <div class="grid-4 mt-6" id="summaryGrid"></div>
+            <div class="tip-box tip-remember mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>จำแบบนี้</b>ภาพดิจิทัล = ตำแหน่ง + สี · ประกอบด้วยพิกเซล · DIP = คอมพิวเตอร์จัดการภาพ · 3 ระดับ (Low/Mid/Higher) · 6 ขั้นตอนพื้นฐาน · ความลึกของสี 1/8/24/32 bit</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 21 · CHEAT SHEET ============ -->
+        <section class="slide-view" data-title="Exam Cheat Sheet — สูตรจำก่อนสอบ" aria-label="สไลด์ 26: สูตรจำก่อนสอบ">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXAM CHEAT SHEET</p>
+            <h2 class="slide-title">สูตรจำก่อนสอบ</h2>
+            <p class="slide-subtitle">รวมคำศัพท์และสูตรสำคัญแบบกระชับ — ทบทวนก่อนสอบในเวลาไม่กี่นาที</p>
+            <div class="cheat-grid mt-6" id="cheatGrid"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 22 · QUIZ 1 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 1 (ข้อ 1–5)" aria-label="สไลด์ 27: แบบทดสอบชุดที่ 1">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 1</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 1</h2>
+            <div id="quiz1" class="mt-4"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 23 · QUIZ 2 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 2 (ข้อ 6–10)" aria-label="สไลด์ 28: แบบทดสอบชุดที่ 2">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 2</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 2</h2>
+            <div id="quiz2" class="mt-4"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 24 · FLASHCARDS ============ -->
+        <section class="slide-view" data-title="Flashcards — ทบทวนการ์ด" aria-label="สไลด์ 29: การ์ดทบทวน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">REVIEW</p>
+            <h2 class="slide-title">Flashcards — <span class="grad-text">ทบทวนการ์ด</span></h2>
+            <p class="slide-subtitle">คลิกการ์ดเพื่อพลิกดูคำตอบ — ใช้ปุ่มซ้าย/ขวาเพื่อสลับใบ</p>
+
+            <div class="split mt-6" style="grid-template-columns:1fr">
+              <div class="flashcard-wrap">
+                <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-label="การ์ดคำถาม — คลิกเพื่อพลิก">
+                  <div class="flashcard-face flashcard-front">
+                    <span class="fc-eyebrow">QUESTION</span>
+                    <p class="fc-q" id="fcQ">—</p>
+                    <span class="flashcard-hint">คลิกเพื่อพลิกการ์ด 🔄</span>
+                  </div>
+                  <div class="flashcard-face flashcard-back">
+                    <span class="fc-eyebrow">ANSWER</span>
+                    <p class="fc-a" id="fcA">—</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-5 wrap" style="justify-content:center">
+              <button class="btn btn-ghost" id="fcPrev"><i data-lucide="chevron-left"></i> Previous</button>
+              <span class="chip" id="fcCounter">1 / 22</span>
+              <button class="btn btn-ghost" id="fcNext">Next <i data-lucide="chevron-right"></i></button>
+              <button class="btn btn-cyan" id="fcShuffle"><i data-lucide="shuffle"></i> Shuffle</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 25 · GLOSSARY ============ -->
+        <section class="slide-view" data-title="Glossary — คำศัพท์" aria-label="สไลด์ 30: คำศัพท์">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">GLOSSARY</p>
+            <h2 class="slide-title">Glossary — <span class="grad-text">คำศัพท์</span></h2>
+            <p class="slide-subtitle">คำศัพท์สำคัญของบทนี้ — ค้นหาได้ด้วยช่องด้านล่าง</p>
+
+            <div class="glossary-wrap mt-6">
+              <div class="glossary-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="glossarySearch" placeholder="ค้นหาคำศัพท์ เช่น pixel, RGB, bitmap..." aria-label="ค้นหาคำศัพท์" />
+              </div>
+              <div class="glossary-count" id="glossaryCount">0 คำศัพท์</div>
+              <div class="glossary-list" id="glossaryList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 26 · POST-LESSON EXAM ============ -->
+        <section class="slide-view quiz-slide" data-title="ข้อสอบหลังเรียน — แบบทดสอบท้ายบท 20 ข้อ" aria-label="สไลด์ 31: ข้อสอบหลังเรียน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">POST-LESSON EXAM</p>
+            <div id="examHeadTitle"><h2 class="slide-title">ข้อสอบหลังเรียน <span class="grad-text">20 ข้อ</span></h2></div>
+            <p class="slide-subtitle" id="examHeadSub">ภาพดิจิทัล · ระดับการประมวลผล · ขั้นตอนพื้นฐาน · ความลึกของสี — เรียนครบทุกสไลด์เพื่อปลดล็อก ดูเฉลยได้ทันทีหลังตอบ</p>
+            <div id="quizExam" class="mt-4"></div>
+          </div>
+        </section>
+
+      </div><!-- /viewport -->
+
+      <!-- ================= BOTTOM BAR ================= -->
+      <footer class="bottombar">
+        <button class="bb-nav-btn" id="prevBtn" aria-label="สไลด์ก่อนหน้า">
+          <i data-lucide="chevron-left"></i><span class="bb-label">ก่อนหน้า</span>
+        </button>
+
+        <div class="bb-center">
+          สไลด์ <b id="bbCounter">1</b> / <b id="bbTotal">28</b>
+        </div>
+
+        <div class="bb-tools">
+          <button class="icon-btn" id="fullscreenBtn" aria-label="ขยายสไลด์เต็มจอ" title="ขยายสไลด์">
+            <i data-lucide="maximize-2"></i>
+          </button>
+          <button class="icon-btn" id="printSlidesBtn" aria-label="พิมพ์สไลด์ทั้งหมด" title="พิมพ์สไลด์ทั้งหมด">
+            <i data-lucide="printer"></i>
+          </button>
+          <button class="icon-btn" id="printCardsBtn" aria-label="พิมพ์การ์ดสรุป" title="พิมพ์การ์ดสรุป">
+            <i data-lucide="file-output"></i>
+          </button>
+        </div>
+
+        <button class="bb-nav-btn next" id="nextBtn" aria-label="สไลด์ถัดไป">
+          <span class="bb-label">ถัดไป</span><i data-lucide="chevron-right"></i>
+        </button>
+      </footer>
+
+    </main>
+  </div><!-- /shell -->
+</div><!-- /app -->
+
+<!-- ================= DRAWER BACKDROP ================= -->
+<div id="drawerBackdrop" aria-hidden="true"></div>
+
+<!-- ================= NOTES PANEL ================= -->
+<aside class="notes-panel" id="notesPanel" aria-label="บันทึกย่อ">
+  <div class="flex items-center justify-between" style="padding:16px 20px;border-bottom:1px solid var(--border)">
+    <div>
+      <b style="font-size:15px">📝 บันทึกย่อ (Notes)</b>
+      <p class="text-3" style="font-size:12px" id="notesLabel">สไลด์ที่กำลังเรียน</p>
+    </div>
+    <button class="icon-btn" id="notesCloseBtn" aria-label="ปิดบันทึกย่อ"><i data-lucide="x"></i></button>
+  </div>
+  <textarea id="notesTextarea" placeholder="เขียนสิ่งที่ต้องจำจากสไลด์นี้...&#10;เช่น:&#10;- ภาพดิจิทัล = ตำแหน่ง (x,y) + ความสว่าง/สี&#10;- พิกเซล = หน่วยเล็กสุดของภาพ&#10;- 1 bit ขาวดำ · 8 bit เทา 256 · 24 bit RGB 16.7 ล้านสี" aria-label="บันทึกย่อ"></textarea>
+  <div class="text-3" style="padding:10px 20px 14px;font-size:12px;border-top:1px solid var(--border)">
+    💾 บันทึกอัตโนมัติลงในเครื่องของคุณ (localStorage)
+  </div>
+</aside>
+
+<!-- ================= TOAST ================= -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================= COMPLETION OVERLAY ================= -->
+<div id="completionOverlay" role="dialog" aria-modal="true" aria-label="จบบทเรียน">
+  <div class="card center" style="max-width:440px;position:relative;padding:40px 32px;z-index:1">
+    <div style="font-size:56px" class="float-y">🎉</div>
+    <h2 class="slide-title mt-4" style="font-size:28px">Chapter Complete!</h2>
+    <p class="text-2 mt-2" id="completionMsg">คุณเรียนครบทุกสไลด์แล้ว — ยอดเยี่ยมมาก! <b class="grad-text">Keep Learning!</b></p>
+    <div class="grid-3 mt-5" style="grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneSlides">28</b><p class="text-3" style="font-size:12px">สไลด์</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneScore">–</b><p class="text-3" style="font-size:12px">คะแนน Quiz</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px">100%</b><p class="text-3" style="font-size:12px">ความคืบหน้า</p></div>
+    </div>
+    <div class="flex items-center gap-3 mt-6 wrap" style="justify-content:center">
+      <button class="btn btn-ghost" id="completionCloseBtn">ปิด 🎊</button>
+      <button class="btn btn-primary" id="completionRestartBtn"><i data-lucide="rotate-ccw"></i> เรียนใหม่อีกครั้ง</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PRINT AREA ================= -->
+<div id="printArea" aria-hidden="true"></div>
+
+<!-- App scripts -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+<!-- Pixel grid demo + DIP animations -->
+<script>
+  (function () {
+    /* Pixel grid — เปิดทีละช่องเหมือนภาพค่อย ๆ ประกอบ */
+    var grid = document.getElementById('pxGrid');
+    if (grid) {
+      for (var i = 0; i < 64; i++) {
+        var p = document.createElement('div');
+        p.className = 'px';
+        p.style.animationDelay = (i * 0.02) + 's';
+        grid.appendChild(p);
+      }
+      var idx = 0;
+      var cells = grid.children;
+      var timer = setInterval(function () {
+        for (var k = 0; k < 4 && idx < cells.length; k++) {
+          cells[idx].classList.add('on');
+          idx++;
+        }
+        if (idx >= cells.length) clearInterval(timer);
+      }, 90);
+    }
+  })();
+</script>
+</body>
+</html>

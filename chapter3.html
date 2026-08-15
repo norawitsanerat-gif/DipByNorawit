@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Interactive Digital Textbook — Digital Image Processing / การทดลองประมวลผลภาพด้วย MATLAB" />
+  <title>DIP · บทที่ 3 — การทดลองประมวลผลภาพด้วย MATLAB</title>
+
+  <!-- App styles — โหลดก่อนเสมอ (สำคัญต่อการแสดงผล) -->
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS (Play CDN) — defer: ไม่บล็อกการโหลดหน้าและ app.js -->
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide icons — defer: ไม่บล็อกการโหลดหน้าและ app.js -->
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- ส่วนประกอบเคลื่อนไหวเฉพาะบท 3 (MATLAB Lab) -->
+  <style>
+    /* MATLAB code block */
+    .mcode { font-family: "Consolas", "SFMono-Regular", monospace; font-size: 13px; line-height: 1.7; background: #0b1220; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; overflow-x: auto; color: #d1e3f8; white-space: pre; }
+    .mcode .c { color: #7d8ca3; } .mcode .k { color: #f472b6; font-weight: 700; } .mcode .f { color: #7dd3fc; }
+
+    /* low-res sampling grid demo */
+    .samp-wrap { display: flex; align-items: center; gap: 18px; justify-content: center; flex-wrap: wrap; }
+    .samp-grid { display: grid; gap: 2px; background: var(--card-2); border: 1px solid var(--border); border-radius: 10px; padding: 6px; }
+    .samp-cell { width: 16px; height: 16px; border-radius: 3px; opacity: 0; animation: sampIn .3s ease forwards; }
+    @keyframes sampIn { to { opacity: 1; } }
+    .samp-cap { text-align: center; font-size: 12.5px; color: var(--text-3); margin-top: 6px; }
+
+    /* gamma curve mini chart */
+    .curve-box { position: relative; width: 170px; height: 140px; border-left: 2px solid var(--border); border-bottom: 2px solid var(--border); margin: 0 auto; }
+    .curve { position: absolute; left: 6px; right: 6px; bottom: 6px; top: 6px; }
+    .curve .line { stroke: var(--cyan); stroke-width: 2.5; fill: none; stroke-linecap: round; }
+
+    /* histogram bars */
+    .h-bar { display: flex; align-items: flex-end; gap: 3px; height: 120px; }
+    .h-col { flex: 1; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, #38bdf8, #2563eb); opacity: 0; animation: hGrow .4s ease forwards; }
+    @keyframes hGrow { from { opacity: 0; transform: scaleY(0); transform-origin: bottom; } to { opacity: 1; transform: scaleY(1); } }
+
+    /* filter mask mini-grid */
+    .mask-grid { display: grid; gap: 3px; width: fit-content; margin: 0 auto; }
+    .mask-cell { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 7px; font-family: Consolas, monospace; font-size: 12.5px; font-weight: 700; background: var(--card-2); border: 1px solid var(--border); }
+
+    /* experiment card */
+    .ex-card { display: flex; gap: 14px; align-items: flex-start; background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 14px; padding: 14px 16px; animation: dipStepIn .5s ease both; }
+    .ex-card .ex-no { flex-shrink: 0; width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; font-weight: 800; font-size: 13px; background: linear-gradient(135deg, #7c3aed, #38bdf8); color: #fff; }
+    @keyframes dipStepIn { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+    .ex-card:nth-child(2) { animation-delay: .1s; } .ex-card:nth-child(3) { animation-delay: .2s; }
+    .ex-card:nth-child(4) { animation-delay: .3s; } .ex-card:nth-child(5) { animation-delay: .4s; }
+
+    /* step list (จับมือ) */
+    .step-list { display: flex; flex-direction: column; gap: 10px; }
+    .step-box { display: flex; gap: 12px; align-items: flex-start; background: var(--card-2); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 12px; padding: 12px 16px; font-size: 14px; line-height: 1.7; animation: dipStepIn .5s ease both; }
+    .step-box:nth-child(2) { animation-delay: .15s; } .step-box:nth-child(3) { animation-delay: .3s; }
+    .step-box:nth-child(4) { animation-delay: .45s; }
+
+    /* frequency filter chips */
+    .fchip { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border); background: var(--card-2); }
+    .fchip .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+    @media (max-width: 640px) {
+      .samp-wrap { gap: 10px; }
+      .mask-cell { width: 28px; height: 28px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body data-page="chapter" data-chapter="3">
+
+  <!-- ================= TOP HEADER ================= -->
+  <header id="topbar">
+    <button class="icon-btn" id="menuBtn" aria-label="เปิดเมนูบทเรียน" title="เมนู">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <div class="brand">
+      <div class="cn-logo" aria-hidden="true">DIP</div>
+      <div class="brand-titles">
+        <h1>การประมวลผลภาพดิจิทัล</h1>
+        <p id="headerChapterLabel">การทดลองประมวลผลภาพด้วย MATLAB · บทที่ 3</p>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" id="homeBtn" aria-label="กลับไปเมนูหลัก" title="เมนูหลัก">
+        <i data-lucide="home"></i>
+      </button>
+      <button class="icon-btn" id="notesBtn" aria-label="เปิดบันทึกย่อ" title="บันทึกย่อ (Notes)">
+        <i data-lucide="notebook-pen"></i>
+      </button>
+
+      <div class="header-progress" aria-label="ความคืบหน้า">
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="headerProgressBar">
+          <div class="progress-fill" id="headerProgressFill"></div>
+        </div>
+        <span class="progress-count" id="headerProgressCount">1 / 28</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SHELL ================= -->
+  <div class="shell">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside id="sidebar" aria-label="เมนูบทเรียน">
+      <div class="sidebar-head">
+        <div class="sidebar-head-title">
+          <h2 id="sidebarChapterTitle">เมนูบทที่ 3</h2>
+          <p id="sidebarChapterSub">หัวข้อในสัปดาห์นี้ · 28 หัวข้อ</p>
+        </div>
+        <button class="icon-btn sidebar-close" id="sidebarCloseBtn" aria-label="ปิดเมนูบทเรียน" title="ปิดเมนู">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="sidebar-info">
+        <i data-lucide="info"></i>
+        <span>คลิกหัวข้อหรือสไลด์เพื่อข้ามไปได้เลย<br />เรียนทีละสไลด์เพื่อเก็บเนื้อหาให้ครบ</span>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav" aria-label="สารบัญสไลด์"></nav>
+      <div class="sidebar-foot">
+        <div class="sf-top"><span>ความคืบหน้า</span><b id="sidebarPct">0%</b></div>
+        <div class="progress-track"><div class="progress-fill" id="sidebarProgressFill"></div></div>
+        <p class="mt-2 text-3" style="font-size:12px" id="sidebarDone">ยังไม่ได้เรียนสไลด์ใดเลย — เริ่มที่ Cover ได้เลย!</p>
+      </div>
+    </aside>
+
+    <!-- ================= STAGE ================= -->
+    <main class="stage">
+
+      <div class="slide-viewport" id="viewport">
+
+        <!-- ============ SLIDE 1 · COVER ============ -->
+        <section class="slide-view" data-title="Cover — Image Processing Lab (MATLAB)" aria-label="สไลด์ 1: เปิดบทเรียน">
+          <div class="slide-inner">
+            <div class="center">
+              <div class="cn-logo float-y" style="width:74px;height:74px;font-size:28px;border-radius:22px;margin:0 auto 18px;background:linear-gradient(135deg,#7c3aed,#38bdf8)">DIP</div>
+              <p class="slide-eyebrow" style="justify-content:center">DIGITAL IMAGE PROCESSING · CHAPTER 3</p>
+              <h2 class="slide-title" style="font-size:clamp(30px,5vw,54px);text-align:center">
+                Image Processing Lab <span class="grad-text">ด้วย MATLAB</span>
+              </h2>
+              <p class="slide-subtitle" style="text-align:center;margin:6px auto 0;max-width:680px">
+                ทดลองจริง 12 Experiments จาก Lab Manual — ตั้งแต่ Sampling &amp; Quantization, Intensity Transformation, DFT,
+                Histogram, Spatial/Frequency Filtering, Edge Detection, Morphology ไปจนถึง Color Models
+                พร้อมโค้ด MATLAB จริง ๆ ให้ทำตาม
+              </p>
+
+              <div class="stat-chips" style="justify-content:center;margin-top:24px">
+                <span class="stat-chip"><i data-lucide="layers"></i> 28 Slides</span>
+                <span class="stat-chip"><i data-lucide="help-circle"></i> 10 Quiz</span>
+                <span class="stat-chip"><i data-lucide="square-stack"></i> 22 Flashcards</span>
+                <span class="stat-chip"><i data-lucide="book-marked"></i> 25 Glossary</span>
+              </div>
+
+              <button class="btn btn-primary mt-6" id="startBtn" style="font-size:16px;padding:14px 30px">
+                Start Learning <i data-lucide="arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 2 · OVERVIEW ============ -->
+        <section class="slide-view" data-title="ภาพรวม 12 Experiments + MATLAB คืออะไร" aria-label="สไลด์ 2: ภาพรวม + MATLAB">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">CHAPTER OVERVIEW</p>
+            <h2 class="slide-title">12 Experiments + <span class="grad-text">MATLAB คืออะไร?</span></h2>
+            <p class="slide-subtitle">MATLAB = MATrix LABoratory — สร้างขึ้นรอบแนวคิดของ <b class="cyan">vector และ matrix</b> สำหรับการคำนวณเชิงตัวเลขและ visualization</p>
+
+            <div class="split mt-6">
+              <div class="flex" style="flex-direction:column;gap:10px">
+                <div class="ex-card"><div class="ex-no">1</div><div><b>Sampling &amp; Quantization</b><p class="text-3 small" style="font-size:12.5px">ทำภาพต่อเนื่องให้เป็นดิจิทัล</p></div></div>
+                <div class="ex-card"><div class="ex-no">2</div><div><b>Spatial &amp; Intensity Resolution</b><p class="text-3 small" style="font-size:12.5px">DPI/LPI/PPI + ระดับเทา</p></div></div>
+                <div class="ex-card"><div class="ex-no">3</div><div><b>Intensity Transformation</b><p class="text-3 small" style="font-size:12.5px">Negative · Gamma · Log · Contrast</p></div></div>
+                <div class="ex-card"><div class="ex-no">4</div><div><b>DFT Analysis</b><p class="text-3 small" style="font-size:12.5px">FFT · Magnitude · Phase</p></div></div>
+                <div class="ex-card"><div class="ex-no">5</div><div><b>Transforms</b><p class="text-3 small" style="font-size:12.5px">Walsh · Hadamard · DCT · Haar</p></div></div>
+                <div class="ex-card"><div class="ex-no">6</div><div><b>Histogram Processing</b><p class="text-3 small" style="font-size:12.5px">Histogram + Equalization</p></div></div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:10px">
+                <div class="ex-card"><div class="ex-no">7</div><div><b>Spatial Filtering</b><p class="text-3 small" style="font-size:12.5px">Average · Gaussian · Laplacian · Median</p></div></div>
+                <div class="ex-card"><div class="ex-no">8</div><div><b>Frequency Filtering</b><p class="text-3 small" style="font-size:12.5px">LPF/HPF · Ideal/Butterworth/Gaussian</p></div></div>
+                <div class="ex-card"><div class="ex-no">9</div><div><b>Edge / Line / Point</b><p class="text-3 small" style="font-size:12.5px">Sobel · Prewitt · Roberts · Canny</p></div></div>
+                <div class="ex-card"><div class="ex-no">10</div><div><b>Morphological Ops</b><p class="text-3 small" style="font-size:12.5px">Dilation · Erosion · Opening · Closing</p></div></div>
+                <div class="ex-card"><div class="ex-no">11</div><div><b>Region-based Segmentation</b><p class="text-3 small" style="font-size:12.5px">Thresholding · Otsu</p></div></div>
+                <div class="ex-card"><div class="ex-no">12</div><div><b>Color Models</b><p class="text-3 small" style="font-size:12.5px">RGB · NTSC/YCbCr · HSV</p></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 3 · MATLAB BASICS ============ -->
+        <section class="slide-view" data-title="คำสั่ง MATLAB พื้นฐาน" aria-label="สไลด์ 3: คำสั่งพื้นฐาน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">GETTING STARTED</p>
+            <h2 class="slide-title">คำสั่ง MATLAB <span class="grad-text">พื้นฐาน</span></h2>
+            <p class="slide-subtitle">ก่อนเริ่มทดลอง จำคำสั่งที่ใช้บ่อยสุดใน Lab นี้ก่อน — เจอทั้ง 12 Experiments</p>
+
+            <div class="split mt-6">
+              <div>
+                <div class="mcode"><span class="c">% การจัดการ workspace</span>
+<span class="k">clc</span>          <span class="c">% ล้าง command window</span>
+<span class="k">clear all</span>    <span class="c">% ลบตัวแปรทั้งหมด</span>
+<span class="k">close all</span>    <span class="c">% ปิด figure ทั้งหมด</span></div>
+                <div class="mcode mt-3"><span class="c">% คำสั่งภาพ</span>
+<span class="f">imread</span>('cameraman.tif')  <span class="c">% อ่านภาพ</span>
+<span class="f">imshow</span>(a)                <span class="c">% แสดงภาพ</span>
+<span class="f">imwrite</span>(a,'out.png')      <span class="c">% เขียนภาพ</span>
+<span class="f">imhist</span>(a)               <span class="c">% ฮิสโตแกรม</span>
+<span class="f">rgb2gray</span>(a)             <span class="c">% สี → เทา</span>
+<span class="f">imresize</span>(a,[1024 1024]) <span class="c">% ย่อ/ขยาย</span></div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="grid-3x3" class="cyan"></i>หัวใจ: ภาพ = matrix</h3>
+                  <p class="card-text">ภาพเทาใน MATLAB คือ <b class="cyan">matrix 2 มิติ</b> (แต่ละช่อง = พิกเซล) ภาพ RGB คือ <b class="cyan">M×N×3</b> — ดังนั้นใช้เลขคณิตเมทริกซ์จัดการภาพได้เลย</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="help-circle" class="cyan"></i>คำสั่งที่ต้องจำคู่กัน</h3>
+                  <p class="card-text small" style="line-height:2">
+                    • <b class="cyan">fft2 / ifft2</b> — DFT ไป/กลับ<br />
+                    • <b class="cyan">abs / angle</b> — magnitude / phase<br />
+                    • <b class="cyan">fspecial + imfilter</b> — สร้าง mask แล้วกรอง<br />
+                    • <b class="cyan">strel + imdilate/imerode</b> — morphology
+                  </p>
+                </div>
+                <div class="tip-box tip-note">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>Procedure มาตรฐาน</b>เปิด MATLAB → New Script → พิมพ์โค้ด → Save (.m) → Run → ดูผลที่ Figure window</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 4 · EX1 SAMPLING ============ -->
+        <section class="slide-view" data-title="Ex1 — Sampling" aria-label="สไลด์ 4: Ex1 Sampling">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 1 · 1/2</p>
+            <h2 class="slide-title">Sampling <span class="grad-text">(สุ่มตัวอย่าง)</span></h2>
+            <p class="slide-subtitle">ภาพ f(x,y) ต้องถูก digitize ทั้งเชิงพื้นที่ (sampling) และเชิง amplitude (quantization) ถึงจะเป็นภาพดิจิทัล</p>
+
+            <div class="split mt-6">
+              <div class="card" style="border-top:3px solid var(--cyan)">
+                <h3 class="card-title"><i data-lucide="scan" class="cyan"></i>Sampling คืออะไร</h3>
+                <p class="card-text">แบ่งตำแหน่ง (x, y) ที่ต่อเนื่องให้เป็นจุดไม่ต่อเนื่อง → <b class="cyan">sampling rate กำหนด spatial resolution</b></p>
+              </div>
+              <div class="card" style="border-top:3px solid var(--success)">
+                <h3 class="card-title"><i data-lucide="grid" class="cyan"></i>เห็นเป็นภาพยังไง</h3>
+                <p class="card-text">ยิ่งสุ่มถี่ (sampling เยอะ) → ภาพยิ่งละเอียด · สุ่มน้อย → เห็นเป็นบล็อก (pixelation) — เหมือนความละเอียดของกล้อง</p>
+              </div>
+            </div>
+
+            <div class="visual-box mt-6">
+              <span class="vb-label">ตัวอย่าง: ภาพ 3×3 สุ่มตัวอย่างเป็น grid — แต่ละช่อง = 1 พิกเซล</span>
+              <div class="fnum mt-3">
+                <div>10</div><div>20</div><div>30</div>
+                <div>40</div><div class="hot">50</div><div>60</div>
+                <div>70</div><div>80</div><div>90</div>
+              </div>
+              <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">Sampling = เลือกค่า ณ ตำแหน่ง (x,y) — จำนวนจุดที่เก็บ = spatial resolution</p>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>Sampling เกี่ยวกับ <b class="cyan">ตำแหน่ง</b> (x,y) → กำหนด spatial resolution</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 5 · EX1 QUANTIZATION ============ -->
+        <section class="slide-view" data-title="Ex1 — Quantization" aria-label="สไลด์ 5: Ex1 Quantization">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 1 · 2/2</p>
+            <h2 class="slide-title">Quantization <span class="grad-text">(ควอนไทซ์)</span></h2>
+            <p class="slide-subtitle">แปลงค่าความเข้มต่อเนื่องให้เป็นดิจิทัล — กำหนดจำนวน grey levels ของภาพ</p>
+
+            <div class="split mt-6">
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card" style="border-top:3px solid var(--success)">
+                  <h3 class="card-title"><i data-lucide="gauge" class="cyan"></i>Quantization คืออะไร</h3>
+                  <p class="card-text">ปัดค่าความเข้ม (amplitude) ให้เป็นระดับไม่ต่อเนื่อง → <b class="cyan">quantization level กำหนดจำนวน grey levels</b></p>
+                </div>
+                <div class="card" style="border-top:3px solid var(--danger)">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>⚠ False Contours</h3>
+                  <p class="card-text">ภาพที่ quantize ด้วยระดับความสว่าง <b class="cyan">ไม่เพียงพอ</b> จะเกิดเส้นขั้นบันได (false contours) บนพื้นผิวเรียบ</p>
+                </div>
+              </div>
+
+              <div class="visual-box">
+                <span class="vb-label">Uniform Quantization — แบ่ง 0–255 เป็น 16 ช่วง ช่วงละ 16</span>
+                <div class="mcode mt-3" style="font-size:12px"><span class="k">for</span> i=<span class="f">1</span>:m
+  <span class="k">for</span> j=<span class="f">1</span>:n
+    <span class="k">if</span> a(i,j)&lt;16  a(i,j)=<span class="f">7</span>;
+    <span class="k">elseif</span> a(i,j)&lt;32 a(i,j)=<span class="f">23</span>;
+    ...
+    <span class="k">else</span> a(i,j)=<span class="f">247</span>;
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span></div>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>🧮 จับมือ</b> พิกเซลค่าระหว่าง 0–15 → 7 · 16–31 → 23 · 32–47 → 39 … ค่าใหม่คือ <b class="cyan">จุดกึ่งกลางช่วง</b> (midpoint) ของแต่ละช่วง</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>Quantization เกี่ยวกับ <b class="cyan">ค่า</b> (amplitude) → กำหนด grey levels · แบ่งช่วงแล้วแทนด้วยจุดกึ่งกลาง</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 6 · EX2 SPATIAL ============ -->
+        <section class="slide-view" data-title="Ex2 — Spatial Resolution" aria-label="สไลด์ 6: Ex2 Spatial Resolution">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 2</p>
+            <h2 class="slide-title">Spatial Resolution — <span class="grad-text">ความละเอียดเชิงพื้นที่</span></h2>
+            <p class="slide-subtitle">รายละเอียดที่เล็กที่สุดที่มองเห็นได้ = จำนวน independent pixel values ต่อหน่วยความยาว</p>
+
+            <div class="cm-grid mt-6" style="grid-template-columns:repeat(3,1fr)">
+              <div class="cm-card" style="border-top:3px solid var(--primary)">
+                <div class="cm-i" style="background:rgba(37,99,235,.12);color:#60a5fa"><i data-lucide="monitor"></i></div>
+                <b>DPI</b>
+                <small>Dots Per Inch<br />ใช้กับ <b class="cyan">monitor</b></small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--warning)">
+                <div class="cm-i" style="background:rgba(245,158,11,.12);color:#fbbf24"><i data-lucide="printer"></i></div>
+                <b>LPI</b>
+                <small>Lines Per Inch<br />ใช้กับ <b class="cyan">laser printer</b></small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--success)">
+                <div class="cm-i" style="background:rgba(34,197,94,.12);color:#4ade80"><i data-lucide="smartphone"></i></div>
+                <b>PPI</b>
+                <small>Pixels Per Inch<br />ใช้กับ <b class="cyan">tablet / mobile</b></small>
+              </div>
+            </div>
+
+            <div class="visual-box mt-6">
+              <span class="vb-label">ลด spatial resolution: เก็บพิกเซลทุก 2 / 4 / 8 / 16 ตำแหน่ง (Ex2 code)</span>
+              <div class="samp-wrap mt-3">
+                <div>
+                  <div class="samp-grid" id="sampFull" style="grid-template-columns:repeat(6,1fr)"></div>
+                  <div class="samp-cap">Full (ละเอียด)</div>
+                </div>
+                <div>
+                  <div class="samp-grid" id="sampLow" style="grid-template-columns:repeat(3,1fr)"></div>
+                  <div class="samp-cap">ข้ามทีละ 2 (หยาบ)</div>
+                </div>
+              </div>
+              <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">ภาพซ้ายเก็บทุกพิกเซล · ภาพขวาเก็บทุก 2 พิกเซล → เห็น blocky / จาง — นี่คือผลของ spatial resolution ที่ลดลง</p>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>จำคู่หน่วยให้แม่น: <b class="cyan">DPI = monitor · LPI = laser printer · PPI = tablet/mobile</b></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 6 · EX2 INTENSITY ============ -->
+        <section class="slide-view" data-title="Ex2 — Intensity Resolution" aria-label="สไลด์ 7: Ex2 Intensity Resolution">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 2</p>
+            <h2 class="slide-title">Intensity Resolution — <span class="grad-text">ระดับสีเทา</span></h2>
+            <p class="slide-subtitle">Ex2 ลองลดจำนวน grey levels: 256 → 128 → 64 → 32 → 16 → 8 → 4 → 2 ด้วย gray2ind</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">จำนวน grey levels ลดลงเรื่อย ๆ</span>
+                <div class="cd-row" style="flex-direction:column;align-items:stretch;gap:8px;margin-top:12px">
+                  <div class="cd-row" style="margin-top:0"><span class="cd-label" style="width:70px">256 (เดิม)</span><div class="cd-track" style="height:18px;background:linear-gradient(90deg,#000,#333,#666,#999,#ccc,#fff)"></div></div>
+                  <div class="cd-row" style="margin-top:0"><span class="cd-label" style="width:70px">64</span><div class="cd-track" style="height:18px;background:repeating-linear-gradient(90deg,#000 0 6.25%,#333 6.25% 12.5%,#666 12.5% 18.75%,#999 18.75% 25%,#ccc 25% 31.25%,#fff 31.25% 37.5%)"></div></div>
+                  <div class="cd-row" style="margin-top:0"><span class="cd-label" style="width:70px">16</span><div class="cd-track" style="height:18px;background:repeating-linear-gradient(90deg,#000 0 25%,#333 25% 50%,#666 50% 75%,#fff 75% 100%)"></div></div>
+                  <div class="cd-row" style="margin-top:0"><span class="cd-label" style="width:70px">4</span><div class="cd-track" style="height:18px;background:repeating-linear-gradient(90deg,#000 0 50%,#fff 50% 100%)"></div></div>
+                  <div class="cd-row" style="margin-top:0"><span class="cd-label" style="width:70px">2</span><div class="cd-track" style="height:18px;background:repeating-linear-gradient(90deg,#000 0 50%,#fff 50% 100%)"></div></div>
+                </div>
+                <p class="text-3 mt-3" style="font-size:12.5px;text-align:center">ยิ่งระดับน้อย ยิ่งเห็นขั้นบันไดชัด — จน 2 ระดับเหลือแค่ ขาว/ดำ</p>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>เห็นผลยังไงใน MATLAB</h3>
+                  <p class="card-text small" style="line-height:2">[I256,map256]=<b class="cyan">gray2ind</b>(I,256) · ... · [I2,map2]=gray2ind(I,2) — ลดระดับเท่าตัวจนเหลือ 2</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>เมื่อระดับน้อยเกินไป</h3>
+                  <p class="card-text">พื้นผิวเรียบจะเห็นเป็น <b class="cyan">ขั้นบันได (false contours)</b> — เพราะค่าที่เคยไล่ระดับละเอียด ถูกบังคับให้อยู่แค่ไม่กี่ค่า</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>Exam Tip</b>intensity resolution = <b class="cyan">จำนวน grey levels</b> (ไม่ใช่ความละเอียดพิกเซล) — spatial = พิกเซล · intensity = ระดับเทา</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 8 · EX3 NEGATIVE ============ -->
+        <section class="slide-view" data-title="Ex3 — Negative" aria-label="สไลด์ 8: Ex3 Negative">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 3 · 1/3</p>
+            <h2 class="slide-title">Photographic <span class="grad-text">Negative</span></h2>
+            <p class="slide-subtitle">กลับระดับเทา: ดำ↔ขาว — ใช้ imcomplement</p>
+
+            <div class="formula mt-6">s = L-1-r</div>
+
+            <div class="split mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="contrast" class="cyan"></i>ทำไมต้องใช้</h3>
+                <p class="card-text">enhance รายละเอียดขาว/เทาในบริเวณมืด — <b class="cyan">โดยเฉพาะเมื่อ black area ใหญ่</b> (เช่น เอกซเรย์)</p>
+              </div>
+              <div class="mcode" style="font-size:12.5px">J = <span class="f">imcomplement</span>(I);</div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>s = L-1-r — L = จำนวนระดับเทา (เช่น 256) · r = ค่าเดิม · s = ค่าใหม่</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 9 · EX3 GAMMA ============ -->
+        <section class="slide-view" data-title="Ex3 — Gamma" aria-label="สไลด์ 9: Ex3 Gamma">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 3 · 2/3</p>
+            <h2 class="slide-title">Gamma <span class="grad-text">Transformation</span></h2>
+            <p class="slide-subtitle">s = c·r^γ — ปรับความสว่างด้วยเลขชี้กำลัง γ</p>
+
+            <div class="split mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="waves" class="cyan"></i>ค่า γ ต่างกันยังไง</h3>
+                <p class="card-text small" style="line-height:2">
+                  • γ &lt; 1 → <b class="cyan">brighten</b> (ภาพมืดสว่างขึ้น)<br />
+                  • γ &gt; 1 → <b class="cyan">darken</b> (ภาพสว่างมืดลง)<br />
+                  • γ = 1 → คงเดิม
+                </p>
+              </div>
+              <div class="mcode" style="font-size:12.5px">J = <span class="f">imadjust</span>(I,[],[],<span class="f">0.4</span>); <span class="c">% γ=0.4 สว่าง</span>
+J = imadjust(I,[],[],<span class="f">3</span>);   <span class="c">% γ=3 มืด</span></div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>จำ: <b class="cyan">γ&lt;1 = สว่าง · γ&gt;1 = มืด</b> — ข้อสอบชอบพลิกถามสองอันนี้</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 10 · EX3 LOG/CONTRAST ============ -->
+        <section class="slide-view" data-title="Ex3 — Log & Contrast Stretching" aria-label="สไลด์ 10: Ex3 Log/Contrast">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 3</p>
+            <h2 class="slide-title">Log &amp; <span class="grad-text">Contrast Stretching</span></h2>
+            <p class="slide-subtitle">อีกรูปแบบของ intensity transformation — เหมาะกับภาพที่มืดหรือ contrast ต่ำ</p>
+
+            <div class="split mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="log-in" class="cyan"></i>Log Transformation</h3>
+                <div class="center mt-2" style="font-family:Inter,monospace;font-size:18px;font-weight:800">s = c·log(1+r)</div>
+                <p class="card-text mt-3">แมปช่วงค่าต่ำ (dark) ที่แคบไปเป็นช่วงกว้าง และบีบอัดค่าสูง → <b class="cyan">expand dark pixels</b></p>
+                <div class="mcode mt-3" style="font-size:12px">d = <span class="f">im2double</span>(tire);
+c = <span class="f">1</span>/<span class="f">log</span>(<span class="f">1</span>+<span class="f">255</span>);
+j = c*<span class="f">log</span>(<span class="f">1</span>+d*<span class="f">255</span>);</div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:16px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="trending-up" class="cyan"></i>Contrast Stretching (sigmoid)</h3>
+                  <p class="card-text small" style="line-height:2">
+                    สูตร: <span style="font-family:Inter,monospace">s = 1 / (1 + (m/(r+ε))^E)</span><br />
+                    • <b class="cyan">E (Exponent)</b> — ความชันของ curve: E ใหญ่ = ตัด contrast แรง<br />
+                    • <b class="cyan">m</b> — จุดกึ่งกลาง (threshold) ที่ curve พลิก
+                  </p>
+                </div>
+                <div class="step-list">
+                  <div class="step-box"><b>🧮 จับมือ</b> E = 4, 5, 10 → ยิ่ง E สูง curve ยิ่งชัน → ค่าที่ต่ำกว่า m ถูกกดให้ดำ ค่าที่สูงกว่า m ถูกดันให้ขาว (contrast เพิ่ม)</div>
+                  <div class="step-box"><b>🧮 จับมือ</b> เปลี่ยน m = 0.2, 0.5, 0.7 → จุดที่ "พลิก" ขยับ — เลือก m ให้ตรงกับระดับเทาที่สนใจ</div>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>Exam Tip</b>contrast stretching = <b class="cyan">เพิ่ม contrast ระหว่าง dark/light</b> — ปรับได้ 2 ค่า: E (ความชัน) และ m (จุดพลิก)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 11 · EX4 DFT ============ -->
+        <section class="slide-view" data-title="Ex4 — DFT Analysis" aria-label="สไลด์ 11: Ex4 DFT">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 4</p>
+            <h2 class="slide-title">DFT Analysis — <span class="grad-text">frequency domain</span></h2>
+            <p class="slide-subtitle">Fourier Transform แยกภาพออกเป็น sine และ cosine components — แต่ละจุดใน frequency domain แทนความถี่ที่อยู่ในภาพ</p>
+
+            <div class="split mt-6">
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="repeat" class="cyan"></i>4 อย่างที่ Ex4 ทำ</h3>
+                  <p class="card-text small" style="line-height:2">
+                    • <b class="cyan">fft2</b> → ภาพไป frequency domain<br />
+                    • <b class="cyan">abs(F)</b> = magnitude plot (ความแรงของแต่ละความถี่)<br />
+                    • <b class="cyan">angle(F)</b> = phase plot (ตำแหน่งของคลื่น)<br />
+                    • <b class="cyan">ifft2</b> → กลับมา spatial domain ได้ภาพเดิม
+                  </p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="refresh-cw" class="cyan"></i>Rotation Property</h3>
+                  <p class="card-text">หมุนภาพ 90° → <b class="cyan">FFT ก็หมุนตาม 90°</b> ด้วย (สเปกตรัมหมุนตามภาพต้นทาง)</p>
+                </div>
+              </div>
+
+              <div class="visual-box">
+                <span class="vb-label">ขนาด DFT = ขนาดภาพเดิม</span>
+                <div class="center mt-3" style="flex-direction:column;gap:8px">
+                  <div class="mcode" style="font-size:12px">b=<span class="f">im2double</span>(a);
+c=<span class="f">fft2</span>(b);        <span class="c">% ไป freq</span>
+d=<span class="f">ifft2</span>(c);       <span class="c">% กลับมา</span>
+mag=<span class="f">abs</span>(c);      <span class="c">% magnitude</span>
+ang=<span class="f">angle</span>(c);     <span class="c">% phase</span></div>
+                  <p class="text-3" style="font-size:13px">จำนวนความถี่ = จำนวนพิกเซล → ภาพทั้ง 2 domain <b class="cyan">ขนาดเท่ากัน</b></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>fft2 = ไปข้างหน้า · ifft2 = ย้อนกลับ · abs = magnitude · angle = phase · DFT มีขนาดเท่าภาพต้นทาง</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 12 · EX5 WALSH/HADAMARD ============ -->
+        <section class="slide-view" data-title="Ex5 — Walsh & Hadamard" aria-label="สไลด์ 12: Ex5 Walsh/Hadamard">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 5</p>
+            <h2 class="slide-title">Walsh &amp; <span class="grad-text">Hadamard Transform</span></h2>
+            <p class="slide-subtitle">Transform ที่ใช้เลข ±1 (binary) แทนฟังก์ชัน sine/cosine — คำนวณด้วย matrix เดียวกันทั้งไปและกลับ</p>
+
+            <div class="split mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="table" class="cyan"></i>ไอเดียของทั้งคู่</h3>
+                <p class="card-text">สร้าง matrix <b class="cyan">f</b> ขนาด N×N ที่มีแต่ค่า ±1 โดยใช้เลข binary ของตำแหน่ง (x, u) แล้วคำนวณ</p>
+                <div class="center mt-3" style="font-family:Inter,monospace;font-size:16px;font-weight:700">F = (1/N) · f · a · f</div>
+                <p class="card-text small mt-2">ใช้ f ตัวเดิมคูณทั้ง 2 ด้าน — ต่างกันแค่<b class="cyan">ลำดับการพลิกบิต</b>:<br />Walsh ใช้ <span style="font-family:monospace">p(n+1-i)·q(i)</span> · Hadamard ใช้ <span style="font-family:monospace">p(n+1-i)·q(n+1-i)</span></p>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="activity" class="cyan"></i>ขั้นตอน (เหมือนกันทั้งคู่)</h3>
+                  <p class="card-text small" style="line-height:2">
+                    1. สร้าง f จาก binary ของ index<br />
+                    2. F = (1/N)·f·a·f<br />
+                    3. สลับ quadrant ให้สเปกตรัมอยู่กลาง (fftshift แบบ manual)<br />
+                    4. ดู log(1+|F|) เพื่อให้เห็นความถี่
+                  </p>
+                </div>
+                <div class="tip-box tip-note">
+                  <i data-lucide="lightbulb"></i>
+                  <div><b>ต่างกันนิดเดียว</b>Walsh vs Hadamard — ต่างที่วิธีการสร้าง matrix f (การเรียงลำดับของแถว) แต่ผลที่เห็นคล้ายกัน</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 11 · EX5 DCT/HAAR ============ -->
+        <section class="slide-view" data-title="Ex5 — DCT & Haar" aria-label="สไลด์ 13: Ex5 DCT/Haar">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 5</p>
+            <h2 class="slide-title">DCT &amp; <span class="grad-text">Haar Transform</span></h2>
+            <p class="slide-subtitle">สอง transform ที่เหลือของ Ex5 — ใช้จริงใน JPEG (DCT) และ compression (Haar)</p>
+
+            <div class="split mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="binary" class="cyan"></i>DCT — Discrete Cosine Transform</h3>
+                <p class="card-text">ใช้ <b class="cyan">cosine basis</b> แทน sine — ใช้กับสัญญาณจริง (real) โดยตรง ไม่มีส่วนจินตภาพ</p>
+                <div class="mcode mt-3" style="font-size:12px">F = <span class="f">dct2</span>(<span class="f">double</span>(a));  <span class="c">% 2-D DCT</span></div>
+                <p class="card-text small mt-3">⭐ ใช้จริงในมาตรฐาน <b class="cyan">JPEG</b> — แปลง block 8×8 แล้วทิ้งค่าความถี่สูง</p>
+              </div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="triangle" class="cyan"></i>Haar Transform</h3>
+                <p class="card-text">basis function เป็น <b class="cyan">ฟังก์ชันขั้น (step ±)</b> ขนาดต่าง ๆ — แบ่งภาพเป็นส่วนละเอียด/หยาบ ตามกำลังของ 2</p>
+                <div class="mcode mt-3" style="font-size:12px">p=<span class="f">fix</span>(<span class="f">log2</span>(i));   <span class="c">% หา scale</span>
+F = f*a*f;          <span class="c">% f มีค่า 0/±2^(p/2)</span></div>
+                <p class="card-text small mt-3">⭐ ใช้ใน <b class="cyan">wavelet / image compression</b> — แยก detail ระดับต่าง ๆ</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-remember mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>จำแบบนี้</b>Walsh/Hadamard = ±1 binary · DCT = cosine (ใช้ใน JPEG) · Haar = step (ใช้ใน wavelet) — ทั้ง 4 เป็นการเปลี่ยนมุมมองภาพไปอีก "domain"</div>
+            </div>
+          </div>
+        </section>        <!-- ============ SLIDE 12 · EX6 HISTOGRAM ============ -->
+        <section class="slide-view" data-title="Ex6 — Histogram" aria-label="สไลด์ 14: Ex6 Histogram">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 6 · 1/2</p>
+            <h2 class="slide-title">Histogram <span class="grad-text">(ฮิสโตแกรม)</span></h2>
+            <p class="slide-subtitle">Histogram = การกระจายของ grey levels ในภาพ — บอกภาพมืด/สว่าง/contrast ต่ำ ได้จากรูปร่าง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">Histogram: P(rk) = nk / n</span>
+                <div class="h-bar mt-3" id="histBars">
+                  <div class="h-col" style="height:30%"></div>
+                  <div class="h-col" style="height:45%"></div>
+                  <div class="h-col" style="height:20%"></div>
+                  <div class="h-col" style="height:60%"></div>
+                  <div class="h-col" style="height:35%"></div>
+                  <div class="h-col" style="height:85%"></div>
+                  <div class="h-col" style="height:50%"></div>
+                  <div class="h-col" style="height:25%"></div>
+                  <div class="h-col" style="height:70%"></div>
+                  <div class="h-col" style="height:40%"></div>
+                </div>
+                <p class="text-3 mt-2" style="font-size:12.5px;text-align:center">nk = จำนวนพิกเซลที่มี grey value rk · n = พิกเซลทั้งหมด</p>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="bar-chart-3" class="cyan"></i>Histogram บอกอะไร</h3>
+                  <p class="card-text small" style="line-height:2">
+                    • Histogram รวมซ้าย (ค่าต่ำ) → ภาพ<b class="cyan">มืด</b><br />
+                    • รวมขวา (ค่าสูง) → ภาพ<b class="cyan">สว่าง</b><br />
+                    • แคบตรงกลาง → ภาพ<b class="cyan">contrast ต่ำ</b>
+                  </p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>Exam Tip</b>P(rk) = nk/n — nk = จำนวนพิกเซลที่มี grey value rk · n = พิกเซลทั้งหมด</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 13 · EX6 EQUALIZATION ============ -->
+        <section class="slide-view" data-title="Ex6 — Histogram Equalization" aria-label="สไลด์ 15: Ex6 Equalization">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 6 · 2/2</p>
+            <h2 class="slide-title">Histogram <span class="grad-text">Equalization</span></h2>
+            <p class="slide-subtitle">ออกแบบ transformation T(.) ให้ grey values กระจายสม่ำเสมอ — ภาพ contrast ดีขึ้น</p>
+
+            <div class="split mt-6">
+              <div class="card" style="border-top:3px solid var(--success)">
+                <h3 class="card-title"><i data-lucide="equal" class="cyan"></i>หลักการ</h3>
+                <p class="card-text">ทำให้ <b class="cyan">grey values ใน output กระจาย uniform ใน [0,1]</b> — ทุก grey value มีสัดส่วนเท่ากัน → ภาพ contrast ดีขึ้น (ใช้พื้นที่ทั้งช่วง)</p>
+              </div>
+              <div class="visual-box">
+                <span class="vb-label">โค้ด MATLAB จริง</span>
+                <div class="mcode mt-3" style="font-size:12px">a = <span class="f">histeq</span>(I);  <span class="c">% equalize</span>
+<span class="f">imhist</span>(a);      <span class="c">% ดู histogram ใหม่</span></div>
+              </div>
+            </div>
+
+            <div class="step-list mt-6">
+              <div class="step-box"><b>🧮 ก่อน/หลัง</b> ภาพ contrast ต่ำ = histogram แคบตรงกลาง → หลัง equalize แผ่กระจายเต็มช่วง 0–255</div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>equalization → <b class="cyan">uniform distribution</b> ใน [0,1] — ใช้ histeq ใน MATLAB</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 14 · EX7 SMOOTHING ============ -->
+        <section class="slide-view" data-title="Ex7 — Spatial Smoothing" aria-label="สไลด์ 16: Ex7 Smoothing">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 7</p>
+            <h2 class="slide-title">Spatial Filtering — <span class="grad-text">Smoothing</span></h2>
+            <p class="slide-subtitle">กรองภาพตรง ๆ ที่พิกเซล: เลื่อน mask ผ่านภาพ ทุกตำแหน่งคำนวณผลตอบ (response) ของ filter</p>
+
+            <div class="split mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="grid-3x3" class="cyan"></i>Average filter (3×3)</h3>
+                <p class="card-text">ผลตอบ = <b class="cyan">ค่าเฉลี่ยของพิกเซลใน neighborhood</b> — เรียกว่า averaging / <b class="cyan">lowpass</b> filter ใช้ blur + ลด noise</p>
+                <div class="mask-grid mt-3">
+                  <div class="mask-cell">1/9</div><div class="mask-cell">1/9</div><div class="mask-cell">1/9</div>
+                  <div class="mask-cell">1/9</div><div class="mask-cell" style="background:rgba(56,189,248,.2)">1/9</div><div class="mask-cell">1/9</div>
+                  <div class="mask-cell">1/9</div><div class="mask-cell">1/9</div><div class="mask-cell">1/9</div>
+                </div>
+                <div class="mcode mt-3" style="font-size:12px">w=<span class="f">fspecial</span>('average',[3 3]);
+g=<span class="f">imfilter</span>(i,w,'symmetric');</div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="waves" class="cyan"></i>Gaussian filter</h3>
+                  <p class="card-text">ถ่วงน้ำหนักตาม <b class="cyan">bell curve</b> — พิกเซลใกล้ศูนย์กลางมีน้ำหนักมากกว่าขอบ → blur นุ่มกว่า average</p>
+                  <div class="mcode mt-3" style="font-size:12px">w=<span class="f">fspecial</span>('gaussian',[3 3],<span class="f">0.5</span>);
+g=<span class="f">imfilter</span>(i,w,'symmetric');</div>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>Exam Tip</b>average/gaussian = <b class="cyan">smoothing (lowpass)</b> — blur + ลด noise · linear filter</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 14 · EX7 SHARPEN/MEDIAN ============ -->
+        <section class="slide-view" data-title="Ex7 — Sharpening & Median" aria-label="สไลด์ 17: Ex7 Sharpening/Median">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 7</p>
+            <h2 class="slide-title">Sharpening + <span class="grad-text">Median / Order-statistic</span></h2>
+            <p class="slide-subtitle">ฝั่ง sharpen ใช้ Laplacian/Sobel (linear) · ฝั่ง non-linear ใช้ median (order-statistic)</p>
+
+            <div class="split mt-6">
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="scan" class="cyan"></i>Laplacian (sharpen)</h3>
+                  <p class="card-text">หาอนุพันธ์อันดับ 2 → จับจุดที่ค่าเปลี่ยนเร็ว (ขอบ) → นำมาเพิ่มความคมชัด</p>
+                  <div class="mask-grid mt-3" style="grid-template-columns:repeat(3,1fr)">
+                    <div class="mask-cell">0</div><div class="mask-cell">-1</div><div class="mask-cell">0</div>
+                    <div class="mask-cell">-1</div><div class="mask-cell" style="background:rgba(56,189,248,.2)">4</div><div class="mask-cell">-1</div>
+                    <div class="mask-cell">0</div><div class="mask-cell">-1</div><div class="mask-cell">0</div>
+                  </div>
+                  <div class="mcode mt-3" style="font-size:12px">w=<span class="f">fspecial</span>('laplacian',<span class="f">0.5</span>);</div>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="activity" class="cyan"></i>Sobel</h3>
+                  <p class="card-text">ประมาณ gradient ของภาพ → เน้นขอบ (ใช้ต่อใน Ex9 edge detection)</p>
+                  <div class="mcode mt-3" style="font-size:12px">w=<span class="f">fspecial</span>('sobel');</div>
+                </div>
+              </div>
+
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="arrow-up-down" class="cyan"></i>Median filter (non-linear)</h3>
+                  <p class="card-text">เรียงค่าใน neighborhood แล้วแทนพิกเซลกลางด้วย <b class="cyan">ค่ามัธยฐาน</b> — เก่งมากเรื่องลบ <b class="cyan">salt-and-pepper noise</b></p>
+                  <div class="mcode mt-3" style="font-size:12px">m = <span class="f">medfilt2</span>(g,[3 3]);</div>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="list-ordered" class="cyan"></i>Order-statistic filter</h3>
+                  <p class="card-text">ordfilt2(i, k, mask) — แทนค่าด้วย <b class="cyan">ค่าอันดับที่ k</b> ของ neighborhood: k=1 (ต่ำสุด) · k=9 (สูงสุด) · k=median (มัธยฐาน)</p>
+                  <div class="mcode mt-3" style="font-size:12px">h = <span class="f">ordfilt2</span>(i,<span class="f">1</span>,ones(3));       <span class="c">% min</span>
+h = <span class="f">ordfilt2</span>(i,<span class="f">median</span>(1:9),ones(3)); <span class="c">% median</span></div>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>Exam Tip</b>median = non-linear order-statistic — แทนค่าด้วย <b class="cyan">median ของ neighborhood</b> ลบ salt-pepper</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 15 · EX8 FREQ FUNDAMENTALS ============ -->
+        <section class="slide-view" data-title="Ex8 — Frequency Domain Fundamentals" aria-label="สไลด์ 18: Ex8 Freq. Domain">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 8</p>
+            <h2 class="slide-title">Frequency Domain <span class="grad-text">Fundamentals</span></h2>
+            <p class="slide-subtitle">กรองใน frequency domain = แก้ FFT ของภาพ แล้ว inverse กลับมา — สมการหัวใจของทั้งบทนี้</p>
+
+            <div class="card mt-6" style="text-align:center">
+              <div style="font-family:Inter,monospace;font-size:22px;font-weight:800" class="cyan">g(x,y) = F⁻¹[ H(u,v) · F(u,v) ]</div>
+              <p class="card-text small mt-3" style="line-height:2">
+                F(u,v) = DFT ของภาพ input f(x,y) · <b class="cyan">H(u,v) = filter function</b> · F⁻¹ = IDFT → g(x,y) = ภาพ output
+              </p>
+            </div>
+
+            <div class="cm-grid mt-6" style="grid-template-columns:repeat(3,1fr)">
+              <div class="cm-card" style="border-top:3px solid var(--success)">
+                <div class="cm-i" style="background:rgba(34,197,94,.12);color:#4ade80"><i data-lucide="filter"></i></div>
+                <b>Lowpass (LPF)</b>
+                <small>คงความถี่ต่ำ ตัดความถี่สูง → ใน spatial = <b class="cyan">smoothing</b></small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--danger)">
+                <div class="cm-i" style="background:rgba(239,68,68,.12);color:#f87171"><i data-lucide="scan" class="cyan"></i></div>
+                <b>Highpass (HPF)</b>
+                <small>คงความถี่สูง ตัดความถี่ต่ำ → ขอบมี high freq → <b class="cyan">edge enhancement</b></small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--warning)">
+                <div class="cm-i" style="background:rgba(245,158,11,.12);color:#fbbf24"><i data-lucide="activity"></i></div>
+                <b>Bandpass</b>
+                <small>คงช่วงกลาง ตัดต่ำ-สูงมาก → enhance ขอบ + ลด noise พร้อมกัน</small>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>LPF = smoothing (ตัด high) · HPF = edge (ตัด low) — ในสมการ H(u,v) คือ <b class="cyan">filter function</b></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 16 · EX8 3 FILTERS ============ -->
+        <section class="slide-view" data-title="Ex8 — Ideal/Butterworth/Gaussian" aria-label="สไลด์ 19: Ex8 3 Filters">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 8</p>
+            <h2 class="slide-title">3 Lowpass Filters: <span class="grad-text">Ideal · Butterworth · Gaussian</span></h2>
+            <p class="slide-subtitle">ความถี่แต่ละจุดอยู่ห่างจากศูนย์กลาง D(u,v) = √[(u−M/2)² + (v−N/2)²] — ตัดตามระยะ D₀</p>
+
+            <div class="cm-grid mt-6" style="grid-template-columns:repeat(3,1fr)">
+              <div class="cm-card" style="border-top:3px solid var(--primary)">
+                <div class="cm-i" style="background:rgba(37,99,235,.12);color:#60a5fa"><i data-lucide="door-open"></i></div>
+                <b>Ideal</b>
+                <small style="font-family:Consolas,monospace;font-size:11.5px">H=1 ถ้า D≤D₀<br />H=0 ถ้า D&gt;D₀</small>
+                <small style="color:var(--text-3);font-size:11.5px;margin-top:6px">ตัดแบบ "คม" ขาด → เกิด ringing</small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--success)">
+                <div class="cm-i" style="background:rgba(34,197,94,.12);color:#4ade80"><i data-lucide="trending-down"></i></div>
+                <b>Butterworth</b>
+                <small style="font-family:Consolas,monospace;font-size:11.5px">H = 1/(1+(D/D₀)^2n)</small>
+                <small style="color:var(--text-3);font-size:11.5px;margin-top:6px">order n ควบคุมความชัน — นุ่มกว่า ideal</small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--warning)">
+                <div class="cm-i" style="background:rgba(245,158,11,.12);color:#fbbf24"><i data-lucide="bell"></i></div>
+                <b>Gaussian</b>
+                <small style="font-family:Consolas,monospace;font-size:11.5px">H = e^(−D²/2σ²)</small>
+                <small style="color:var(--text-3);font-size:11.5px;margin-top:6px">เรียบที่สุด ไม่มี ringing</small>
+              </div>
+            </div>
+
+            <div class="mcode mt-6" style="font-size:12.5px"><span class="c">% สร้าง Butterworth LPF ขนาดเท่าภาพ แล้วคูณกับ FFT</span>
+d(i,j) = <span class="f">sqrt</span>((i-x).^2+(j-y).^2);
+h(i,j) = <span class="f">1</span>/(<span class="f">1</span>+((d(i,j))/rad).^(2*N));
+fft1 = <span class="f">fftshift</span>(<span class="f">fft2</span>(img));
+fil  = h.*fft1;
+fin  = <span class="f">ifft2</span>(fil);</div>
+
+            <div class="tip-box tip-note mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>Highpass = 1 − Lowpass</b> — H_hp(u,v) = 1 − H_lp(u,v) · สลับจาก "ผ่านต่ำ" เป็น "ผ่านสูง" ได้ทันที</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 17 · EX9 EDGE ============ -->
+        <section class="slide-view" data-title="Ex9 — Edge Detection" aria-label="สไลด์ 20: Ex9 Edge">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 9</p>
+            <h2 class="slide-title">Edge Detection — <span class="grad-text">4 Operators</span></h2>
+            <p class="slide-subtitle">ขอบ = ตำแหน่งที่ระดับเทาเปลี่ยนเร็ว — ใช้ gradient (การประมาณอนุพันธ์) ของความเข้มภาพ</p>
+
+            <div class="cm-grid mt-6" style="grid-template-columns:repeat(4,1fr)">
+              <div class="cm-card" style="border-top:3px solid var(--primary)">
+                <div class="cm-i" style="background:rgba(37,99,235,.12);color:#60a5fa"><i data-lucide="grid-3x3"></i></div>
+                <b>Sobel</b>
+                <small>gradient แนวนอน/แนวตั้ง integer mask — นิยมใช้สุด</small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--success)">
+                <div class="cm-i" style="background:rgba(34,197,94,.12);color:#4ade80"><i data-lucide="grid-3x3"></i></div>
+                <b>Prewitt</b>
+                <small>คล้าย Sobel แต่ mask ต่างกันเล็กน้อย</small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--warning)">
+                <div class="cm-i" style="background:rgba(245,158,11,.12);color:#fbbf24"><i data-lucide="move-diagonal"></i></div>
+                <b>Roberts</b>
+                <small>2×2 — ใช้ผลต่างแนวทแยง (diagonal) ขนาดเล็กสุด</small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--danger)">
+                <div class="cm-i" style="background:rgba(239,68,68,.12);color:#f87171"><i data-lucide="sparkles"></i></div>
+                <b>Canny</b>
+                <small>multi-stage algorithm — ตรวจจับขอบได้หลากหลาย (optimal: derivative ของ Gaussian)</small>
+              </div>
+            </div>
+
+            <div class="mcode mt-6" style="font-size:12.5px">[g,t]=<span class="f">edge</span>(f,'sobel','vertical');    <span class="c">% ขอบแนวตั้ง</span>
+[g,t]=edge(f,'sobel','horizontal');  <span class="c">% ขอบแนวนอน</span>
+[g,t]=edge(f,'sobel','both');        <span class="c">% ทั้งสองทิศ</span></div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>4 operators: Sobel · Prewitt · Roberts · Canny — Canny คือ <b class="cyan">multi-stage</b> ที่แม่นที่สุด</div>
+            </div>
+          </div>
+        </section>        <!-- ============ SLIDE 18 · EX9 LINE ============ -->
+        <section class="slide-view" data-title="Ex9 — Line Detection" aria-label="สไลด์ 21: Ex9 Line">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 9 · 2/3</p>
+            <h2 class="slide-title">Line <span class="grad-text">Detection</span></h2>
+            <p class="slide-subtitle">mask จะตอบสนองแรงสุดเมื่อเส้นพาดผ่านกลาง mask — เส้นไหนตรงทิศ mask เส้นนั้นเด่น</p>
+
+            <div class="grid-2 mt-6" style="grid-template-columns:1fr 1fr;gap:10px">
+              <div class="center" style="background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:14px">
+                <div class="mask-grid" style="grid-template-columns:repeat(3,1fr)">
+                  <div class="mask-cell">-1</div><div class="mask-cell">-1</div><div class="mask-cell">-1</div>
+                  <div class="mask-cell">2</div><div class="mask-cell">2</div><div class="mask-cell">2</div>
+                  <div class="mask-cell">-1</div><div class="mask-cell">-1</div><div class="mask-cell">-1</div>
+                </div>
+                <small class="text-3" style="font-size:11.5px">แนวนอน</small>
+              </div>
+              <div class="center" style="background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:14px">
+                <div class="mask-grid" style="grid-template-columns:repeat(3,1fr)">
+                  <div class="mask-cell">-1</div><div class="mask-cell">2</div><div class="mask-cell">-1</div>
+                  <div class="mask-cell">-1</div><div class="mask-cell">2</div><div class="mask-cell">-1</div>
+                  <div class="mask-cell">-1</div><div class="mask-cell">2</div><div class="mask-cell">-1</div>
+                </div>
+                <small class="text-3" style="font-size:11.5px">แนวตั้ง</small>
+              </div>
+              <div class="center" style="background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:14px">
+                <div class="mask-grid" style="grid-template-columns:repeat(3,1fr)">
+                  <div class="mask-cell">-1</div><div class="mask-cell">-1</div><div class="mask-cell">2</div>
+                  <div class="mask-cell">-1</div><div class="mask-cell">2</div><div class="mask-cell">-1</div>
+                  <div class="mask-cell">2</div><div class="mask-cell">-1</div><div class="mask-cell">-1</div>
+                </div>
+                <small class="text-3" style="font-size:11.5px">45°</small>
+              </div>
+              <div class="center" style="background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:14px">
+                <div class="mask-grid" style="grid-template-columns:repeat(3,1fr)">
+                  <div class="mask-cell">2</div><div class="mask-cell">-1</div><div class="mask-cell">-1</div>
+                  <div class="mask-cell">-1</div><div class="mask-cell">2</div><div class="mask-cell">-1</div>
+                  <div class="mask-cell">-1</div><div class="mask-cell">-1</div><div class="mask-cell">2</div>
+                </div>
+                <small class="text-3" style="font-size:11.5px">135°</small>
+              </div>
+            </div>
+
+            <div class="step-list mt-6">
+              <div class="step-box"><b>🧮 จับมือ</b> กรองด้วย mask → |ผลลัพธ์| → threshold (เช่น ≥ 300) → เหลือเฉพาะเส้นที่ตรงทิศ</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 19 · EX9 POINT ============ -->
+        <section class="slide-view" data-title="Ex9 — Point Detection" aria-label="สไลด์ 22: Ex9 Point">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 9 · 3/3</p>
+            <h2 class="slide-title">Point <span class="grad-text">Detection</span></h2>
+            <p class="slide-subtitle">mask จุด: -1 รอบ + 8 ตรงกลาง — จับ "จุดที่ต่างจากรอบข้างมาก"</p>
+
+            <div class="split mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="circle-dot" class="cyan"></i>mask จุด</h3>
+                <div class="mask-grid mt-3" style="grid-template-columns:repeat(3,1fr)">
+                  <div class="mask-cell">-1</div><div class="mask-cell">-1</div><div class="mask-cell">-1</div>
+                  <div class="mask-cell">-1</div><div class="mask-cell" style="background:rgba(56,189,248,.2)">8</div><div class="mask-cell">-1</div>
+                  <div class="mask-cell">-1</div><div class="mask-cell">-1</div><div class="mask-cell">-1</div>
+                </div>
+                <p class="card-text small mt-3">จุดที่ต่างจากรอบข้างมาก (R ≥ T) จะถูกจับ</p>
+              </div>
+              <div class="step-list">
+                <div class="step-box"><b>🧮 จับมือ</b> mask จุดให้ response สูงเฉพาะ "จุดที่ต่างจากรอบข้าง" → R ≥ T = จุดเด่น</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 23 · EX10 EROSION/DILATION ============ -->
+        <section class="slide-view" data-title="Ex10 — Erosion & Dilation" aria-label="สไลด์ 23: Ex10 Erosion/Dilation">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 10 · 1/2</p>
+            <h2 class="slide-title">Erosion &amp; <span class="grad-text">Dilation</span></h2>
+            <p class="slide-subtitle">operation พื้นฐาน 2 ตัวของ Morphology — ใช้ structuring element (strel) กำหนดรูปร่าง</p>
+
+            <div class="cm-grid mt-6" style="grid-template-columns:repeat(2,1fr)">
+              <div class="cm-card" style="border-top:3px solid var(--primary)">
+                <div class="cm-i" style="background:rgba(37,99,235,.12);color:#60a5fa"><i data-lucide="expand"></i></div>
+                <b>Dilation</b>
+                <small>เพิ่มพิกเซลที่ขอบ — <b class="cyan">ขยาย</b>วัตถุ</small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--danger)">
+                <div class="cm-i" style="background:rgba(239,68,68,.12);color:#f87171"><i data-lucide="shrink"></i></div>
+                <b>Erosion</b>
+                <small>ลบพิกเซลที่ขอบ — <b class="cyan">กร่อน</b>วัตถุ</small>
+              </div>
+            </div>
+
+            <div class="split mt-6">
+              <div class="mcode" style="font-size:12.5px">b = <span class="f">strel</span>('disk',<span class="f">10</span>);   <span class="c">% structuring element</span>
+c = <span class="f">imdilate</span>(a,b);   <span class="c">% dilation → ขยาย</span>
+c = <span class="f">imerode</span>(a,b);    <span class="c">% erosion → กร่อน</span></div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="shapes" class="cyan"></i>Structuring Element (strel)</h3>
+                <p class="card-text">ขนาดและรูปร่างของ neighborhood เป็นตัวกำหนดว่าจะเพิ่ม/ลบกี่พิกเซล — 'disk', 'square', 'line'…</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>dilate = เพิ่มขอบ (ขยาย) · erode = ลบขอบ (กร่อน) — จำง่าย: ขยาย = + พิกเซล, กร่อน = − พิกเซล</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 21 · EX10 OPEN/CLOSE ============ -->
+        <section class="slide-view" data-title="Ex10 — Opening & Closing" aria-label="สไลด์ 24: Ex10 Open/Close">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 10 · 2/2</p>
+            <h2 class="slide-title">Opening &amp; <span class="grad-text">Closing</span></h2>
+            <p class="slide-subtitle">ผสม Erosion + Dilation เข้าด้วยกัน 2 แบบ — ใช้จัดรูปวัตถุ</p>
+
+            <div class="cm-grid mt-6" style="grid-template-columns:repeat(2,1fr)">
+              <div class="cm-card" style="border-top:3px solid var(--success)">
+                <div class="cm-i" style="background:rgba(34,197,94,.12);color:#4ade80"><i data-lucide="scan"></i></div>
+                <b>Opening</b>
+                <small>erode แล้ว dilate — <b class="cyan">ลบจุดเล็ก/เส้นเล็ก</b></small>
+              </div>
+              <div class="cm-card" style="border-top:3px solid var(--warning)">
+                <div class="cm-i" style="background:rgba(245,158,11,.12);color:#fbbf24"><i data-lucide="circle"></i></div>
+                <b>Closing</b>
+                <small>dilate แล้ว erode — <b class="cyan">เติมรู/ช่องว่างเล็ก</b></small>
+              </div>
+            </div>
+
+            <div class="split mt-6">
+              <div class="mcode" style="font-size:12.5px">c = <span class="f">imopen</span>(a,b);     <span class="c">% opening = erode→dilate</span>
+c = <span class="f">imclose</span>(a,b);    <span class="c">% closing = dilate→erode</span>
+c = <span class="f">bwmorph</span>(b,'thin'); <span class="c">% ผอมเส้น</span></div>
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="wand-2" class="cyan"></i>bwmorph — ตัวช่วย</h3>
+                <p class="card-text small" style="line-height:2">'remove' · 'clean' · 'shrink' · 'fill' · 'thin' · 'thick' — operation สำเร็จรูปสำหรับ binary image</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>open = erode→dilate (ลบจุดเล็ก) · close = dilate→erode (เติมรูเล็ก) — จำลำดับให้ตรง</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 22 · EX11 THRESHOLD ============ -->
+        <section class="slide-view" data-title="Ex11 — Thresholding & Otsu" aria-label="สไลด์ 25: Ex11 Thresholding">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 11</p>
+            <h2 class="slide-title">Region-based Segmentation: <span class="grad-text">Thresholding</span></h2>
+            <p class="slide-subtitle">วิธี segmentation ที่ง่ายสุด: เลือกค่า T แล้วแบ่งพิกเซลเป็น object / background</p>
+
+            <div class="card mt-6">
+              <h3 class="card-title"><i data-lucide="function-square" class="cyan"></i>รูปแบบทั่วไปของ Threshold</h3>
+              <div class="center mt-2" style="font-family:Inter,monospace;font-size:18px;font-weight:700" class="cyan">T = T[x, y, p(x,y), f(x,y)]</div>
+              <div class="cm-grid mt-4" style="grid-template-columns:repeat(3,1fr)">
+                <div class="cm-card">
+                  <b>Global</b>
+                  <small>T ขึ้นกับ <b class="cyan">f(x,y)</b> เท่านั้น — ค่าคงที่ทั้งภาพ</small>
+                </div>
+                <div class="cm-card">
+                  <b>Local</b>
+                  <small>T ขึ้นกับ f + local properties <b class="cyan">p(x,y)</b> (เช่น ค่าเฉลี่ยรอบข้าง)</small>
+                </div>
+                <div class="cm-card">
+                  <b>Dynamic / Adaptive</b>
+                  <small>T ขึ้นกับพิกัด <b class="cyan">(x,y)</b> ด้วย — เปลี่ยนตามตำแหน่ง</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="split mt-6">
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="bar-chart-3" class="cyan"></i>เมื่อไหร่ใช้ global ได้</h3>
+                  <p class="card-text">เมื่อ histogram มี <b class="cyan">2 ยอด (bimodal)</b> แยกชัด — แต่ละยอดแทน background / object แบ่งตรงหุบระหว่างยอด</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="cog" class="cyan"></i>Otsu's Method (graythresh)</h3>
+                  <p class="card-text">หา threshold <b class="cyan">อัตโนมัติ</b> ที่แบ่ง histogram ให้สองกลุ่มแยกกันมากที่สุด</p>
+                  <div class="mcode mt-3" style="font-size:12px">level=<span class="f">graythresh</span>(a);
+b=<span class="f">im2bw</span>(a,level);</div>
+                </div>
+              </div>
+              <div class="visual-box">
+                <span class="vb-label">ตัวอย่าง bimodal histogram</span>
+                <div class="h-bar mt-3" style="height:90px">
+                  <div class="h-col" style="height:85%;background:linear-gradient(180deg,#60a5fa,#2563eb)"></div>
+                  <div class="h-col" style="height:70%"></div>
+                  <div class="h-col" style="height:50%"></div>
+                  <div class="h-col" style="height:28%"></div>
+                  <div class="h-col" style="height:12%;background:#f59e0b"></div>
+                  <div class="h-col" style="height:35%;background:#f59e0b"></div>
+                  <div class="h-col" style="height:60%;background:#f59e0b"></div>
+                  <div class="h-col" style="height:80%;background:linear-gradient(180deg,#fbbf24,#f59e0b)"></div>
+                  <div class="h-col" style="height:55%;background:#f59e0b"></div>
+                  <div class="h-col" style="height:30%;background:#f59e0b"></div>
+                </div>
+                <p class="text-3 mt-2" style="font-size:12.5px;text-align:center">ยอดซ้าย = background (มืด) · ยอดขวา = object (สว่าง) · T อยู่ตรงหุบ</p>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>Global = ขึ้นกับ f เท่านั้น · Local = +p(x,y) · Dynamic = ขึ้นกับ (x,y) · Otsu = graythresh หา T อัตโนมัติ</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 22 · EX12 RGB COMPONENTS ============ -->
+        <section class="slide-view" data-title="Ex12 — RGB Component Images" aria-label="สไลด์ 26: Ex12 RGB Components">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 12 · 1/2</p>
+            <h2 class="slide-title">RGB = <span class="grad-text">M×N×3</span> — Component Images</h2>
+            <p class="slide-subtitle">ภาพ RGB เป็น stack 3 ชั้น — แยกดูทีละช่องสีได้</p>
+
+            <div class="split mt-6">
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="layers" class="cyan"></i>RGB = stack 3 ชั้น</h3>
+                <p class="card-text small" style="line-height:2">
+                  • ภาพ RGB = array <b class="cyan">M×N×3</b> — แต่ละพิกเซล = triplet (R,G,B)<br />
+                  • <b class="cyan">component images</b>: R=a(:,:,1) · G=a(:,:,2) · B=a(:,:,3)<br />
+                  • ปิดช่องอื่นให้ 0 → เห็นแค่ช่องสีเดียว
+                </p>
+                <div class="mcode mt-3" style="font-size:12px">a(:,:,2)=<span class="f">0</span>; a(:,:,3)=<span class="f">0</span>; <span class="c">% เหลือ R</span></div>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title"><i data-lucide="palette" class="cyan"></i>Colormap</h3>
+                <p class="card-text">matrix m×3 (ค่า 0–1) — แต่ละแถว = สี 1 สี: copper · jet · summer · gray…</p>
+                <div class="mcode mt-3" style="font-size:12px"><span class="f">imshow</span>(a,copper); <span class="c">% ย้อมภาพเทา</span></div>
+              </div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>RGB = M×N×3 · แยกช่องด้วย a(:,:,k) · ใช้ colormap ย้อมภาพเทา</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 23 · EX12 COLOR SPACE ============ -->
+        <section class="slide-view" data-title="Ex12 — Color Space Conversion" aria-label="สไลด์ 27: Ex12 Color Space">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXPERIMENT 12 · 2/2</p>
+            <h2 class="slide-title">แปลง <span class="grad-text">Color Space</span></h2>
+            <p class="slide-subtitle">เปลี่ยนโมเดลสีเพื่อให้เหมาะกับงาน — luminance/chrominance แยกกัน</p>
+
+            <div class="step-list mt-6">
+              <div class="step-box"><b>🟡 <span style="font-family:monospace">rgb2ntsc</span></b> — YIQ: luminance (Y) + chrominance (I, Q)</div>
+              <div class="step-box"><b>🟢 <span style="font-family:monospace">rgb2ycbcr</span></b> — YCbCr: Y = luminance แบบ NTSC + Cb/Cr</div>
+              <div class="step-box"><b>🔵 <span style="font-family:monospace">rgb2hsv</span></b> — H = Hue, S = Saturation, V = Brightness (ตรงกับวิธีคนมองสี)</div>
+              <div class="step-box"><b>🔄 <span style="font-family:monospace">imcomplement</span></b> — กลับสี (negative ของภาพสี)</div>
+            </div>
+
+            <div class="tip-box tip-exam mt-6">
+              <i data-lucide="graduation-cap"></i>
+              <div><b>Exam Tip</b>NTSC/YCbCr = luminance+chrominance · HSV = Hue/Saturation/Value — จำคู่ฟังก์ชันให้ตรง</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 24 · SUMMARY ============ -->
+        <section class="slide-view" data-title="Chapter Summary — สรุปบทเรียน" aria-label="สไลด์ 28: สรุปบทเรียน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">CHAPTER SUMMARY</p>
+            <h2 class="slide-title">สรุปบทเรียน</h2>
+            <p class="slide-subtitle">เก็บทุกประเด็นสำคัญของ 12 Experiments ไว้ในหน้าเดียว</p>
+            <div class="grid-3 mt-6">
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="binary" class="cyan"></i>Ex1–2 พื้นฐาน</h3><p class="card-text small">Sampling = spatial resolution · Quantization = grey levels (น้อยไป = false contours) · DPI/LPI/PPI</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="contrast" class="cyan"></i>Ex3 Intensity</h3><p class="card-text small">Negative s=L-1-r · Gamma γ&lt;1 สว่าง γ&gt;1 มืด · Log ขยาย dark · Contrast stretching (E, m)</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="activity" class="cyan"></i>Ex4–5 Transforms</h3><p class="card-text small">DFT = sine/cosine · fft2/ifft2/abs/angle · Walsh/Hadamard ±1 · DCT (JPEG) · Haar (wavelet)</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="bar-chart-3" class="cyan"></i>Ex6–8 Enhancement</h3><p class="card-text small">P(rk)=nk/n · equalization → uniform · average/gaussian = smooth · median = non-linear · g=F⁻¹[H·F]</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="scan" class="cyan"></i>Ex9–11 Segmentation</h3><p class="card-text small">Sobel/Prewitt/Roberts/Canny · line/point masks · dilate/erode/open/close · threshold global/local/dynamic + Otsu</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="palette" class="cyan"></i>Ex12 Color</h3><p class="card-text small">RGB = M×N×3 · component images · NTSC/YCbCr/HSV · colormap</p></div>
+            </div>
+            <div class="tip-box tip-remember mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>จำแบบนี้</b>sampling = ตำแหน่ง · quantization = ค่า · γ&lt;1 สว่าง · fft2/ifft2 · equalization = uniform · LPF smooth / HPF edge · dilate ขยาย / erode กร่อน</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 23 · CHEAT SHEET ============ -->
+        <section class="slide-view" data-title="Exam Cheat Sheet — สูตรจำก่อนสอบ" aria-label="สไลด์ 29: สูตรจำก่อนสอบ">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXAM CHEAT SHEET</p>
+            <h2 class="slide-title">สูตรจำก่อนสอบ</h2>
+            <p class="slide-subtitle">รวมคำสั่ง MATLAB + สูตรสำคัญแบบกระชับ — ทบทวนก่อนสอบในเวลาไม่กี่นาที</p>
+            <div class="cheat-grid mt-6" id="cheatGrid"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 24 · QUIZ 1 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 1 (ข้อ 1–5)" aria-label="สไลด์ 30: แบบทดสอบชุดที่ 1">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 1</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 1</h2>
+            <div id="quiz1" class="mt-4"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 25 · QUIZ 2 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 2 (ข้อ 6–10)" aria-label="สไลด์ 31: แบบทดสอบชุดที่ 2">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 2</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 2</h2>
+            <div id="quiz2" class="mt-4"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 26 · FLASHCARDS ============ -->
+        <section class="slide-view" data-title="Flashcards — ทบทวนการ์ด" aria-label="สไลด์ 32: การ์ดทบทวน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">REVIEW</p>
+            <h2 class="slide-title">Flashcards — <span class="grad-text">ทบทวนการ์ด</span></h2>
+            <p class="slide-subtitle">คลิกการ์ดเพื่อพลิกดูคำตอบ — ใช้ปุ่มซ้าย/ขวาเพื่อสลับใบ</p>
+
+            <div class="split mt-6" style="grid-template-columns:1fr">
+              <div class="flashcard-wrap">
+                <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-label="การ์ดคำถาม — คลิกเพื่อพลิก">
+                  <div class="flashcard-face flashcard-front">
+                    <span class="fc-eyebrow">QUESTION</span>
+                    <p class="fc-q" id="fcQ">—</p>
+                    <span class="flashcard-hint">คลิกเพื่อพลิกการ์ด 🔄</span>
+                  </div>
+                  <div class="flashcard-face flashcard-back">
+                    <span class="fc-eyebrow">ANSWER</span>
+                    <p class="fc-a" id="fcA">—</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-5 wrap" style="justify-content:center">
+              <button class="btn btn-ghost" id="fcPrev"><i data-lucide="chevron-left"></i> Previous</button>
+              <span class="chip" id="fcCounter">1 / 22</span>
+              <button class="btn btn-ghost" id="fcNext">Next <i data-lucide="chevron-right"></i></button>
+              <button class="btn btn-cyan" id="fcShuffle"><i data-lucide="shuffle"></i> Shuffle</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 27 · GLOSSARY ============ -->
+        <section class="slide-view" data-title="Glossary — คำศัพท์" aria-label="สไลด์ 33: คำศัพท์">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">GLOSSARY</p>
+            <h2 class="slide-title">Glossary — <span class="grad-text">คำศัพท์</span></h2>
+            <p class="slide-subtitle">คำศัพท์สำคัญของบทนี้ — ค้นหาได้ด้วยช่องด้านล่าง</p>
+
+            <div class="glossary-wrap mt-6">
+              <div class="glossary-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="glossarySearch" placeholder="ค้นหาคำศัพท์ เช่น FFT, histogram, dilation..." aria-label="ค้นหาคำศัพท์" />
+              </div>
+              <div class="glossary-count" id="glossaryCount">0 คำศัพท์</div>
+              <div class="glossary-list" id="glossaryList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 28 · POST-LESSON EXAM ============ -->
+        <section class="slide-view quiz-slide" data-title="ข้อสอบหลังเรียน — แบบทดสอบท้ายบท 20 ข้อ" aria-label="สไลด์ 34: ข้อสอบหลังเรียน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">POST-LESSON EXAM</p>
+            <div id="examHeadTitle"><h2 class="slide-title">ข้อสอบหลังเรียน <span class="grad-text">20 ข้อ</span></h2></div>
+            <p class="slide-subtitle" id="examHeadSub">คำสั่ง MATLAB · Sampling/Quantization · Intensity Transformation · DFT/Transforms · Histogram · Spatial/Frequency Filtering · Morphology · Thresholding — เรียนครบทุกสไลด์เพื่อปลดล็อก ดูเฉลยได้ทันทีหลังตอบ</p>
+            <div id="quizExam3" class="mt-4"></div>
+          </div>
+        </section>
+
+      </div><!-- /viewport -->
+
+      <!-- ================= BOTTOM BAR ================= -->
+      <footer class="bottombar">
+        <button class="bb-nav-btn" id="prevBtn" aria-label="สไลด์ก่อนหน้า">
+          <i data-lucide="chevron-left"></i><span class="bb-label">ก่อนหน้า</span>
+        </button>
+
+        <div class="bb-center">
+          สไลด์ <b id="bbCounter">1</b> / <b id="bbTotal">28</b>
+        </div>
+
+        <div class="bb-tools">
+          <button class="icon-btn" id="fullscreenBtn" aria-label="ขยายสไลด์เต็มจอ" title="ขยายสไลด์">
+            <i data-lucide="maximize-2"></i>
+          </button>
+          <button class="icon-btn" id="printSlidesBtn" aria-label="พิมพ์สไลด์ทั้งหมด" title="พิมพ์สไลด์ทั้งหมด">
+            <i data-lucide="printer"></i>
+          </button>
+          <button class="icon-btn" id="printCardsBtn" aria-label="พิมพ์การ์ดสรุป" title="พิมพ์การ์ดสรุป">
+            <i data-lucide="file-output"></i>
+          </button>
+        </div>
+
+        <button class="bb-nav-btn next" id="nextBtn" aria-label="สไลด์ถัดไป">
+          <span class="bb-label">ถัดไป</span><i data-lucide="chevron-right"></i>
+        </button>
+      </footer>
+
+    </main>
+  </div><!-- /shell -->
+</div><!-- /app -->
+
+<!-- ================= DRAWER BACKDROP ================= -->
+<div id="drawerBackdrop" aria-hidden="true"></div>
+
+<!-- ================= NOTES PANEL ================= -->
+<aside class="notes-panel" id="notesPanel" aria-label="บันทึกย่อ">
+  <div class="flex items-center justify-between" style="padding:16px 20px;border-bottom:1px solid var(--border)">
+    <div>
+      <b style="font-size:15px">📝 บันทึกย่อ (Notes)</b>
+      <p class="text-3" style="font-size:12px" id="notesLabel">สไลด์ที่กำลังเรียน</p>
+    </div>
+    <button class="icon-btn" id="notesCloseBtn" aria-label="ปิดบันทึกย่อ"><i data-lucide="x"></i></button>
+  </div>
+  <textarea id="notesTextarea" placeholder="เขียนสิ่งที่ต้องจำจากสไลด์นี้...&#10;เช่น:&#10;- Sampling = ตำแหน่ง · Quantization = ค่า grey level&#10;- Negative s=L-1-r · Gamma γ&lt;1 สว่าง γ&gt;1 มืด&#10;- g = F⁻¹[H·F] · fft2/ifft2/abs/angle&#10;- dilate ขยาย · erode กร่อน · global/local/dynamic threshold" aria-label="บันทึกย่อ"></textarea>
+  <div class="text-3" style="padding:10px 20px 14px;font-size:12px;border-top:1px solid var(--border)">
+    💾 บันทึกอัตโนมัติลงในเครื่องของคุณ (localStorage)
+  </div>
+</aside>
+
+<!-- ================= TOAST ================= -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================= COMPLETION OVERLAY ================= -->
+<div id="completionOverlay" role="dialog" aria-modal="true" aria-label="จบบทเรียน">
+  <div class="card center" style="max-width:440px;position:relative;padding:40px 32px;z-index:1">
+    <div style="font-size:56px" class="float-y">🎉</div>
+    <h2 class="slide-title mt-4" style="font-size:28px">Chapter Complete!</h2>
+    <p class="text-2 mt-2" id="completionMsg">คุณเรียนครบทุกสไลด์แล้ว — ยอดเยี่ยมมาก! <b class="grad-text">Keep Learning!</b></p>
+    <div class="grid-3 mt-5" style="grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneSlides">28</b><p class="text-3" style="font-size:12px">สไลด์</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneScore">–</b><p class="text-3" style="font-size:12px">คะแนน Quiz</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px">100%</b><p class="text-3" style="font-size:12px">ความคืบหน้า</p></div>
+    </div>
+    <div class="flex items-center gap-3 mt-6 wrap" style="justify-content:center">
+      <button class="btn btn-ghost" id="completionCloseBtn">ปิด 🎊</button>
+      <button class="btn btn-primary" id="completionRestartBtn"><i data-lucide="rotate-ccw"></i> เรียนใหม่อีกครั้ง</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PRINT AREA ================= -->
+<div id="printArea" aria-hidden="true"></div>
+
+<!-- App scripts -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+<!-- Sampling grid demo -->
+<script>
+  (function () {
+    /* Spatial resolution demo: full 6x6 vs half-res 3x3 */
+    function buildGrid(id, rows, cols, seed) {
+      var g = document.getElementById(id);
+      if (!g) return;
+      var vals = [];
+      var s = seed || 1;
+      for (var i = 0; i < rows * cols; i++) {
+        s = (s * 1103515245 + 12345) % 2147483648;
+        vals.push(90 + (s % 166));
+      }
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          var cell = document.createElement('div');
+          cell.className = 'samp-cell';
+          cell.style.background = 'rgb(' + vals[r * cols + c] + ',' + vals[r * cols + c] + ',' + vals[r * cols + c] + ')';
+          cell.style.animationDelay = ((r * cols + c) * 0.04) + 's';
+          g.appendChild(cell);
+        }
+      }
+    }
+    buildGrid('sampFull', 6, 6, 7);
+    buildGrid('sampLow', 3, 3, 42);
+
+    /* histogram bars stagger */
+    var bars = document.querySelectorAll('#histBars .h-col');
+    bars.forEach(function (b, i) { b.style.animationDelay = (i * 0.06) + 's'; });
+  })();
+</script>
+</body>
+</html>
