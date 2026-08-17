@@ -574,7 +574,8 @@ window.DATA = {
 
     slides: [
       { title: "Cover — เริ่มต้น OpenCV", short: "เปิดบทเรียน" },
-      { title: "OpenCV คืออะไร — และติดตั้งยังไง", short: "OpenCV คืออะไร" },
+      { title: "เราจะเรียนอะไรบ้าง", short: "ภาพรวมบทเรียน" },
+      { title: "OpenCV คืออะไร — รู้จัก OpenCV ก่อนเริ่ม", short: "OpenCV คืออะไร" },
       { title: "ภาพใน OpenCV คือ NumPy Array", short: "ภาพ = Array" },
       { title: "อ่านภาพ — cv2.imread()", short: "cv2.imread" },
       { title: "img.shape — (Height, Width, Channels)", short: "img.shape" },
@@ -606,31 +607,31 @@ window.DATA = {
 
     sections: [
       { label: "ภาพรวมสัปดาห์", topics: [1, 2] },
-      { label: "1. รู้จัก OpenCV", topics: [3, 4, 5, 6] },
-      { label: "2. แสดงภาพ", topics: [7, 8, 9, 10] },
-      { label: "3. BGR vs RGB", topics: [11, 12] },
-      { label: "4. จัดการ Pixel", topics: [13, 14, 15, 16] },
-      { label: "5. ROI (Region Of Interest)", topics: [17, 18, 19, 20, 21, 22] },
-      { label: "ทบทวนและฝึกฝน", topics: [23, 24, 25, 26, 27, 28, 29] }
+      { label: "1. รู้จัก OpenCV", topics: [3, 4, 5, 6, 7] },
+      { label: "2. แสดงภาพ", topics: [8, 9, 10, 11] },
+      { label: "3. BGR vs RGB", topics: [12, 13] },
+      { label: "4. จัดการ Pixel", topics: [14, 15, 16, 17] },
+      { label: "5. ROI (Region Of Interest)", topics: [18, 19, 20, 21, 22, 23] },
+      { label: "ทบทวนและฝึกฝน", topics: [24, 25, 26, 27, 28, 29, 30] }
     ],
 
     quiz: [
       {
         q: "คำสั่งใดใช้อ่านภาพใน OpenCV?",
-        options: ["cv2.imread()", "cv2.imshow()", "cv2.imwrite()", "cv2.imreadall()"],
-        correct: 0,
+        options: ["cv2.imshow()", "cv2.imwrite()", "cv2.imreadall()", "cv2.imread()"],
+        correct: 3,
         explain: "cv2.imread(\"image.jpg\") อ่านไฟล์ภาพเข้ามาเป็น NumPy array"
       },
       {
         q: "img.shape ของภาพ 640×480 สี (RGB) คืนค่าอะไร?",
-        options: ["(640, 480, 3)", "(480, 640, 3)", "(3, 640, 480)", "(480, 640)"],
-        correct: 1,
+        options: ["(3, 640, 480)", "(480, 640)", "(640, 480, 3)", "(480, 640, 3)"],
+        correct: 2,
         explain: "shape = (Height, Width, Channels) = (480, 640, 3) — แถว (y) มาก่อนเสมอ"
       },
       {
         q: "img.dtype ของภาพปกติคืออะไร?",
-        options: ["uint8", "float32", "int64", "uint16"],
-        correct: 0,
+        options: ["uint16", "uint8", "float32", "int64"],
+        correct: 1,
         explain: "uint8 — เก็บค่าพิกเซล 0–255 (8 บิต ไม่มีเครื่องหมาย)"
       },
       {
@@ -641,20 +642,20 @@ window.DATA = {
       },
       {
         q: "OpenCV เก็บภาพสีเรียงช่องแบบใด?",
-        options: ["RGB", "BGR", "GRB", "RBG"],
-        correct: 1,
+        options: ["BGR", "GRB", "RBG", "RGB"],
+        correct: 3,
         explain: "OpenCV ใช้ BGR (Blue-Green-Red) — ตรงข้ามกับ RGB ที่คุ้นเคย"
       },
       {
         q: "แปลง BGR → RGB ใช้คำสั่งใด?",
-        options: ["cv2.cvtColor(img, cv2.COLOR_BGR2RGB)", "cv2.convert(img, BGR2RGB)", "cv2.bgr2rgb(img)", "img = img[..., ::-1] เท่านั้น"],
-        correct: 0,
+        options: ["cv2.bgr2rgb(img)", "img = img[..., ::-1] เท่านั้น", "cv2.cvtColor(img, cv2.COLOR_BGR2RGB)", "cv2.convert(img, BGR2RGB)"],
+        correct: 2,
         explain: "cvtColor + flag COLOR_BGR2RGB เป็นวิธีมาตรฐาน (สลับช่องด้วย slice ก็ได้เหมือนกัน)"
       },
       {
         q: "เข้าถึงพิกเซลแถว 100 คอลัมน์ 200 เขียนยังไง?",
-        options: ["img[100, 200]", "img[200, 100]", "img(100, 200)", "img[100][200][0] เฉพาะ"],
-        correct: 0,
+        options: ["img[100][200][0] เฉพาะ", "img[100, 200]", "img[200, 100]", "img(100, 200)"],
+        correct: 1,
         explain: "ลำดับเป็น [y, x] = [แถว, คอลัมน์] = img[100, 200] (y มาก่อน!)"
       },
       {
@@ -665,24 +666,27 @@ window.DATA = {
       },
       {
         q: "ตัด ROI แถว 100–300, คอลัมน์ 200–500 เขียนยังไง?",
-        options: ["roi = img[100:300, 200:500]", "roi = img[200:500, 100:300]", "roi = img[100:200, 300:500]", "roi = img[100, 300, 200, 500]"],
-        correct: 0,
+        options: ["roi = img[200:500, 100:300]", "roi = img[100:200, 300:500]", "roi = img[100, 300, 200, 500]", "roi = img[100:300, 200:500]"],
+        correct: 3,
         explain: "img[y1:y2, x1:x2] — y ก่อน x เสมอ: img[100:300, 200:500]"
       },
       {
         q: "คำสั่งใดบันทึกภาพลงไฟล์?",
-        options: ["cv2.imwrite()", "cv2.imsave()", "cv2.save()", "cv2.write()"],
-        correct: 0,
+        options: ["cv2.save()", "cv2.write()", "cv2.imwrite()", "cv2.imsave()"],
+        correct: 2,
         explain: "cv2.imwrite(\"roi.jpg\", roi) — บันทึกภาพเป็นไฟล์ (นามสกุลกำหนดรูปแบบ)"
-      },
+      }
+    ],
+
+    exam: [
       {
         q: "img.shape ของภาพ 720×1280 สี จะคืนค่าอะไร?",
-        options: ["(720, 1280, 3)", "(1280, 720, 3)", "(3, 720, 1280)", "(720, 1280)"],
-        correct: 0,
+        options: ["(1280, 720, 3)", "(3, 720, 1280)", "(720, 1280)", "(720, 1280, 3)"],
+        correct: 3,
         explain: "shape = (Height, Width, Channels) = (720, 1280, 3) — ความสูง (720 แถว) มาก่อน",
         en: {
           q: "What does img.shape return for a 720×1280 color image?",
-          options: ["(720, 1280, 3)", "(1280, 720, 3)", "(3, 720, 1280)", "(720, 1280)"],
+          options: ["(1280, 720, 3)", "(3, 720, 1280)", "(720, 1280)", "(720, 1280, 3)"],
           explain: "shape = (Height, Width, Channels) = (720, 1280, 3) — height (720 rows) comes first"
         },
         steps: [
@@ -695,12 +699,12 @@ window.DATA = {
       },
       {
         q: "ค่าตัวแรกของ img.shape คืออะไร?",
-        options: ["Height — จำนวนแถว (y)", "Width — จำนวนคอลัมน์ (x)", "Channels — จำนวนช่องสี", "Depth — ความลึกบิต"],
-        correct: 0,
+        options: ["Channels — จำนวนช่องสี", "Depth — ความลึกบิต", "Height — จำนวนแถว (y)", "Width — จำนวนคอลัมน์ (x)"],
+        correct: 2,
         explain: "ตัวแรก = Height (แถว/พิกัด y) — ตามด้วย Width แล้ว Channels",
         en: {
           q: "What is the first value of img.shape?",
-          options: ["Height — number of rows (y)", "Width — number of columns (x)", "Channels — number of color channels", "Depth — bit depth"],
+          options: ["Channels — number of color channels", "Depth — bit depth", "Height — number of rows (y)", "Width — number of columns (x)"],
           explain: "First = Height (rows / y) — then Width, then Channels"
         },
         steps: [
@@ -712,12 +716,12 @@ window.DATA = {
       },
       {
         q: "img.dtype = uint8 เก็บค่าพิกเซลได้ช่วงใด?",
-        options: ["0–255", "0–1", "−128 ถึง 127", "0–65,535"],
-        correct: 0,
+        options: ["0–65,535", "0–255", "0–1", "−128 ถึง 127"],
+        correct: 1,
         explain: "uint8 = unsigned 8-bit → 0–255 — เป็นค่าความเข้มมาตรฐานของภาพ",
         en: {
           q: "With img.dtype = uint8, what range can a pixel have?",
-          options: ["0–255", "0–1", "−128 to 127", "0–65,535"],
+          options: ["0–65,535", "0–255", "0–1", "−128 to 127"],
           explain: "uint8 = unsigned 8-bit → 0–255 — the standard intensity range of images"
         },
         steps: [
@@ -746,12 +750,12 @@ window.DATA = {
       },
       {
         q: "cv2.imshow() ต้องตามด้วยคำสั่งใดเสมอ เพื่อให้หน้าต่างไม่ปิดทันที?",
-        options: ["cv2.waitKey()", "cv2.sleep()", "cv2.pause()", "cv2.hold()"],
-        correct: 0,
+        options: ["cv2.sleep()", "cv2.pause()", "cv2.hold()", "cv2.waitKey()"],
+        correct: 3,
         explain: "imshow + waitKey(0) — waitKey รอรับคีย์บอร์ดก่อนปิดหน้าต่าง",
         en: {
           q: "Which command must follow cv2.imshow() so the window does not close instantly?",
-          options: ["cv2.waitKey()", "cv2.sleep()", "cv2.pause()", "cv2.hold()"],
+          options: ["cv2.sleep()", "cv2.pause()", "cv2.hold()", "cv2.waitKey()"],
           explain: "imshow + waitKey(0) — waitKey waits for a keyboard press before the window closes"
         },
         steps: [
@@ -763,12 +767,12 @@ window.DATA = {
       },
       {
         q: "cv2.waitKey(0) หมายความว่าอย่างไร?",
-        options: ["รอจนกว่าจะกดปุ่มใดก็ได้", "รอ 0 มิลลิวินาทีแล้วปิด", "รอให้ภาพโหลดเสร็จ", "ปิดหน้าต่างทันที"],
-        correct: 0,
+        options: ["รอให้ภาพโหลดเสร็จ", "ปิดหน้าต่างทันที", "รอจนกว่าจะกดปุ่มใดก็ได้", "รอ 0 มิลลิวินาทีแล้วปิด"],
+        correct: 2,
         explain: "waitKey(0) = รอคีย์บอร์ดอย่างไม่มีกำหนด — ใส่ตัวเลข > 0 เช่น 5000 = รอ 5 วินาที",
         en: {
           q: "What does cv2.waitKey(0) mean?",
-          options: ["Wait until any key is pressed", "Wait 0 ms then close", "Wait for the image to load", "Close the window immediately"],
+          options: ["Wait for the image to load", "Close the window immediately", "Wait until any key is pressed", "Wait 0 ms then close"],
           explain: "waitKey(0) waits for a keyboard press indefinitely — a value > 0 like 5000 waits 5 seconds"
         },
         steps: [
@@ -780,12 +784,12 @@ window.DATA = {
       },
       {
         q: "OpenCV อ่านภาพสีมาเรียงช่องแบบใด?",
-        options: ["BGR", "RGB", "CMYK", "HSV"],
-        correct: 0,
+        options: ["HSV", "BGR", "RGB", "CMYK"],
+        correct: 1,
         explain: "OpenCV ใช้ BGR (Blue-Green-Red) — สลับลำดับกับ RGB ที่คุ้นเคย",
         en: {
           q: "In what channel order does OpenCV read color images?",
-          options: ["BGR", "RGB", "CMYK", "HSV"],
+          options: ["HSV", "BGR", "RGB", "CMYK"],
           explain: "OpenCV uses BGR (Blue-Green-Red) — reversed from the familiar RGB"
         },
         steps: [
@@ -814,12 +818,12 @@ window.DATA = {
       },
       {
         q: "เข้าถึงพิกเซลแถว 100 คอลัมน์ 200 เขียนอย่างไร?",
-        options: ["img[100, 200]", "img[200, 100]", "img(100, 200)", "img[100][200, 0] เฉพาะ"],
-        correct: 0,
+        options: ["img[200, 100]", "img(100, 200)", "img[100][200, 0] เฉพาะ", "img[100, 200]"],
+        correct: 3,
         explain: "ลำดับ [y, x] = [แถว, คอลัมน์] → img[100, 200] (y มาก่อน x เสมอ)",
         en: {
           q: "How do you access the pixel at row 100, column 200?",
-          options: ["img[100, 200]", "img[200, 100]", "img(100, 200)", "img[100][200, 0] only"],
+          options: ["img[200, 100]", "img(100, 200)", "img[100][200, 0] only", "img[100, 200]"],
           explain: "Order is [y, x] = [row, column] → img[100, 200] (y always comes before x)"
         },
         steps: [
@@ -831,12 +835,12 @@ window.DATA = {
       },
       {
         q: "b, g, r = img[100, 200] — ตัวแปร b คือค่าของสีอะไร?",
-        options: ["น้ำเงิน (Blue)", "เขียว (Green)", "แดง (Red)", "เทา (Gray)"],
-        correct: 0,
+        options: ["แดง (Red)", "เทา (Gray)", "น้ำเงิน (Blue)", "เขียว (Green)"],
+        correct: 2,
         explain: "OpenCV เรียง BGR → b = Blue, g = Green, r = Red",
         en: {
           q: "In b, g, r = img[100, 200], what color is b?",
-          options: ["Blue", "Green", "Red", "Gray"],
+          options: ["Red", "Gray", "Blue", "Green"],
           explain: "OpenCV stores BGR → b = Blue, g = Green, r = Red"
         },
         steps: [
@@ -848,12 +852,12 @@ window.DATA = {
       },
       {
         q: "อยากได้เฉพาะช่องสีน้ำเงินของพิกเซล (100, 200) ใช้คำสั่งใด?",
-        options: ["img[100, 200, 0]", "img[100, 200, 1]", "img[100, 200, 2]", "img[0, 100, 200]"],
-        correct: 0,
+        options: ["img[0, 100, 200]", "img[100, 200, 0]", "img[100, 200, 1]", "img[100, 200, 2]"],
+        correct: 1,
         explain: "ดัชนีช่อง: 0 = B, 1 = G, 2 = R → น้ำเงิน = img[100, 200, 0]",
         en: {
           q: "To get only the blue channel of pixel (100, 200), which command?",
-          options: ["img[100, 200, 0]", "img[100, 200, 1]", "img[100, 200, 2]", "img[0, 100, 200]"],
+          options: ["img[0, 100, 200]", "img[100, 200, 0]", "img[100, 200, 1]", "img[100, 200, 2]"],
           explain: "Channel index: 0 = B, 1 = G, 2 = R → blue = img[100, 200, 0]"
         },
         steps: [
@@ -883,12 +887,12 @@ window.DATA = {
       },
       {
         q: "ภาพที่อ่านด้วย cv2.imread() เก็บอยู่ในรูปแบบใด?",
-        options: ["NumPy Array", "Python List", "Dictionary", "String"],
-        correct: 0,
+        options: ["Python List", "Dictionary", "String", "NumPy Array"],
+        correct: 3,
         explain: "cv2.imread() คืน NumPy array — ทำให้ใช้ numpy ต่อยอดได้ทุกอย่าง",
         en: {
           q: "What data structure does cv2.imread() return?",
-          options: ["NumPy Array", "Python List", "Dictionary", "String"],
+          options: ["Python List", "Dictionary", "String", "NumPy Array"],
           explain: "cv2.imread() returns a NumPy array — everything else builds on that"
         },
         steps: [
@@ -900,12 +904,12 @@ window.DATA = {
       },
       {
         q: "plt.imshow(img) คือการแสดงภาพด้วยไลบรารีใด?",
-        options: ["Matplotlib", "Pillow", "Seaborn", "Plotly"],
-        correct: 0,
+        options: ["Seaborn", "Plotly", "Matplotlib", "Pillow"],
+        correct: 2,
         explain: "Matplotlib (plt) — นิยมใช้ใน Jupyter/Colab แสดงภาพพร้อมกราฟได้ในที่เดียว",
         en: {
           q: "plt.imshow(img) displays images using which library?",
-          options: ["Matplotlib", "Pillow", "Seaborn", "Plotly"],
+          options: ["Seaborn", "Plotly", "Matplotlib", "Pillow"],
           explain: "Matplotlib (plt) — popular in Jupyter/Colab to show images and plots together"
         },
         steps: [
@@ -917,12 +921,12 @@ window.DATA = {
       },
       {
         q: "ภาพ 640×480 สี มี img.shape เท่ากับข้อใด?",
-        options: ["(480, 640, 3)", "(640, 480, 3)", "(3, 640, 480)", "(480, 640)"],
-        correct: 0,
+        options: ["(480, 640)", "(480, 640, 3)", "(640, 480, 3)", "(3, 640, 480)"],
+        correct: 1,
         explain: "(Height, Width, Channels) = (480, 640, 3) — ความสูง 480 มาก่อน",
         en: {
           q: "What is img.shape for a 640×480 color image?",
-          options: ["(480, 640, 3)", "(640, 480, 3)", "(3, 640, 480)", "(480, 640)"],
+          options: ["(480, 640)", "(480, 640, 3)", "(640, 480, 3)", "(3, 640, 480)"],
           explain: "(Height, Width, Channels) = (480, 640, 3) — height 480 comes first"
         },
         steps: [
@@ -952,12 +956,12 @@ window.DATA = {
       },
       {
         q: "roi = img[100:300, 200:500] ครอบคลุมพื้นที่ใด?",
-        options: ["y = 100–300, x = 200–500", "x = 100–300, y = 200–500", "y = 100–200, x = 300–500", "x = 100–200, y = 300–500"],
-        correct: 0,
+        options: ["x = 100–300, y = 200–500", "y = 100–200, x = 300–500", "x = 100–200, y = 300–500", "y = 100–300, x = 200–500"],
+        correct: 3,
         explain: "img[y1:y2, x1:x2] → y = 100–300, x = 200–500 (y มาก่อนเสมอ)",
         en: {
           q: "Which area does roi = img[100:300, 200:500] cover?",
-          options: ["y = 100–300, x = 200–500", "x = 100–300, y = 200–500", "y = 100–200, x = 300–500", "x = 100–200, y = 300–500"],
+          options: ["x = 100–300, y = 200–500", "y = 100–200, x = 300–500", "x = 100–200, y = 300–500", "y = 100–300, x = 200–500"],
           explain: "img[y1:y2, x1:x2] → y = 100–300, x = 200–500 (y always first)"
         },
         steps: [
@@ -969,12 +973,12 @@ window.DATA = {
       },
       {
         q: "cv2.destroyAllWindows() ใช้ทำอะไร?",
-        options: ["ปิดหน้าต่างทั้งหมดที่ imshow สร้างไว้", "ลบภาพออกจากหน่วยความจำ", "ปิดโปรแกรม Python", "เคลียร์ console"],
-        correct: 0,
+        options: ["ปิดโปรแกรม Python", "เคลียร์ console", "ปิดหน้าต่างทั้งหมดที่ imshow สร้างไว้", "ลบภาพออกจากหน่วยความจำ"],
+        correct: 2,
         explain: "destroyAllWindows() ปิดหน้าต่างแสดงภาพทุกอัน — ใช้คู่กับ imshow/waitKey",
         en: {
           q: "What does cv2.destroyAllWindows() do?",
-          options: ["Closes all windows created by imshow", "Deletes the image from memory", "Quits Python", "Clears the console"],
+          options: ["Quits Python", "Clears the console", "Closes all windows created by imshow", "Deletes the image from memory"],
           explain: "destroyAllWindows() closes every display window — used with imshow/waitKey"
         },
         steps: [
@@ -986,12 +990,12 @@ window.DATA = {
       },
       {
         q: "plt.hist(img.ravel(), bins=256) ใช้ทำอะไร?",
-        options: ["วาด Histogram ของค่าพิกเซล", "แปลงภาพเป็นขาวดำ", "หมุนภาพ 256 องศา", "ปรับขนาดภาพเป็น 256×256"],
-        correct: 0,
+        options: ["ปรับขนาดภาพเป็น 256×256", "วาด Histogram ของค่าพิกเซล", "แปลงภาพเป็นขาวดำ", "หมุนภาพ 256 องศา"],
+        correct: 1,
         explain: "ravel() ปรับ array เป็นเส้นตรง แล้ว hist วาดการกระจายของค่าพิกเซล 256 ช่อง",
         en: {
           q: "What does plt.hist(img.ravel(), bins=256) do?",
-          options: ["Draws a histogram of pixel values", "Converts the image to grayscale", "Rotates the image 256 degrees", "Resizes the image to 256×256"],
+          options: ["Resizes the image to 256×256", "Draws a histogram of pixel values", "Converts the image to grayscale", "Rotates the image 256 degrees"],
           explain: "ravel() flattens the array, then hist plots the distribution of pixel values into 256 bins"
         },
         steps: [
@@ -1142,20 +1146,20 @@ window.DATA = {
     quiz: [
       {
         q: "การแปลงภาพจากอนาล็อกเป็นดิจิทัลมี 2 ขั้นตอนคืออะไร?",
-        options: ["Sampling และ Quantization", "Coding และ Decoding", "Filtering และ Threshold", "Compression และ Decompression"],
-        correct: 0,
+        options: ["Coding และ Decoding", "Filtering และ Threshold", "Compression และ Decompression", "Sampling และ Quantization"],
+        correct: 3,
         explain: "Sampling (เก็บตัวอย่างตำแหน่ง) + Quantization (ปัดค่าระดับความเข้ม)"
       },
       {
         q: "Sampling Rate กำหนดอะไร?",
-        options: ["ความละเอียดเชิงพื้นที่ (Spatial Resolution)", "จำนวนสีของภาพ", "ขนาดไฟล์ที่บีบอัด", "ความเร็วของกล้อง"],
-        correct: 0,
+        options: ["ขนาดไฟล์ที่บีบอัด", "ความเร็วของกล้อง", "ความละเอียดเชิงพื้นที่ (Spatial Resolution)", "จำนวนสีของภาพ"],
+        correct: 2,
         explain: "Sampling rate กำหนด spatial resolution — เก็บจุดกี่จุดต่อพื้นที่"
       },
       {
         q: "Quantization กำหนดอะไร?",
-        options: ["จำนวนระดับความเข้ม (Grey Levels)", "ความกว้างของภาพ", "ความเร็วชัตเตอร์", "จำนวนช่องสี"],
-        correct: 0,
+        options: ["จำนวนช่องสี", "จำนวนระดับความเข้ม (Grey Levels)", "ความกว้างของภาพ", "ความเร็วชัตเตอร์"],
+        correct: 1,
         explain: "Quantization level กำหนดจำนวน grey levels — ปัดค่าความเข้มเป็นระดับที่จำกัด"
       },
       {
@@ -1166,20 +1170,20 @@ window.DATA = {
       },
       {
         q: "สูตรลด 256 → 16 ระดับคือข้อใด?",
-        options: ["q = (img // 16) * 16 + 7", "q = (img // 256) * 16", "q = img % 16", "q = img - 240"],
-        correct: 0,
+        options: ["q = (img // 256) * 16", "q = img % 16", "q = img - 240", "q = (img // 16) * 16 + 7"],
+        correct: 3,
         explain: "q = (img // 16) × 16 + 7 — แบ่ง 0–255 เป็น 16 ช่วง แล้วใช้ค่ากลางแต่ละช่วง"
       },
       {
         q: "Bit-Plane Slicing คืออะไร?",
-        options: ["แยกภาพออกเป็นชั้นบิต (bit 0–7)", "ตัดภาพเป็นชิ้นเล็ก ๆ", "บีบอัดภาพ 50%", "หมุนภาพทีละบิต"],
-        correct: 0,
+        options: ["บีบอัดภาพ 50%", "หมุนภาพทีละบิต", "แยกภาพออกเป็นชั้นบิต (bit 0–7)", "ตัดภาพเป็นชิ้นเล็ก ๆ"],
+        correct: 2,
         explain: "แยกแต่ละบิตของค่าพิกเซลออกมาเป็นภาพขาวดำ 8 ชั้น (bit plane)"
       },
       {
         q: "Bit 7 (MSB) มีน้ำหนักเท่าไร?",
-        options: ["128", "64", "16", "1"],
-        correct: 0,
+        options: ["1", "128", "64", "16"],
+        correct: 1,
         explain: "Bit 7 = 2^7 = 128 — เป็นบิตที่สำคัญสุดต่อโครงสร้างภาพ"
       },
       {
@@ -1190,24 +1194,27 @@ window.DATA = {
       },
       {
         q: "Downsample ภาพ 1024×1024 → 512×512 ไฟล์เล็กลงกี่เท่า?",
-        options: ["¼ เท่า", "½ เท่า", "2 เท่า", "เท่าเดิม"],
-        correct: 0,
+        options: ["½ เท่า", "2 เท่า", "เท่าเดิม", "¼ เท่า"],
+        correct: 3,
         explain: "พิกเซลเหลือ (512/1024)² = ¼ — ไฟล์เล็กลง ¼ (ลด 75%)"
       },
       {
         q: "Image Pyramid คืออะไร?",
-        options: ["ภาพขนาดต่าง ๆ เรียงซ้อนกัน", "ภาพ 3 มิติ", "ภาพที่บีบอัดแล้ว", "ภาพขาวดำ"],
-        correct: 0,
+        options: ["ภาพที่บีบอัดแล้ว", "ภาพขาวดำ", "ภาพขนาดต่าง ๆ เรียงซ้อนกัน", "ภาพ 3 มิติ"],
+        correct: 2,
         explain: "ชุดภาพที่ downsample ต่อเนื่องกัน (เช่น 1024 → 512 → 256 → 128) ใช้ในงาน Object Detection"
-      },
+      }
+    ],
+
+    exam: [
       {
         q: "การแปลงภาพจากอนาล็อกเป็นดิจิทัลมี 2 ขั้นตอนคืออะไร?",
-        options: ["Sampling และ Quantization", "Encoding และ Decoding", "Filtering และ Thresholding", "Resize และ Rotate"],
-        correct: 0,
+        options: ["Encoding และ Decoding", "Filtering และ Thresholding", "Resize และ Rotate", "Sampling และ Quantization"],
+        correct: 3,
         explain: "Sampling (เก็บตัวอย่างตำแหน่ง/space) + Quantization (ปัดค่าระดับความเข้ม/amplitude)",
         en: {
           q: "What are the two steps to convert an analog image to digital?",
-          options: ["Sampling and Quantization", "Encoding and Decoding", "Filtering and Thresholding", "Resize and Rotate"],
+          options: ["Encoding and Decoding", "Filtering and Thresholding", "Resize and Rotate", "Sampling and Quantization"],
           explain: "Sampling (capture positions/space) + Quantization (round intensity levels/amplitude)"
         },
         steps: [
@@ -1220,12 +1227,12 @@ window.DATA = {
       },
       {
         q: "Sampling Rate กำหนดคุณภาพด้านใดของภาพดิจิทัล?",
-        options: ["ความละเอียดเชิงพื้นที่ (Spatial Resolution)", "จำนวนระดับเทา", "ความสดของสี", "ความเร็วเฟรม"],
-        correct: 0,
+        options: ["ความสดของสี", "ความเร็วเฟรม", "ความละเอียดเชิงพื้นที่ (Spatial Resolution)", "จำนวนระดับเทา"],
+        correct: 2,
         explain: "Sampling rate กำหนด spatial resolution — เก็บตัวอย่างกี่จุดต่อพื้นที่",
         en: {
           q: "What quality of the digital image does the sampling rate determine?",
-          options: ["Spatial resolution", "Number of gray levels", "Color saturation", "Frame rate"],
+          options: ["Color saturation", "Frame rate", "Spatial resolution", "Number of gray levels"],
           explain: "Sampling rate determines spatial resolution — how many samples per area"
         },
         steps: [
@@ -1238,12 +1245,12 @@ window.DATA = {
       },
       {
         q: "Quantization Level กำหนดอะไร?",
-        options: ["จำนวนระดับเทา (Grey Levels) ในภาพ", "ความกว้างของภาพ", "จำนวนเฟรมต่อวินาที", "ขนาดไฟล์ที่บีบอัด"],
-        correct: 0,
+        options: ["ขนาดไฟล์ที่บีบอัด", "จำนวนระดับเทา (Grey Levels) ในภาพ", "ความกว้างของภาพ", "จำนวนเฟรมต่อวินาที"],
+        correct: 1,
         explain: "Quantization level = จำนวน grey levels — เช่น 8 บิต = 256 ระดับ",
         en: {
           q: "What does the quantization level determine?",
-          options: ["The number of gray levels in the image", "The width of the image", "Frames per second", "Compressed file size"],
+          options: ["Compressed file size", "The number of gray levels in the image", "The width of the image", "Frames per second"],
           explain: "Quantization level = number of gray levels — e.g. 8 bits = 256 levels"
         },
         steps: [
@@ -1283,12 +1290,12 @@ window.DATA = {
       },
       {
         q: "จากสูตร q = (img // 16) * 16 + 7 ถ้า img = 210 จะได้ค่าใด?",
-        options: ["215", "207", "210", "240"],
-        correct: 0,
+        options: ["207", "210", "240", "215"],
+        correct: 3,
         explain: "210 // 16 = 13 → 13 × 16 + 7 = 215",
         en: {
           q: "Using q = (img // 16) * 16 + 7, if img = 210 what is q?",
-          options: ["215", "207", "210", "240"],
+          options: ["207", "210", "240", "215"],
           explain: "210 // 16 = 13 → 13 × 16 + 7 = 215"
         },
         steps: [
@@ -1300,12 +1307,12 @@ window.DATA = {
       },
       {
         q: "พิกเซล [210, 219, 223] ผ่าน quantization 16 ระดับ (q = (img//16)*16+7) จะได้?",
-        options: ["[215, 215, 215]", "[208, 208, 208]", "[210, 219, 223]", "[215, 223, 223]"],
-        correct: 0,
+        options: ["[210, 219, 223]", "[215, 223, 223]", "[215, 215, 215]", "[208, 208, 208]"],
+        correct: 2,
         explain: "210→215 · 219→215 · 223→215 เพราะทั้ง 3 อยู่ในช่วง 208–223 ช่วงเดียวกัน",
         en: {
           q: "Pixels [210, 219, 223] through 16-level quantization (q = (img//16)*16+7) become?",
-          options: ["[215, 215, 215]", "[208, 208, 208]", "[210, 219, 223]", "[215, 223, 223]"],
+          options: ["[210, 219, 223]", "[215, 223, 223]", "[215, 215, 215]", "[208, 208, 208]"],
           explain: "210→215 · 219→215 · 223→215 — all three fall in the same 208–223 range"
         },
         steps: [
@@ -1318,12 +1325,12 @@ window.DATA = {
       },
       {
         q: "ถ้า img = 108 ด้วยสูตรเดียวกัน (q = (img//16)*16+7) จะได้ค่าใด?",
-        options: ["103", "107", "108", "111"],
-        correct: 0,
+        options: ["111", "103", "107", "108"],
+        correct: 1,
         explain: "108 // 16 = 6 → 6 × 16 + 7 = 103",
         en: {
           q: "With the same formula (q = (img//16)*16+7), img = 108 gives?",
-          options: ["103", "107", "108", "111"],
+          options: ["111", "103", "107", "108"],
           explain: "108 // 16 = 6 → 6 × 16 + 7 = 103"
         },
         steps: [
@@ -1353,12 +1360,12 @@ window.DATA = {
       },
       {
         q: "Bit 7 (MSB) ของพิกเซล 8-bit มีน้ำหนักเท่าไร?",
-        options: ["128", "64", "16", "1"],
-        correct: 0,
+        options: ["64", "16", "1", "128"],
+        correct: 3,
         explain: "MSB = 2^7 = 128 — บิตที่มีผลต่อค่า/โครงสร้างภาพมากที่สุด",
         en: {
           q: "What is the weight of bit 7 (MSB) in an 8-bit pixel?",
-          options: ["128", "64", "16", "1"],
+          options: ["64", "16", "1", "128"],
           explain: "MSB = 2^7 = 128 — the bit that most affects the value/structure of the image"
         },
         steps: [
@@ -1370,12 +1377,12 @@ window.DATA = {
       },
       {
         q: "บิต 3–0 (LSB) เก็บข้อมูลแบบใดของภาพ?",
-        options: ["รายละเอียดเล็ก ๆ และ noise", "โครงสร้างหลักของภาพ", "สีแดงทั้งหมด", "ขนาดภาพ"],
-        correct: 0,
+        options: ["สีแดงทั้งหมด", "ขนาดภาพ", "รายละเอียดเล็ก ๆ และ noise", "โครงสร้างหลักของภาพ"],
+        correct: 2,
         explain: "LSB (น้ำหนัก 8,4,2,1) มีผลต่อค่าพิกเซลน้อย → เก็บรายละเอียดเล็ก ๆ + noise",
         en: {
           q: "What kind of information do bits 3–0 (LSB) hold?",
-          options: ["Fine details and noise", "The main structure of the image", "All the red color", "Image size"],
+          options: ["All the red color", "Image size", "Fine details and noise", "The main structure of the image"],
           explain: "LSB (weights 8,4,2,1) barely changes pixel values → fine details + noise"
         },
         steps: [
@@ -1393,7 +1400,7 @@ window.DATA = {
           "ลบบิต 7 ออก 1 บิต",
           "เก็บเฉพาะบิตคู่"
         ],
-        correct: 0,
+        correct: 1,
         explain: "บิต 4–7 เก็บโครงสร้างหลักของภาพ → เก็บครึ่งบน ทิ้งครึ่งล่าง = เหลือข้อมูล 50%",
         en: {
           q: "The bit-plane image compression principle (saving 50%) is?",
@@ -1432,12 +1439,12 @@ window.DATA = {
       },
       {
         q: "ค่า 255 ในเลขฐานสอง 8 บิตคือข้อใด?",
-        options: ["11111111", "10000000", "11110000", "00001111"],
-        correct: 0,
+        options: ["10000000", "11110000", "00001111", "11111111"],
+        correct: 3,
         explain: "255 = 128+64+32+16+8+4+2+1 = ทุกบิตเป็น 1 = 11111111",
         en: {
           q: "What is 255 in 8-bit binary?",
-          options: ["11111111", "10000000", "11110000", "00001111"],
+          options: ["10000000", "11110000", "00001111", "11111111"],
           explain: "255 = 128+64+32+16+8+4+2+1 = all bits 1 = 11111111"
         },
         steps: [
@@ -1449,12 +1456,12 @@ window.DATA = {
       },
       {
         q: "(ex >> 4) & 1 ดึงบิตตำแหน่งใดของค่า ex?",
-        options: ["Bit 4", "Bit 3", "Bit 5", "Bit 0"],
-        correct: 0,
+        options: ["Bit 5", "Bit 0", "Bit 4", "Bit 3"],
+        correct: 2,
         explain: ">> 4 เลื่อนบิต 4 มายังตำแหน่งล่างสุด แล้ว & 1 ตัดเอา — ได้บิตที่ 4",
         en: {
           q: "(ex >> 4) & 1 extracts which bit of ex?",
-          options: ["Bit 4", "Bit 3", "Bit 5", "Bit 0"],
+          options: ["Bit 5", "Bit 0", "Bit 4", "Bit 3"],
           explain: ">> 4 moves bit 4 to the lowest position, then & 1 keeps it — that is bit 4"
         },
         steps: [
@@ -1466,12 +1473,12 @@ window.DATA = {
       },
       {
         q: "Downsample ภาพ 1024×1024 → 512×512 เหลือจำนวนพิกเซลกี่เท่าของเดิม?",
-        options: ["¼ เท่า", "½ เท่า", "2 เท่า", "เท่าเดิม"],
-        correct: 0,
+        options: ["เท่าเดิม", "¼ เท่า", "½ เท่า", "2 เท่า"],
+        correct: 1,
         explain: "512/1024 = ½ ทั้ง 2 ด้าน → พื้นที่ (½)² = ¼",
         en: {
           q: "Downsampling 1024×1024 → 512×512 leaves what fraction of pixels?",
-          options: ["1/4", "1/2", "2×", "Same"],
+          options: ["Same", "1/4", "1/2", "2×"],
           explain: "512/1024 = ½ on both sides → area (½)² = 1/4"
         },
         steps: [
@@ -1500,12 +1507,12 @@ window.DATA = {
       },
       {
         q: "Image Pyramid นำไปใช้ในงานใด?",
-        options: ["Object Detection — SIFT · SURF · ORB · Optical Flow", "การพิมพ์ภาพ", "การเปลี่ยนสีภาพ", "การลบพื้นหลังด้วยมือ"],
-        correct: 0,
+        options: ["การพิมพ์ภาพ", "การเปลี่ยนสีภาพ", "การลบพื้นหลังด้วยมือ", "Object Detection — SIFT · SURF · ORB · Optical Flow"],
+        correct: 3,
         explain: "Pyramid (ภาพหลายขนาด) ช่วยให้อัลกอริทึมตรวจจับวัตถุ/จุดเด่นได้หลาย scale",
         en: {
           q: "Image pyramids are used in which task?",
-          options: ["Object detection — SIFT · SURF · ORB · Optical Flow", "Printing images", "Recoloring images", "Manual background removal"],
+          options: ["Printing images", "Recoloring images", "Manual background removal", "Object detection — SIFT · SURF · ORB · Optical Flow"],
           explain: "Pyramids (multi-scale images) let detection/feature algorithms work at many scales"
         },
         steps: [
@@ -1518,12 +1525,12 @@ window.DATA = {
       },
       {
         q: "ภาพ 5 บิตต่อพิกเซล มีระดับเทากี่ระดับ?",
-        options: ["32", "16", "64", "256"],
-        correct: 0,
+        options: ["64", "256", "32", "16"],
+        correct: 2,
         explain: "2^5 = 32 ระดับ",
         en: {
           q: "An image with 5 bits per pixel has how many gray levels?",
-          options: ["32", "16", "64", "256"],
+          options: ["64", "256", "32", "16"],
           explain: "2^5 = 32 levels"
         },
         steps: [
@@ -1535,12 +1542,12 @@ window.DATA = {
       },
       {
         q: "Sampling rate สูงขึ้นมีผลอย่างไรต่อภาพ?",
-        options: ["ความละเอียดเชิงพื้นที่ดีขึ้น ภาพชัดขึ้น", "ระดับเทาเพิ่มขึ้น", "สีสดขึ้น", "ไฟล์เล็กลงเสมอ"],
-        correct: 0,
+        options: ["ไฟล์เล็กลงเสมอ", "ความละเอียดเชิงพื้นที่ดีขึ้น ภาพชัดขึ้น", "ระดับเทาเพิ่มขึ้น", "สีสดขึ้น"],
+        correct: 1,
         explain: "เก็บตัวอย่างถี่ขึ้น → พิกเซลต่อพื้นที่มากขึ้น → รายละเอียดเชิงพื้นที่ดีขึ้น",
         en: {
           q: "What happens when the sampling rate increases?",
-          options: ["Spatial resolution improves, image is sharper", "More gray levels", "Colors get more vivid", "File always gets smaller"],
+          options: ["File always gets smaller", "Spatial resolution improves, image is sharper", "More gray levels", "Colors get more vivid"],
           explain: "More samples per area → more pixels → better spatial detail"
         },
         steps: [
@@ -1667,20 +1674,20 @@ window.DATA = {
     quiz: [
       {
         q: "เพิ่มความสว่างด้วย cv2.convertScaleAbs ใช้พารามิเตอร์ใด?",
-        options: ["beta (บวกค่าคงที่)", "alpha (คูณค่าคงที่)", "gamma", "threshold"],
-        correct: 0,
+        options: ["alpha (คูณค่าคงที่)", "gamma", "threshold", "beta (บวกค่าคงที่)"],
+        correct: 3,
         explain: "beta = ค่าที่บวกเข้ากับทุกพิกเซล → ภาพสว่างขึ้น (beta=50) หรือมืดลง (beta=-50)"
       },
       {
         q: "เพิ่มคอนทราสต์ใช้พารามิเตอร์ใด?",
-        options: ["alpha (คูณค่าคงที่)", "beta (บวกค่าคงที่)", "kernel", "borderType"],
-        correct: 0,
+        options: ["kernel", "borderType", "alpha (คูณค่าคงที่)", "beta (บวกค่าคงที่)"],
+        correct: 2,
         explain: "alpha = ตัวคูณ — alpha > 1 เพิ่ม contrast, alpha < 1 ลด contrast"
       },
       {
         q: "สูตรรวม Brightness + Contrast คือข้อใด?",
-        options: ["new = (alpha × pixel) + beta", "new = pixel + alpha × beta", "new = (pixel + beta) × alpha", "new = alpha / pixel + beta"],
-        correct: 0,
+        options: ["new = alpha / pixel + beta", "new = (alpha × pixel) + beta", "new = pixel + alpha × beta", "new = (pixel + beta) × alpha"],
+        correct: 1,
         explain: "new = (alpha × pixel) + beta — คูณ contrast ก่อนแล้วบวก brightness"
       },
       {
@@ -1691,20 +1698,20 @@ window.DATA = {
       },
       {
         q: "Histogram ของภาพคืออะไร?",
-        options: ["การกระจายของจำนวนพิกเซลต่อระดับความเข้ม", "เส้นขอบของวัตถุ", "ตารางสีของภาพ", "ขนาดของภาพ"],
-        correct: 0,
+        options: ["เส้นขอบของวัตถุ", "ตารางสีของภาพ", "ขนาดของภาพ", "การกระจายของจำนวนพิกเซลต่อระดับความเข้ม"],
+        correct: 3,
         explain: "Histogram นับว่าค่า 0–255 มีพิกเซลเท่าไร — บอกความสว่าง/คอนทราสต์ของภาพ"
       },
       {
         q: "ภาพมืดเกินไป histogram จะเป็นแบบใด?",
-        options: ["ค่าส่วนใหญ่อยู่ทางซ้าย (ค่าต่ำ)", "ค่าส่วนใหญ่อยู่ทางขวา (ค่าสูง)", "กระจายทั่ว", "ว่างเปล่า"],
-        correct: 0,
+        options: ["กระจายทั่ว", "ว่างเปล่า", "ค่าส่วนใหญ่อยู่ทางซ้าย (ค่าต่ำ)", "ค่าส่วนใหญ่อยู่ทางขวา (ค่าสูง)"],
+        correct: 2,
         explain: "พิกเซลส่วนใหญ่มีค่าต่ำ → แท่ง histogram รวมอยู่ด้านซ้าย"
       },
       {
         q: "Histogram Equalization ใช้ทำอะไร?",
-        options: ["กระจาย histogram ให้ทั่วทั้งช่วง 0–255", "ทำให้ภาพเบลอ", "ตัดภาพเป็นส่วน ๆ", "แปลงเป็นขาวดำ"],
-        correct: 0,
+        options: ["แปลงเป็นขาวดำ", "กระจาย histogram ให้ทั่วทั้งช่วง 0–255", "ทำให้ภาพเบลอ", "ตัดภาพเป็นส่วน ๆ"],
+        correct: 1,
         explain: "Equalization ยืด histogram ที่เบียดกันให้กระจายทั่ว → คอนทราสต์ดีขึ้น"
       },
       {
@@ -1715,24 +1722,27 @@ window.DATA = {
       },
       {
         q: "CLAHE ต่างจาก Histogram Equalization อย่างไร?",
-        options: ["ปรับเป็นบล็อกเล็ก ๆ (local) แทนทั้งภาพ", "เร็วกว่าเสมอ", "ใช้กับภาพสีเท่านั้น", "ไม่มี parameter"],
-        correct: 0,
+        options: ["เร็วกว่าเสมอ", "ใช้กับภาพสีเท่านั้น", "ไม่มี parameter", "ปรับเป็นบล็อกเล็ก ๆ (local) แทนทั้งภาพ"],
+        correct: 3,
         explain: "CLAHE แบ่งภาพเป็นบล็อกแล้ว equalize ทีละบล็อก → กัน noise โผล่ในบริเวณสว่าง"
       },
       {
         q: "Contrast Stretching คืออะไร?",
-        options: ["ยืดช่วงค่าที่แคบให้กว้างขึ้น", "บีบช่วงค่าให้แคบลง", "เปลี่ยนสีภาพ", "หมุนภาพ"],
-        correct: 0,
+        options: ["เปลี่ยนสีภาพ", "หมุนภาพ", "ยืดช่วงค่าที่แคบให้กว้างขึ้น", "บีบช่วงค่าให้แคบลง"],
+        correct: 2,
         explain: "ถ้าค่าพิกเซลอยู่แค่ 50–150 ให้ยืดเป็น 0–255 → เห็นความต่างชัดขึ้น"
-      },
+      }
+    ],
+
+    exam: [
       {
         q: "cv2.convertScaleAbs(img, beta=50) มีผลต่อภาพอย่างไร?",
-        options: ["ภาพสว่างขึ้น 50 ระดับ", "ภาพมืดลง 50 ระดับ", "คอนทราสต์เพิ่มขึ้น", "ภาพเบลอ"],
-        correct: 0,
+        options: ["ภาพมืดลง 50 ระดับ", "คอนทราสต์เพิ่มขึ้น", "ภาพเบลอ", "ภาพสว่างขึ้น 50 ระดับ"],
+        correct: 3,
         explain: "beta คือค่าที่บวกทุกพิกเซล → beta=50 สว่างขึ้น · beta=-50 มืดลง (ปรับ brightness)",
         en: {
           q: "What does cv2.convertScaleAbs(img, beta=50) do?",
-          options: ["Brightens the image by 50 levels", "Darkens the image by 50 levels", "Increases contrast", "Blurs the image"],
+          options: ["Darkens the image by 50 levels", "Increases contrast", "Blurs the image", "Brightens the image by 50 levels"],
           explain: "beta is added to every pixel → beta=50 brightens · beta=-50 darkens (brightness)"
         },
         steps: [
@@ -1745,12 +1755,12 @@ window.DATA = {
       },
       {
         q: "cv2.convertScaleAbs(img, alpha=1.8) มีผลต่อภาพอย่างไร?",
-        options: ["คอนทราสต์เพิ่มขึ้น (alpha > 1)", "คอนทราสต์ลดลง", "ภาพมืดลง", "ภาพเบลอ"],
-        correct: 0,
+        options: ["ภาพมืดลง", "ภาพเบลอ", "คอนทราสต์เพิ่มขึ้น (alpha > 1)", "คอนทราสต์ลดลง"],
+        correct: 2,
         explain: "alpha คือตัวคูณ — alpha > 1 ขยายระยะห่างของค่า → contrast เพิ่มขึ้น",
         en: {
           q: "What does cv2.convertScaleAbs(img, alpha=1.8) do?",
-          options: ["Increases contrast (alpha > 1)", "Decreases contrast", "Darkens the image", "Blurs the image"],
+          options: ["Darkens the image", "Blurs the image", "Increases contrast (alpha > 1)", "Decreases contrast"],
           explain: "alpha is a multiplier — alpha > 1 widens the gaps between values → higher contrast"
         },
         steps: [
@@ -1762,12 +1772,12 @@ window.DATA = {
       },
       {
         q: "สูตรรวม Brightness + Contrast ใน convertScaleAbs คือข้อใด?",
-        options: ["new = (alpha × pixel) + beta", "new = pixel + (alpha × beta)", "new = (pixel + beta) ÷ alpha", "new = alpha + beta + pixel"],
-        correct: 0,
+        options: ["new = alpha + beta + pixel", "new = (alpha × pixel) + beta", "new = pixel + (alpha × beta)", "new = (pixel + beta) ÷ alpha"],
+        correct: 1,
         explain: "คูณด้วย alpha (contrast) ก่อน แล้วบวก beta (brightness) — ตรงกับโค้ด convertScaleAbs",
         en: {
           q: "What is the combined brightness + contrast formula in convertScaleAbs?",
-          options: ["new = (alpha × pixel) + beta", "new = pixel + (alpha × beta)", "new = (pixel + beta) ÷ alpha", "new = alpha + beta + pixel"],
+          options: ["new = alpha + beta + pixel", "new = (alpha × pixel) + beta", "new = pixel + (alpha × beta)", "new = (pixel + beta) ÷ alpha"],
           explain: "Multiply by alpha (contrast) first, then add beta (brightness) — matches convertScaleAbs"
         },
         steps: [
@@ -1796,12 +1806,12 @@ window.DATA = {
       },
       {
         q: "พารามิเตอร์ beta ใน convertScaleAbs มีค่าเป็นลบได้หรือไม่ และผลเป็นอย่างไร?",
-        options: ["ได้ — beta=-50 ทำให้ภาพมืดลง", "ไม่ได้ — beta ต้องเป็นบวกเสมอ", "ได้แต่ภาพพัง", "ไม่เกี่ยวกัน"],
-        correct: 0,
+        options: ["ไม่ได้ — beta ต้องเป็นบวกเสมอ", "ได้แต่ภาพพัง", "ไม่เกี่ยวกัน", "ได้ — beta=-50 ทำให้ภาพมืดลง"],
+        correct: 3,
         explain: "beta เป็นตัวบวกได้ทั้งบวก/ลบ — ลบ = ลด brightness (ภาพมืดลง)",
         en: {
           q: "Can beta in convertScaleAbs be negative, and what happens?",
-          options: ["Yes — beta=-50 darkens the image", "No — beta must always be positive", "Yes but it breaks the image", "Irrelevant"],
+          options: ["No — beta must always be positive", "Yes but it breaks the image", "Irrelevant", "Yes — beta=-50 darkens the image"],
           explain: "beta can be positive or negative — negative lowers brightness (darker image)"
         },
         steps: [
@@ -1813,12 +1823,12 @@ window.DATA = {
       },
       {
         q: "cv2.convertScaleAbs() คลิปค่าเกินช่วงเท่าไร?",
-        options: ["0–255 (uint8)", "0–1", "−128 ถึง 127", "ไม่คลิป"],
-        correct: 0,
+        options: ["−128 ถึง 127", "ไม่คลิป", "0–255 (uint8)", "0–1"],
+        correct: 2,
         explain: "ผลลัพธ์ที่เกิน 255 ถูกตัดเป็น 255 และต่ำกว่า 0 ถูกตัดเป็น 0 — เพราะ dtype เป็น uint8",
         en: {
           q: "What range does cv2.convertScaleAbs() clip values to?",
-          options: ["0–255 (uint8)", "0–1", "−128 to 127", "No clipping"],
+          options: ["−128 to 127", "No clipping", "0–255 (uint8)", "0–1"],
           explain: "Values above 255 clamp to 255 and below 0 clamp to 0 — dtype is uint8"
         },
         steps: [
@@ -1830,12 +1840,12 @@ window.DATA = {
       },
       {
         q: "ถ้า pixel = 200 และ alpha = 1.8 ผลลัพธ์หลังคลิปคือเท่าไร?",
-        options: ["255", "360", "200", "180"],
-        correct: 0,
+        options: ["180", "255", "360", "200"],
+        correct: 1,
         explain: "200 × 1.8 = 360 → เกิน 255 → คลิปเป็น 255",
         en: {
           q: "If pixel = 200 and alpha = 1.8, what is the clipped result?",
-          options: ["255", "360", "200", "180"],
+          options: ["180", "255", "360", "200"],
           explain: "200 × 1.8 = 360 → exceeds 255 → clipped to 255"
         },
         steps: [
@@ -1864,12 +1874,12 @@ window.DATA = {
       },
       {
         q: "Gamma γ < 1 (เช่น 0.5) มีผลต่อภาพอย่างไร?",
-        options: ["ภาพสว่างขึ้น เห็นเงามืดชัดขึ้น", "ภาพมืดลง", "ภาพไม่เปลี่ยน", "ภาพกลับหัว"],
-        correct: 0,
+        options: ["ภาพมืดลง", "ภาพไม่เปลี่ยน", "ภาพกลับหัว", "ภาพสว่างขึ้น เห็นเงามืดชัดขึ้น"],
+        correct: 3,
         explain: "γ < 1 (เศษส่วน) ดันค่ามืดให้สูงขึ้น → ภาพสว่างขึ้น เน้นรายละเอียดในเงา",
         en: {
           q: "What does gamma γ < 1 (e.g. 0.5) do?",
-          options: ["Brightens the image, reveals shadows", "Darkens the image", "No change", "Flips the image"],
+          options: ["Darkens the image", "No change", "Flips the image", "Brightens the image, reveals shadows"],
           explain: "γ < 1 (fraction) pushes dark values up → brighter image, more shadow detail"
         },
         steps: [
@@ -1881,12 +1891,12 @@ window.DATA = {
       },
       {
         q: "Gamma γ > 1 (เช่น 2.2) มีผลต่อภาพอย่างไร?",
-        options: ["ภาพมืดลง", "ภาพสว่างขึ้น", "ภาพไม่เปลี่ยน", "ภาพคมขึ้น"],
-        correct: 0,
+        options: ["ภาพไม่เปลี่ยน", "ภาพคมขึ้น", "ภาพมืดลง", "ภาพสว่างขึ้น"],
+        correct: 2,
         explain: "γ > 1 ดันค่าสว่างให้ต่ำลง → ภาพมืดลง — คล้ายฟิล์มมืดของกล้อง",
         en: {
           q: "What does gamma γ > 1 (e.g. 2.2) do?",
-          options: ["Darkens the image", "Brightens the image", "No change", "Sharpens the image"],
+          options: ["No change", "Sharpens the image", "Darkens the image", "Brightens the image"],
           explain: "γ > 1 pulls bright values down → darker image — like a dark film look"
         },
         steps: [
@@ -1898,12 +1908,12 @@ window.DATA = {
       },
       {
         q: "Gamma γ = 1 มีผลต่อภาพอย่างไร?",
-        options: ["ภาพไม่เปลี่ยน (s = r)", "ภาพสว่างขึ้น", "ภาพมืดลง", "ภาพเบลอ"],
-        correct: 0,
+        options: ["ภาพเบลอ", "ภาพไม่เปลี่ยน (s = r)", "ภาพสว่างขึ้น", "ภาพมืดลง"],
+        correct: 1,
         explain: "r^1 = r → ค่าเท่าเดิมทุกพิกเซล → ภาพเหมือนเดิม",
         en: {
           q: "What does gamma γ = 1 do?",
-          options: ["No change (s = r)", "Brightens", "Darkens", "Blurs"],
+          options: ["Blurs", "No change (s = r)", "Brightens", "Darkens"],
           explain: "r^1 = r → every pixel stays the same → identical image"
         },
         steps: [
@@ -1932,12 +1942,12 @@ window.DATA = {
       },
       {
         q: "Logarithmic Transformation เหมาะกับภาพแบบใด?",
-        options: ["ภาพที่มืดมาก ต้องการเน้นรายละเอียดในเงา", "ภาพสว่างเกินไป", "ภาพเบลอ", "ภาพสีสด"],
-        correct: 0,
+        options: ["ภาพสว่างเกินไป", "ภาพเบลอ", "ภาพสีสด", "ภาพที่มืดมาก ต้องการเน้นรายละเอียดในเงา"],
+        correct: 3,
         explain: "log ยกค่ามืดขึ้นมากกว่าค่าสว่าง → เน้นรายละเอียดในบริเวณมืด (dynamic range กว้าง)",
         en: {
           q: "What kind of image is Logarithmic Transformation for?",
-          options: ["Very dark images where shadow detail must be enhanced", "Over-bright images", "Blurry images", "Vivid color images"],
+          options: ["Over-bright images", "Blurry images", "Vivid color images", "Very dark images where shadow detail must be enhanced"],
           explain: "log boosts dark values more than bright ones → reveals detail in shadows (wide dynamic range)"
         },
         steps: [
@@ -1956,7 +1966,7 @@ window.DATA = {
           "เปลี่ยนภาพเป็นสี",
           "ลบ noise ด้วยค่าเฉลี่ย"
         ],
-        correct: 0,
+        correct: 2,
         explain: "ถ้าค่าพิกเซลทั้งหมดอยู่ในช่วงแคบ (ภาพซีด) → ยืดให้เต็ม 0–255 → เห็นความต่างชัดขึ้น",
         en: {
           q: "What is Contrast Stretching?",
@@ -1977,40 +1987,13 @@ window.DATA = {
         ]
       },
       {
-        q: "Histogram ของภาพคืออะไร?",
-        options: [
-          "กราฟนับจำนวนพิกเซลต่อระดับความเข้ม (0–255)",
-          "เส้นขอบของวัตถุในภาพ",
-          "ตารางสีที่ใช้ในภาพ",
-          "ขนาดความกว้าง-สูงของภาพ"
-        ],
-        correct: 0,
-        explain: "Histogram = การกระจายของพิกเซลตามค่าความเข้ม — บอกว่าภาพมืด/สว่าง/คอนทราสต์เป็นยังไง",
-        en: {
-          q: "What is an image histogram?",
-          options: [
-            "A graph counting pixels per intensity level (0–255)",
-            "The edges of objects in the image",
-            "The color table used in the image",
-            "The width and height of the image"
-          ],
-          explain: "A histogram is the distribution of pixels across intensities — it tells you about brightness/contrast"
-        },
-        steps: [
-          "ไล่ทุกพิกเซลในภาพ",
-          "นับว่าค่า 0 มีกี่พิกเซล, ค่า 1 มีกี่พิกเซล, ..., ค่า 255 มีกี่พิกเซล",
-          "วาดเป็นกราฟแท่ง (bins=256)",
-          "ตอบ: กราฟนับจำนวนพิกเซลต่อระดับความเข้ม"
-        ]
-      },
-      {
         q: "ภาพสว่างเกินไป (overexposed) histogram จะเป็นแบบใด?",
-        options: ["แท่งส่วนใหญ่อยู่ทางขวา (ค่าสูง)", "แท่งส่วนใหญ่อยู่ทางซ้าย (ค่าต่ำ)", "แท่งกระจายทั่ว", "ไม่มีแท่งเลย"],
-        correct: 0,
+        options: ["ไม่มีแท่งเลย", "แท่งส่วนใหญ่อยู่ทางขวา (ค่าสูง)", "แท่งส่วนใหญ่อยู่ทางซ้าย (ค่าต่ำ)", "แท่งกระจายทั่ว"],
+        correct: 1,
         explain: "พิกเซลส่วนใหญ่มีค่าสูง (ใกล้ 255) → histogram รวมกันอยู่ทางขวา",
         en: {
           q: "An overexposed (too bright) image has a histogram that is?",
-          options: ["Mostly on the right (high values)", "Mostly on the left (low values)", "Spread evenly", "Empty"],
+          options: ["Empty", "Mostly on the right (high values)", "Mostly on the left (low values)", "Spread evenly"],
           explain: "Most pixels have high values (near 255) → histogram piles up on the right"
         },
         steps: [
@@ -2045,7 +2028,7 @@ window.DATA = {
           "ลบ histogram ทิ้ง",
           "เพิ่มสีให้ histogram"
         ],
-        correct: 0,
+        correct: 3,
         explain: "Equalization แปลงค่าให้ histogram แบน/กระจายทั่ว → คอนทราสต์และรายละเอียดดีขึ้น",
         en: {
           q: "What does Histogram Equalization do?",
@@ -2067,12 +2050,12 @@ window.DATA = {
       },
       {
         q: "cv2.equalizeHist() ใช้กับภาพแบบใดโดยตรง?",
-        options: ["Grayscale 1 ช่อง", "RGB 3 ช่อง", "RGBA 4 ช่อง", "ภาพเวกเตอร์"],
-        correct: 0,
+        options: ["RGBA 4 ช่อง", "ภาพเวกเตอร์", "Grayscale 1 ช่อง", "RGB 3 ช่อง"],
+        correct: 2,
         explain: "equalizeHist รับภาพ 1 ช่อง (grayscale) — ภาพสีต้องแยกช่องหรือใช้ YUV แล้วทำที่ช่อง Y",
         en: {
           q: "Which image can cv2.equalizeHist() process directly?",
-          options: ["Single-channel grayscale", "3-channel RGB", "4-channel RGBA", "Vector images"],
+          options: ["4-channel RGBA", "Vector images", "Single-channel grayscale", "3-channel RGB"],
           explain: "equalizeHist takes 1 channel (grayscale) — for color, split channels or convert to YUV and process Y"
         },
         steps: [
@@ -2090,7 +2073,7 @@ window.DATA = {
           "เร็วกว่าเสมอ",
           "ใช้ได้กับภาพขาวดำเท่านั้น"
         ],
-        correct: 0,
+        correct: 1,
         explain: "CLAHE = Contrast Limited Adaptive HE — equalize เป็นบล็อกเล็ก ป้องกัน noise โผล่ในบริเวณสว่าง",
         en: {
           q: "How is CLAHE different from Histogram Equalization?",
@@ -2252,20 +2235,20 @@ window.DATA = {
     quiz: [
       {
         q: "Spatial Filtering กระทำกับอะไรโดยตรง?",
-        options: ["พิกเซลของภาพ (เลื่อน mask ทีละจุด)", "ความถี่ของภาพ", "ขนาดไฟล์", "ชื่อไฟล์"],
-        correct: 0,
+        options: ["ความถี่ของภาพ", "ขนาดไฟล์", "ชื่อไฟล์", "พิกเซลของภาพ (เลื่อน mask ทีละจุด)"],
+        correct: 3,
         explain: "Spatial filtering เลื่อน filter mask ไปทีละจุดบนภาพ แล้วคำนวณ response ที่จุดนั้น"
       },
       {
         q: "Spatial Filter แบ่งเป็น 2 ประเภทคือ?",
-        options: ["Linear และ Non-linear", "ใหญ่และเล็ก", "แดงและน้ำเงิน", "เร็วและช้า"],
-        correct: 0,
+        options: ["แดงและน้ำเงิน", "เร็วและช้า", "Linear และ Non-linear", "ใหญ่และเล็ก"],
+        correct: 2,
         explain: "Linear (ผลรวมถ่วงน้ำหนัก เช่น mean, gaussian, sobel) · Non-linear (เรียงค่า เช่น median)"
       },
       {
         q: "Mean Filter ใช้ทำอะไร?",
-        options: ["เบลอภาพและลด noise", "ทำให้ภาพคมขึ้น", "ตรวจจับขอบ", "เปลี่ยนสีภาพ"],
-        correct: 0,
+        options: ["เปลี่ยนสีภาพ", "เบลอภาพและลด noise", "ทำให้ภาพคมขึ้น", "ตรวจจับขอบ"],
+        correct: 1,
         explain: "Mean (averaging) = เฉลี่ยพิกเซลใน neighborhood → เรียบขึ้น เบลอขึ้น ลด noise ลง"
       },
       {
@@ -2276,20 +2259,20 @@ window.DATA = {
       },
       {
         q: "Median Filter จัดเป็น filter แบบใด?",
-        options: ["Non-linear (order statistics)", "Linear", "Low-pass เฉพาะ", "High-pass"],
-        correct: 0,
+        options: ["Linear", "Low-pass เฉพาะ", "High-pass", "Non-linear (order statistics)"],
+        correct: 3,
         explain: "Median เรียงค่าพิกเซลใน neighborhood แล้วเอาค่ากลาง — ไม่ใช่ผลรวมถ่วงน้ำหนัก → non-linear"
       },
       {
         q: "Median Filter เหมาะกับ Noise แบบใด?",
-        options: ["Salt & Pepper (จุดขาวดำสุ่ม)", "Gaussian noise", "Motion blur", "สีเพี้ยน"],
-        correct: 0,
+        options: ["Motion blur", "สีเพี้ยน", "Salt & Pepper (จุดขาวดำสุ่ม)", "Gaussian noise"],
+        correct: 2,
         explain: "Median ตัดค่าที่ผิดปกติ (จุดขาว/ดำ) ออกได้ดี — เหมาะกับ salt & pepper noise"
       },
       {
         q: "Sobel ใช้หลักการใดในการหาขอบ?",
-        options: ["อนุพันธ์อันดับ 1 (gradient)", "อนุพันธ์อันดับ 2", "การเฉลี่ย", "การเรียงค่า"],
-        correct: 0,
+        options: ["การเรียงค่า", "อนุพันธ์อันดับ 1 (gradient)", "อนุพันธ์อันดับ 2", "การเฉลี่ย"],
+        correct: 1,
         explain: "Sobel = first-order derivative — วัดอัตราการเปลี่ยนของ intensity (gradient)"
       },
       {
@@ -2300,72 +2283,27 @@ window.DATA = {
       },
       {
         q: "Laplacian เป็นอนุพันธ์อันดับเท่าไร?",
-        options: ["2 (second-order)", "1 (first-order)", "0", "3"],
-        correct: 0,
+        options: ["1 (first-order)", "0", "3", "2 (second-order)"],
+        correct: 3,
         explain: "Laplacian = second-order derivative ∇²f — ใช้หา edge และ sharpening"
       },
       {
         q: "Laplacian ใช้กับบริเวณเรียบ (flat region) ให้ค่าเท่าไร?",
-        options: ["0", "255", "128", "ค่ากลาง"],
-        correct: 0,
+        options: ["128", "ค่ากลาง", "0", "255"],
+        correct: 2,
         explain: "บริเวณที่ค่าพิกเซลไม่เปลี่ยน อนุพันธ์อันดับ 2 = 0 → response เป็น 0"
-      },
-      {
-        q: "FFT แปลงภาพจาก domain ใดไป domain ใด?",
-        options: ["Spatial → Frequency", "Frequency → Spatial", "สี → เทา", "เล็ก → ใหญ่"],
-        correct: 0,
-        explain: "FFT (Fast Fourier Transform) แปลงภาพจาก spatial domain ไป frequency domain"
-      },
-      {
-        q: "ตรงกลางของ Magnitude Spectrum คืออะไร?",
-        options: ["DC Component (ความสว่างเฉลี่ย)", "ขอบที่คมที่สุด", "noise ทั้งหมด", "จุดมืดสุด"],
-        correct: 0,
-        explain: "หลัง fftshift ตรงกลาง = ความถี่ต่ำสุด = DC component (ค่าเฉลี่ยความสว่างของภาพ)"
-      },
-      {
-        q: "Spatial Filtering กระทำกับอะไรโดยตรง?",
-        options: ["พิกเซลของภาพโดยตรง", "ความถี่ของภาพ", "ไฟล์บีบอัด", "metadata ของภาพ"],
-        correct: 0,
-        explain: "Spatial filtering ทำงานที่พิกเซลโดยตรง — เลื่อน filter mask ไปทีละจุดแล้วคำนวณ response",
-        en: {
-          q: "What does spatial filtering operate on directly?",
-          options: ["The image pixels directly", "The image frequencies", "The compressed file", "Image metadata"],
-          explain: "Spatial filtering works directly on pixels — sliding a filter mask point by point and computing the response"
-        },
-        steps: [
-          "Spatial = เชิงพื้นที่ (พิกเซล) — ตรงข้ามกับ frequency domain",
-          "วาง mask ลงบนตำแหน่งแรกของภาพ",
-          "คำนวณ response ที่จุดนั้น (เช่น ค่าเฉลี่ย)",
-          "เลื่อน mask ไปจุดถัดไปทีละ 1 พิกเซล",
-          "ตอบ: พิกเซลของภาพโดยตรง"
-        ]
-      },
-      {
-        q: "Spatial Filter แบ่งเป็น 2 ประเภทหลักคืออะไร?",
-        options: ["Linear และ Non-linear", "ใหญ่และเล็ก", "แดงและน้ำเงิน", "เร็วและช้า"],
-        correct: 0,
-        explain: "Linear = ผลรวมถ่วงน้ำหนัก (mean, gaussian, sobel) · Non-linear = เรียงค่า (median, order statistics)",
-        en: {
-          q: "What are the two main types of spatial filters?",
-          options: ["Linear and Non-linear", "Big and small", "Red and blue", "Fast and slow"],
-          explain: "Linear = weighted sum (mean, gaussian, sobel) · Non-linear = ordering values (median, order statistics)"
-        },
-        steps: [
-          "Linear: response = ΣΣ w(s,t)·f(x+s,y+t) — ผลรวมถ่วงน้ำหนัก",
-          "Non-linear: response มาจากการเรียงลำดับค่า เช่น median",
-          "ตัวอย่าง Linear: mean, gaussian, sobel, laplacian",
-          "ตัวอย่าง Non-linear: median, bilateral",
-          "ตอบ: Linear และ Non-linear"
-        ]
-      },
+      }
+    ],
+
+    exam: [
       {
         q: "Mean Filter 3×3 บนพื้นที่ [5 4 5; 2 1 2; 5 4 5] ได้ค่าเท่าไร?",
-        options: ["≈ 4 (33/9)", "≈ 3", "≈ 5", "≈ 1"],
-        correct: 0,
+        options: ["≈ 3", "≈ 5", "≈ 1", "≈ 4 (33/9)"],
+        correct: 3,
         explain: "ผลรวม = 5+4+5+2+1+2+5+4+5 = 33 → 33/9 = 3.67 ≈ 4 (ปัดเป็น 4)",
         en: {
           q: "A 3×3 mean filter on [5 4 5; 2 1 2; 5 4 5] gives?",
-          options: ["≈ 4 (33/9)", "≈ 3", "≈ 5", "≈ 1"],
+          options: ["≈ 3", "≈ 5", "≈ 1", "≈ 4 (33/9)"],
           explain: "Sum = 5+4+5+2+1+2+5+4+5 = 33 → 33/9 = 3.67 ≈ 4"
         },
         steps: [
@@ -2378,12 +2316,12 @@ window.DATA = {
       },
       {
         q: "เมื่อ mask (kernel) ของ Mean Filter ใหญ่ขึ้น ผลคือ?",
-        options: ["ภาพเบลอมากขึ้น", "ภาพคมขึ้น", "สีเปลี่ยน", "ขนาดภาพเล็กลง"],
-        correct: 0,
+        options: ["สีเปลี่ยน", "ขนาดภาพเล็กลง", "ภาพเบลอมากขึ้น", "ภาพคมขึ้น"],
+        correct: 2,
         explain: "mask ใหญ่ขึ้น = เฉลี่ยพิกเซลมากขึ้น → เรียบ/เบลอมากขึ้น วัตถุเล็กอาจหาย",
         en: {
           q: "As the mean filter mask gets bigger, the result is?",
-          options: ["The image blurs more", "The image sharpens", "Colors change", "The image shrinks"],
+          options: ["Colors change", "The image shrinks", "The image blurs more", "The image sharpens"],
           explain: "A bigger mask averages more pixels → smoother/blurrier; small objects may disappear"
         },
         steps: [
@@ -2396,12 +2334,12 @@ window.DATA = {
       },
       {
         q: "คำสั่ง Gaussian Filter ใน OpenCV คือข้อใด?",
-        options: ["cv2.GaussianBlur()", "cv2.blur()", "cv2.medianBlur()", "cv2.equalizeHist()"],
-        correct: 0,
+        options: ["cv2.equalizeHist()", "cv2.GaussianBlur()", "cv2.blur()", "cv2.medianBlur()"],
+        correct: 1,
         explain: "cv2.GaussianBlur(img, (5,5), 0) — เบลอแบบถ่วงน้ำหนักตาม Gaussian ลด noise + smooth",
         en: {
           q: "Which OpenCV command is the Gaussian filter?",
-          options: ["cv2.GaussianBlur()", "cv2.blur()", "cv2.medianBlur()", "cv2.equalizeHist()"],
+          options: ["cv2.equalizeHist()", "cv2.GaussianBlur()", "cv2.blur()", "cv2.medianBlur()"],
           explain: "cv2.GaussianBlur(img, (5,5), 0) — weighted blur by a Gaussian, reduces noise + smooths"
         },
         steps: [
@@ -2430,12 +2368,12 @@ window.DATA = {
       },
       {
         q: "Median Filter คำนวณค่าพิกเซลใหม่อย่างไร?",
-        options: ["เรียงค่าพิกเซลใน neighborhood แล้วเอาค่ากลาง", "หาค่าเฉลี่ยของพิกเซล", "หาผลรวมของพิกเซล", "เอาค่ามากสุด"],
-        correct: 0,
+        options: ["หาค่าเฉลี่ยของพิกเซล", "หาผลรวมของพิกเซล", "เอาค่ามากสุด", "เรียงค่าพิกเซลใน neighborhood แล้วเอาค่ากลาง"],
+        correct: 3,
         explain: "Median = sort พิกเซลใน mask แล้วเลือกค่าตรงกลาง — ไม่ใช้การบวก/คูณ",
         en: {
           q: "How does the median filter compute a new pixel value?",
-          options: ["Sorts the neighborhood pixels and takes the middle value", "Averages the pixels", "Sums the pixels", "Takes the maximum"],
+          options: ["Averages the pixels", "Sums the pixels", "Takes the maximum", "Sorts the neighborhood pixels and takes the middle value"],
           explain: "Median = sort the pixels in the mask and pick the middle one — no addition/multiplication"
         },
         steps: [
@@ -2447,23 +2385,6 @@ window.DATA = {
         ]
       },
       {
-        q: "Median Filter เหมาะกับ Noise แบบใดที่สุด?",
-        options: ["Salt & Pepper (จุดขาวดำสุ่ม)", "Gaussian noise", "Motion blur", "สีซีดจาง"],
-        correct: 0,
-        explain: "Median ตัดค่าผิดปกติ (จุดขาว/ดำ) ทิ้งได้ดี — เพราะจุดเหล่านี้ไม่ใช่ค่ากลางหลังเรียงลำดับ",
-        en: {
-          q: "Which noise is the median filter best for?",
-          options: ["Salt & pepper (random black/white dots)", "Gaussian noise", "Motion blur", "Washed-out colors"],
-          explain: "Median removes outliers (white/black dots) well — they are never the middle value after sorting"
-        },
-        steps: [
-          "Salt & pepper = จุดขาว (255) / ดำ (0) สุ่มปนในภาพ",
-          "เรียงค่า 9 พิกเซล → จุดผิดปกติอยู่หัว/ท้ายแถว",
-          "ค่ากลางเป็นค่าปกติ → จุด noise หายไป",
-          "ตอบ: Salt & Pepper"
-        ]
-      },
-      {
         q: "Mean Filter กับ Median Filter ต่างกันตรงไหน?",
         options: [
           "Mean = เฉลี่ย (linear) · Median = เรียงแล้วเอาค่ากลาง (non-linear)",
@@ -2471,7 +2392,7 @@ window.DATA = {
           "Mean ใช้กับสี Median ใช้กับเทา",
           "Median เร็วกว่าเสมอ"
         ],
-        correct: 0,
+        correct: 2,
         explain: "Mean ใช้ผลรวมถ่วงน้ำหนัก (linear) · Median เรียงค่าแล้วเลือกกลาง (non-linear) — median ลบ salt & pepper ได้ดีกว่า",
         en: {
           q: "What is the difference between mean and median filters?",
@@ -2492,12 +2413,12 @@ window.DATA = {
       },
       {
         q: "Bilateral Filter มีจุดเด่นอะไร?",
-        options: ["เบลอ noise แต่รักษาขอบ (edge) ให้คมไว้", "เบลอทุกอย่างเท่ากัน", "ทำให้ภาพคมขึ้นอย่างเดียว", "เปลี่ยนสีภาพ"],
-        correct: 0,
+        options: ["เปลี่ยนสีภาพ", "เบลอ noise แต่รักษาขอบ (edge) ให้คมไว้", "เบลอทุกอย่างเท่ากัน", "ทำให้ภาพคมขึ้นอย่างเดียว"],
+        correct: 1,
         explain: "Bilateral ถ่วงน้ำหนักทั้งระยะห่างและความต่างของค่า → noise ถูกลบ แต่ขอบที่ค่าต่างกันมากยังอยู่",
         en: {
           q: "What is the advantage of the bilateral filter?",
-          options: ["Blurs noise but keeps edges sharp", "Blurs everything equally", "Only sharpens the image", "Recolors the image"],
+          options: ["Recolors the image", "Blurs noise but keeps edges sharp", "Blurs everything equally", "Only sharpens the image"],
           explain: "Bilateral weights both distance and intensity difference → noise is removed while strong edges survive"
         },
         steps: [
@@ -2526,12 +2447,12 @@ window.DATA = {
       },
       {
         q: "Sobel ใช้หลักการใดในการหาขอบ?",
-        options: ["First-order derivative (gradient)", "Second-order derivative", "ค่าเฉลี่ย", "การเรียงค่า"],
-        correct: 0,
+        options: ["Second-order derivative", "ค่าเฉลี่ย", "การเรียงค่า", "First-order derivative (gradient)"],
+        correct: 3,
         explain: "Sobel = อนุพันธ์อันดับ 1 — วัดอัตราการเปลี่ยนของ intensity (gradient) ทั้งแกน x และ y",
         en: {
           q: "What principle does Sobel use to find edges?",
-          options: ["First-order derivative (gradient)", "Second-order derivative", "Averaging", "Sorting values"],
+          options: ["Second-order derivative", "Averaging", "Sorting values", "First-order derivative (gradient)"],
           explain: "Sobel = first-order derivative — measures the rate of intensity change (gradient) on both axes"
         },
         steps: [
@@ -2543,12 +2464,12 @@ window.DATA = {
       },
       {
         q: "Sobel_x ตรวจจับขอบแบบใด?",
-        options: ["ขอบแนวตั้ง (vertical edges)", "ขอบแนวนอน (horizontal edges)", "ขอบโค้ง", "ขอบทุกแบบ"],
-        correct: 0,
+        options: ["ขอบโค้ง", "ขอบทุกแบบ", "ขอบแนวตั้ง (vertical edges)", "ขอบแนวนอน (horizontal edges)"],
+        correct: 2,
         explain: "Sobel_x คำนวณ gradient แกน x → เน้นการเปลี่ยนตามแนวนอน → เห็นขอบแนวตั้ง",
         en: {
           q: "What kind of edges does Sobel_x detect?",
-          options: ["Vertical edges", "Horizontal edges", "Curved edges", "All edges"],
+          options: ["Curved edges", "All edges", "Vertical edges", "Horizontal edges"],
           explain: "Sobel_x computes the x-axis gradient → highlights horizontal change → vertical edges appear"
         },
         steps: [
@@ -2560,12 +2481,12 @@ window.DATA = {
       },
       {
         q: "Sobel_y ตรวจจับขอบแบบใด?",
-        options: ["ขอบแนวนอน (horizontal edges)", "ขอบแนวตั้ง (vertical edges)", "ขอบเฉียง", "ขอบวงกลม"],
-        correct: 0,
+        options: ["ขอบวงกลม", "ขอบแนวนอน (horizontal edges)", "ขอบแนวตั้ง (vertical edges)", "ขอบเฉียง"],
+        correct: 1,
         explain: "Sobel_y วัดความต่างบน-ล่าง (แกน y) → เห็นขอบแนวนอนชัด",
         en: {
           q: "What kind of edges does Sobel_y detect?",
-          options: ["Horizontal edges", "Vertical edges", "Diagonal edges", "Circular edges"],
+          options: ["Circular edges", "Horizontal edges", "Vertical edges", "Diagonal edges"],
           explain: "Sobel_y measures top-bottom difference (y-axis) → horizontal edges appear clearly"
         },
         steps: [
@@ -2593,12 +2514,12 @@ window.DATA = {
       },
       {
         q: "Laplacian บนบริเวณเรียบ (flat region) ให้ค่าเท่าไร?",
-        options: ["0", "255", "128", "ค่ามากที่สุด"],
-        correct: 0,
+        options: ["255", "128", "ค่ามากที่สุด", "0"],
+        correct: 3,
         explain: "บริเวณค่าคงที่ → อนุพันธ์อันดับ 2 = 0 → response เป็น 0",
         en: {
           q: "What value does the Laplacian give on a flat region?",
-          options: ["0", "255", "128", "The maximum"],
+          options: ["255", "128", "The maximum", "0"],
           explain: "A constant region has zero second derivative → the response is 0"
         },
         steps: [
@@ -2610,12 +2531,12 @@ window.DATA = {
       },
       {
         q: "สูตร Sharpening ด้วย Laplacian คือข้อใด?",
-        options: ["g = f − ∇²f", "g = f + ∇²f", "g = f × ∇²f", "g = f ÷ ∇²f"],
-        correct: 0,
+        options: ["g = f × ∇²f", "g = f ÷ ∇²f", "g = f − ∇²f", "g = f + ∇²f"],
+        correct: 2,
         explain: "ลบ Laplacian (ซึ่งเน้นจุดเปลี่ยนเร็ว) ออกจากภาพเดิม → ขอบคมขึ้น",
         en: {
           q: "What is the Laplacian sharpening formula?",
-          options: ["g = f − ∇²f", "g = f + ∇²f", "g = f × ∇²f", "g = f ÷ ∇²f"],
+          options: ["g = f × ∇²f", "g = f ÷ ∇²f", "g = f − ∇²f", "g = f + ∇²f"],
           explain: "Subtract the Laplacian (which highlights rapid changes) from the original → sharper edges"
         },
         steps: [
@@ -2627,12 +2548,12 @@ window.DATA = {
       },
       {
         q: "Laplacian Kernel แบบ 4-neighbor มีค่ากลางเป็นเท่าไร?",
-        options: ["−4", "−8", "4", "8"],
-        correct: 0,
+        options: ["8", "−4", "−8", "4"],
+        correct: 1,
         explain: "4-neighbor: [0 1 0; 1 −4 1; 0 1 0] — กลาง −4 · 8-neighbor: กลาง −8",
         en: {
           q: "What is the center value of the 4-neighbor Laplacian kernel?",
-          options: ["−4", "−8", "4", "8"],
+          options: ["8", "−4", "−8", "4"],
           explain: "4-neighbor: [0 1 0; 1 −4 1; 0 1 0] — center −4 · 8-neighbor: center −8"
         },
         steps: [
@@ -2662,12 +2583,12 @@ window.DATA = {
       },
       {
         q: "หลัง fftshift ตรงกลางของ Magnitude Spectrum คืออะไร?",
-        options: ["DC Component (ความสว่างเฉลี่ยของภาพ)", "ขอบคมที่สุด", "noise ทั้งหมด", "จุดมืดที่สุด"],
-        correct: 0,
+        options: ["ขอบคมที่สุด", "noise ทั้งหมด", "จุดมืดที่สุด", "DC Component (ความสว่างเฉลี่ยของภาพ)"],
+        correct: 3,
         explain: "fftshift ย้ายความถี่ต่ำ (DC) มาตรงกลาง — DC = ค่าเฉลี่ยความสว่างของภาพ",
         en: {
           q: "After fftshift, what is at the center of the magnitude spectrum?",
-          options: ["The DC component (average brightness)", "The sharpest edge", "All the noise", "The darkest point"],
+          options: ["The sharpest edge", "All the noise", "The darkest point", "The DC component (average brightness)"],
           explain: "fftshift moves low frequencies (DC) to the center — DC = the image's average brightness"
         },
         steps: [
@@ -2679,12 +2600,12 @@ window.DATA = {
       },
       {
         q: "High Frequency ในภาพคืออะไร?",
-        options: ["Edge, Detail และ Noise", "บริเวณเรียบ", "พื้นหลัง", "สีเดียว"],
-        correct: 0,
+        options: ["พื้นหลัง", "สีเดียว", "Edge, Detail และ Noise", "บริเวณเรียบ"],
+        correct: 2,
         explain: "ความถี่สูง = จุดที่ค่าเปลี่ยนเร็ว = ขอบ (edge), รายละเอียดเล็ก ๆ และ noise",
         en: {
           q: "What is high frequency in an image?",
-          options: ["Edges, details, and noise", "Flat regions", "Backgrounds", "A single color"],
+          options: ["Backgrounds", "A single color", "Edges, details, and noise", "Flat regions"],
           explain: "High frequency = where values change fast = edges, fine details, and noise"
         },
         steps: [
@@ -2696,12 +2617,12 @@ window.DATA = {
       },
       {
         q: "Walsh / Hadamard Transform ใช้ค่าพื้นฐานแบบใด?",
-        options: ["+1 และ −1 (square wave)", "sin และ cos", "0 ถึง 255", "เฉพาะ 0"],
-        correct: 0,
+        options: ["เฉพาะ 0", "+1 และ −1 (square wave)", "sin และ cos", "0 ถึง 255"],
+        correct: 1,
         explain: "Walsh/Hadamard ใช้ basis แบบ +1/−1 (square wave) — ต่างจาก Fourier ที่ใช้ sine/cosine",
         en: {
           q: "What basis values does the Walsh/Hadamard transform use?",
-          options: ["+1 and −1 (square waves)", "sin and cos", "0 to 255", "Only 0"],
+          options: ["Only 0", "+1 and −1 (square waves)", "sin and cos", "0 to 255"],
           explain: "Walsh/Hadamard uses +1/−1 bases (square waves) — unlike Fourier which uses sine/cosine"
         },
         steps: [
@@ -2851,20 +2772,20 @@ window.DATA = {
     quiz: [
       {
         q: "Thresholding ใช้ทำอะไร?",
-        options: ["แยก object ออกจาก background (ขาว/ดำ)", "เพิ่มสีให้ภาพ", "หมุนภาพ", "บีบอัดภาพ"],
-        correct: 0,
+        options: ["เพิ่มสีให้ภาพ", "หมุนภาพ", "บีบอัดภาพ", "แยก object ออกจาก background (ขาว/ดำ)"],
+        correct: 3,
         explain: "Threshold เปลี่ยนภาพ grayscale เป็น binary — แยกวัตถุ (ขาว) ออกจากพื้นหลัง (ดำ)"
       },
       {
         q: "cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY) — พิกเซล ≥ 128 ได้ค่าเท่าไร?",
-        options: ["255 (ขาว)", "0 (ดำ)", "128", "ค่าเดิม"],
-        correct: 0,
+        options: ["128", "ค่าเดิม", "255 (ขาว)", "0 (ดำ)"],
+        correct: 2,
         explain: "THRESH_BINARY: ค่า ≥ threshold → 255 · ต่ำกว่า → 0"
       },
       {
         q: "THRESH_BINARY_INV ต่างจาก THRESH_BINARY อย่างไร?",
-        options: ["สลับขาว-ดำ (กลับด้าน)", "เหมือนกันทุกอย่าง", "ใช้ threshold อัตโนมัติ", "ทำให้ภาพเบลอ"],
-        correct: 0,
+        options: ["ทำให้ภาพเบลอ", "สลับขาว-ดำ (กลับด้าน)", "เหมือนกันทุกอย่าง", "ใช้ threshold อัตโนมัติ"],
+        correct: 1,
         explain: "INV = inverted — ค่า ≥ threshold → 0, ต่ำกว่า → 255 (กลับด้านกับ BINARY)"
       },
       {
@@ -2875,20 +2796,20 @@ window.DATA = {
       },
       {
         q: "Adaptive Threshold ต่างจาก Global อย่างไร?",
-        options: ["คำนวณ threshold แยกเป็นแต่ละพื้นที่ (local)", "ใช้ threshold เดียวทั้งภาพ", "เร็วกว่าเสมอ", "ใช้กับภาพสีเท่านั้น"],
-        correct: 0,
+        options: ["ใช้ threshold เดียวทั้งภาพ", "เร็วกว่าเสมอ", "ใช้กับภาพสีเท่านั้น", "คำนวณ threshold แยกเป็นแต่ละพื้นที่ (local)"],
+        correct: 3,
         explain: "Adaptive คำนวณ threshold จาก neighborhood ของแต่ละพิกเซล → กันปัญหาแสงไม่สม่ำเสมอ"
       },
       {
         q: "ค่า 11 ใน cv2.adaptiveThreshold(gray, 255, GAUSSIAN_C, BINARY, 11, 2) หมายถึง?",
-        options: ["ขนาดบล็อก 11×11 พิกเซล", "threshold = 11", "จำนวน iteration", "ความสว่าง 11%"],
-        correct: 0,
+        options: ["จำนวน iteration", "ความสว่าง 11%", "ขนาดบล็อก 11×11 พิกเซล", "threshold = 11"],
+        correct: 2,
         explain: "พารามิเตอร์ตัวที่ 5 = blockSize — ขนาด neighborhood (11×11) ใช้คำนวณ threshold ของแต่ละพิกเซล"
       },
       {
         q: "Otsu Threshold คืออะไร?",
-        options: ["หา threshold อัตโนมัติจาก histogram", "threshold คงที่ 128", "threshold แบบ manual", "filter เบลอ"],
-        correct: 0,
+        options: ["filter เบลอ", "หา threshold อัตโนมัติจาก histogram", "threshold คงที่ 128", "threshold แบบ manual"],
+        correct: 1,
         explain: "Otsu วิเคราะห์ histogram หาค่า threshold ที่แบ่ง 2 กลุ่มได้ดีที่สุดอัตโนมัติ"
       },
       {
@@ -2899,36 +2820,39 @@ window.DATA = {
       },
       {
         q: "Dilation มีผลต่อภาพ binary อย่างไร?",
-        options: ["ขยายขอบวัตถุให้ใหญ่ขึ้น", "กร่อนวัตถุให้เล็กลง", "ลบ noise", "ทำให้เบลอ"],
-        correct: 0,
+        options: ["กร่อนวัตถุให้เล็กลง", "ลบ noise", "ทำให้เบลอ", "ขยายขอบวัตถุให้ใหญ่ขึ้น"],
+        correct: 3,
         explain: "Dilation = เพิ่มพิกเซลที่ขอบ (ใช้ max) → วัตถุใหญ่ขึ้น เติมรู/ช่องว่างเล็ก ๆ"
       },
       {
         q: "Opening = ? และ Closing = ?",
-        options: ["Opening = erode แล้ว dilate · Closing = dilate แล้ว erode", "Opening = dilate แล้ว erode · Closing = erode แล้ว dilate", "ทั้งคู่เป็นแค่ erode", "ทั้งคู่เป็นแค่ dilate"],
-        correct: 0,
+        options: ["ทั้งคู่เป็นแค่ erode", "ทั้งคู่เป็นแค่ dilate", "Opening = erode แล้ว dilate · Closing = dilate แล้ว erode", "Opening = dilate แล้ว erode · Closing = erode แล้ว dilate"],
+        correct: 2,
         explain: "Opening = erode(dilate⁻¹)... จำง่าย: Opening = E แล้ว D (ลบจุดเล็ก) · Closing = D แล้ว E (เติมรูเล็ก)"
-      },
+      }
+    ],
+
+    exam: [
       {
         q: "cv2.findContours() ใช้หาอะไร?",
-        options: ["ขอบเขต (contour) ของวัตถุในภาพ binary", "สีของพิกเซล", "ความสว่างเฉลี่ย", "ขนาดไฟล์"],
-        correct: 0,
+        options: ["สีของพิกเซล", "ความสว่างเฉลี่ย", "ขนาดไฟล์", "ขอบเขต (contour) ของวัตถุในภาพ binary"],
+        correct: 3,
         explain: "findContours หาเส้นขอบของวัตถุ — ใช้กับภาพ binary หลัง threshold"
       },
       {
         q: "SIFT / SURF / ORB คืออะไร?",
-        options: ["Feature Descriptor — อธิบายจุดเด่นของภาพ", "filter เบลอ", "การปรับสี", "การบีบอัดไฟล์"],
-        correct: 0,
+        options: ["การปรับสี", "การบีบอัดไฟล์", "Feature Descriptor — อธิบายจุดเด่นของภาพ", "filter เบลอ"],
+        correct: 2,
         explain: "SIFT/SURF/ORB สร้าง descriptor (ลายเซ็น) ของจุดเด่น — ใช้จับคู่ภาพ/ตรวจจับวัตถุ"
       },
       {
         q: "Thresholding ใช้ทำอะไรในภาพ?",
-        options: ["แยก Object ออกจาก Background (ภาพขาว-ดำ)", "เพิ่มความสว่าง", "หมุนภาพ", "บีบอัดไฟล์"],
-        correct: 0,
+        options: ["บีบอัดไฟล์", "แยก Object ออกจาก Background (ภาพขาว-ดำ)", "เพิ่มความสว่าง", "หมุนภาพ"],
+        correct: 1,
         explain: "Threshold เปลี่ยน grayscale เป็น binary — พิกเซลที่เกิน threshold = วัตถุ (ขาว) ที่เหลือ = พื้นหลัง (ดำ)",
         en: {
           q: "What does thresholding do to an image?",
-          options: ["Separates objects from the background (black & white)", "Brightens the image", "Rotates the image", "Compresses the file"],
+          options: ["Compresses the file", "Separates objects from the background (black & white)", "Brightens the image", "Rotates the image"],
           explain: "Threshold converts grayscale to binary — pixels above the threshold become objects (white), the rest background (black)"
         },
         steps: [
@@ -2957,30 +2881,13 @@ window.DATA = {
         ]
       },
       {
-        q: "THRESH_BINARY_INV ทำงานอย่างไร?",
-        options: ["กลับด้าน: ค่า ≥ threshold → 0, ต่ำกว่า → 255", "เหมือน THRESH_BINARY", "ใช้ threshold อัตโนมัติ", "เบลอภาพ"],
-        correct: 0,
-        explain: "INV = inverted — สลับขาวดำ: วัตถุกลายเป็นดำ พื้นหลังเป็นขาว",
-        en: {
-          q: "How does THRESH_BINARY_INV work?",
-          options: ["Inverted: ≥ threshold → 0, below → 255", "Same as THRESH_BINARY", "Automatic threshold", "Blurs the image"],
-          explain: "INV = inverted — swaps black & white: objects become black, background white"
-        },
-        steps: [
-          "BINARY: ≥t → 255 · <t → 0",
-          "INV = เอาตรงข้ามทั้งหมด",
-          "≥t → 0 · <t → 255",
-          "ตอบ: กลับด้าน: ค่า ≥ threshold → 0, ต่ำกว่า → 255"
-        ]
-      },
-      {
         q: "THRESH_TRUNC ทำงานอย่างไร?",
-        options: ["ค่าที่เกิน threshold ถูกจำกัดไว้ที่ threshold (ค่าต่ำกว่าคงเดิม)", "ทุกค่าเป็น 0", "ทุกค่าเป็น 255", "กลับด้าน"],
-        correct: 0,
+        options: ["ทุกค่าเป็น 0", "ทุกค่าเป็น 255", "กลับด้าน", "ค่าที่เกิน threshold ถูกจำกัดไว้ที่ threshold (ค่าต่ำกว่าคงเดิม)"],
+        correct: 3,
         explain: "TRUNC = truncate — พิกเซล > threshold ถูกตัดลงมาเท่ากับ threshold ส่วนที่ต่ำกว่าคงเดิม",
         en: {
           q: "How does THRESH_TRUNC work?",
-          options: ["Values above the threshold are capped at it (lower ones unchanged)", "Everything becomes 0", "Everything becomes 255", "Inverts"],
+          options: ["Everything becomes 0", "Everything becomes 255", "Inverts", "Values above the threshold are capped at it (lower ones unchanged)"],
           explain: "TRUNC = truncate — pixels above the threshold are cut down to it; lower ones stay unchanged"
         },
         steps: [
@@ -2992,12 +2899,12 @@ window.DATA = {
       },
       {
         q: "THRESH_TOZERO ทำงานอย่างไร?",
-        options: ["ค่าที่ต่ำกว่า threshold กลายเป็น 0 (ค่าที่เกินคงเดิม)", "ค่าที่เกินกลายเป็น 0", "ทุกค่าเป็น 255", "ทุกค่าเท่ากัน"],
-        correct: 0,
+        options: ["ทุกค่าเป็น 255", "ทุกค่าเท่ากัน", "ค่าที่ต่ำกว่า threshold กลายเป็น 0 (ค่าที่เกินคงเดิม)", "ค่าที่เกินกลายเป็น 0"],
+        correct: 2,
         explain: "TOZERO — พิกเซลที่ต่ำกว่า threshold = 0 ส่วนที่เกิน threshold คงค่าเดิม",
         en: {
           q: "How does THRESH_TOZERO work?",
-          options: ["Values below the threshold become 0 (above stay unchanged)", "Values above become 0", "Everything becomes 255", "Everything becomes equal"],
+          options: ["Everything becomes 255", "Everything becomes equal", "Values below the threshold become 0 (above stay unchanged)", "Values above become 0"],
           explain: "TOZERO — pixels below the threshold become 0; those above keep their value"
         },
         steps: [
@@ -3008,59 +2915,13 @@ window.DATA = {
         ]
       },
       {
-        q: "Global Threshold มีปัญหาหลักอะไร?",
-        options: [
-          "แสงไม่สม่ำเสมอ — threshold เดียวตัดผิดที่ในบริเวณมืด/สว่าง",
-          "ทำงานช้าเกินไป",
-          "ใช้กับภาพสีเท่านั้น",
-          "ไม่มีปัญหาอะไร"
-        ],
-        correct: 0,
-        explain: "ภาพที่แสงไม่เท่ากัน (เช่น มุมหนึ่งมืด) — threshold เดียวไม่พอ ต้องใช้ Adaptive Threshold",
-        en: {
-          q: "What is the main problem of global threshold?",
-          options: [
-            "Uneven lighting — a single threshold fails in dark/bright regions",
-            "It is too slow",
-            "It only works on color images",
-            "No problems at all"
-          ],
-          explain: "With uneven lighting (e.g. one dark corner), a single threshold fails — use adaptive threshold instead"
-        },
-        steps: [
-          "Global = ใช้ threshold ค่าเดียวทั้งภาพ",
-          "ถ้าแสงสม่ำเสมอ → ใช้ได้",
-          "ถ้าแสงไม่เท่ากัน → บริเวณมืดถูกตัดเป็นดำทั้งที่ควรเป็นวัตถุ",
-          "แก้ด้วย Adaptive Threshold",
-          "ตอบ: แสงไม่สม่ำเสมอ"
-        ]
-      },
-      {
-        q: "Adaptive Threshold ต่างจาก Global อย่างไร?",
-        options: ["คำนวณ threshold แยกตาม neighborhood ของแต่ละพิกเซล", "ใช้ threshold เดียวทั้งภาพ", "เร็วกว่าเสมอ", "ใช้ได้กับภาพสีเท่านั้น"],
-        correct: 0,
-        explain: "Adaptive คำนวณ threshold จากบริเวณรอบพิกเซล (kernel เลื่อน) → ปรับตามแสงเฉพาะที่ได้",
-        en: {
-          q: "How is adaptive threshold different from global?",
-          options: ["It computes a threshold per pixel from its neighborhood", "One threshold for the whole image", "Always faster", "Only for color images"],
-          explain: "Adaptive computes the threshold from each pixel's neighborhood (sliding kernel) → adapts to local lighting"
-        },
-        steps: [
-          "Global: threshold 1 ค่า ทั้งภาพ",
-          "Adaptive: kernel เลื่อนทีละจุด คำนวณ threshold จาก neighborhood",
-          "บริเวณมืดได้ threshold ต่ำ บริเวณสว่างได้ threshold สูง",
-          "กันปัญหาแสงไม่สม่ำเสมอ",
-          "ตอบ: คำนวณ threshold แยกตาม neighborhood"
-        ]
-      },
-      {
         q: "ค่า 11 ใน cv2.adaptiveThreshold(gray, 255, GAUSSIAN_C, BINARY, 11, 2) หมายถึงอะไร?",
-        options: ["ขนาดบล็อก (blockSize) 11×11 พิกเซล", "threshold = 11", "จำนวนรอบวนซ้ำ", "ความสว่าง 11%"],
-        correct: 0,
+        options: ["ความสว่าง 11%", "ขนาดบล็อก (blockSize) 11×11 พิกเซล", "threshold = 11", "จำนวนรอบวนซ้ำ"],
+        correct: 1,
         explain: "blockSize = ขนาด neighborhood (11×11) ที่ใช้คำนวณ threshold ของแต่ละพิกเซล",
         en: {
           q: "In cv2.adaptiveThreshold(gray, 255, GAUSSIAN_C, BINARY, 11, 2), what is 11?",
-          options: ["blockSize — an 11×11 pixel neighborhood", "threshold = 11", "Number of iterations", "11% brightness"],
+          options: ["11% brightness", "blockSize — an 11×11 pixel neighborhood", "threshold = 11", "Number of iterations"],
           explain: "blockSize = the neighborhood size (11×11) used to compute each pixel's threshold"
         },
         steps: [
@@ -3088,31 +2949,13 @@ window.DATA = {
         ]
       },
       {
-        q: "Otsu Threshold ทำงานอย่างไร?",
-        options: ["วิเคราะห์ histogram หา threshold ที่แบ่ง 2 กลุ่มได้ดีที่สุดอัตโนมัติ", "ใช้ threshold = 128 เสมอ", "ให้ผู้ใช้เลือก threshold", "สุ่ม threshold"],
-        correct: 0,
-        explain: "Otsu หาค่า threshold ที่ทำให้ variance ระหว่าง 2 กลุ่ม (object/background) มากที่สุด",
-        en: {
-          q: "How does Otsu thresholding work?",
-          options: ["Analyzes the histogram to automatically find the best split point", "Always uses threshold 128", "Lets the user pick the threshold", "Random threshold"],
-          explain: "Otsu finds the threshold that maximizes the between-class variance of the two groups (object/background)"
-        },
-        steps: [
-          "สร้าง histogram ของภาพ",
-          "ลองทุกค่า threshold ที่เป็นไปได้",
-          "เลือกค่าที่แยก 2 กลุ่ม (object/background) ต่างกันมากสุด",
-          "ได้ threshold อัตโนมัติ — ไม่ต้องเดา",
-          "ตอบ: วิเคราะห์ histogram หา threshold อัตโนมัติ"
-        ]
-      },
-      {
         q: "ใช้ Otsu ใน OpenCV เขียน flag อย่างไร?",
-        options: ["cv2.THRESH_BINARY + cv2.THRESH_OTSU", "cv2.THRESH_BINARY", "cv2.THRESH_OTSU อย่างเดียว", "cv2.THRESH_TRUNC"],
-        correct: 0,
+        options: ["cv2.THRESH_BINARY", "cv2.THRESH_OTSU อย่างเดียว", "cv2.THRESH_TRUNC", "cv2.THRESH_BINARY + cv2.THRESH_OTSU"],
+        correct: 3,
         explain: "ret, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU) — ret คือ threshold ที่ Otsu หาได้",
         en: {
           q: "How do you enable Otsu in OpenCV?",
-          options: ["cv2.THRESH_BINARY + cv2.THRESH_OTSU", "cv2.THRESH_BINARY", "cv2.THRESH_OTSU alone", "cv2.THRESH_TRUNC"],
+          options: ["cv2.THRESH_BINARY", "cv2.THRESH_OTSU alone", "cv2.THRESH_TRUNC", "cv2.THRESH_BINARY + cv2.THRESH_OTSU"],
           explain: "ret, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU) — ret is the threshold Otsu found"
         },
         steps: [
@@ -3125,12 +2968,12 @@ window.DATA = {
       },
       {
         q: "Erosion (cv2.erode) มีผลต่อวัตถุในภาพ binary อย่างไร?",
-        options: ["กร่อนขอบวัตถุให้เล็กลง (ลบพิกเซลขอบ)", "ขยายวัตถุให้ใหญ่ขึ้น", "ทำให้วัตถุคมขึ้น", "เพิ่มสีให้วัตถุ"],
-        correct: 0,
+        options: ["ทำให้วัตถุคมขึ้น", "เพิ่มสีให้วัตถุ", "กร่อนขอบวัตถุให้เล็กลง (ลบพิกเซลขอบ)", "ขยายวัตถุให้ใหญ่ขึ้น"],
+        correct: 2,
         explain: "Erosion ใช้ min ของ neighborhood — พิกเซลขอบที่ติดพื้นหลังถูกเอาออก → วัตถุเล็กลง ลบ noise จุดเล็กได้",
         en: {
           q: "What does erosion (cv2.erode) do to objects in a binary image?",
-          options: ["Shrinks object borders (removes edge pixels)", "Enlarges objects", "Sharpens objects", "Colors objects"],
+          options: ["Sharpens objects", "Colors objects", "Shrinks object borders (removes edge pixels)", "Enlarges objects"],
           explain: "Erosion takes the min of the neighborhood — edge pixels touching the background are removed → objects shrink, small noise disappears"
         },
         steps: [
@@ -3143,12 +2986,12 @@ window.DATA = {
       },
       {
         q: "Dilation (cv2.dilate) มีผลต่อวัตถุในภาพ binary อย่างไร?",
-        options: ["ขยายขอบวัตถุให้ใหญ่ขึ้น (เพิ่มพิกเซลที่ขอบ)", "กร่อนวัตถุให้เล็กลง", "ทำให้ภาพเบลอ", "ลบ noise"],
-        correct: 0,
+        options: ["ลบ noise", "ขยายขอบวัตถุให้ใหญ่ขึ้น (เพิ่มพิกเซลที่ขอบ)", "กร่อนวัตถุให้เล็กลง", "ทำให้ภาพเบลอ"],
+        correct: 1,
         explain: "Dilation ใช้ max ของ neighborhood — พิกเซลรอบวัตถุถูกเติมให้เป็น 1 → วัตถุใหญ่ขึ้น เติมรูเล็ก ๆ ได้",
         en: {
           q: "What does dilation (cv2.dilate) do to objects in a binary image?",
-          options: ["Expands object borders (adds edge pixels)", "Shrinks objects", "Blurs the image", "Removes noise"],
+          options: ["Removes noise", "Expands object borders (adds edge pixels)", "Shrinks objects", "Blurs the image"],
           explain: "Dilation takes the max of the neighborhood — pixels around objects become 1 → objects grow, small holes fill"
         },
         steps: [
@@ -3178,12 +3021,12 @@ window.DATA = {
       },
       {
         q: "Closing = ?",
-        options: ["Dilation แล้วตามด้วย Erosion", "Erosion แล้วตามด้วย Dilation", "Dilation อย่างเดียว", "Erosion อย่างเดียว"],
-        correct: 0,
+        options: ["Erosion แล้วตามด้วย Dilation", "Dilation อย่างเดียว", "Erosion อย่างเดียว", "Dilation แล้วตามด้วย Erosion"],
+        correct: 3,
         explain: "Closing = erode(dilate(A)) — ขยายก่อน (เติมรู) แล้วกร่อนกลับ → เติมรู/ช่องว่างเล็ก ๆ",
         en: {
           q: "Closing = ?",
-          options: ["Dilation followed by erosion", "Erosion followed by dilation", "Dilation only", "Erosion only"],
+          options: ["Erosion followed by dilation", "Dilation only", "Erosion only", "Dilation followed by erosion"],
           explain: "Closing = erode(dilate(A)) — dilate first (fills holes) then erode back → fills small holes/gaps"
         },
         steps: [
@@ -3195,12 +3038,12 @@ window.DATA = {
       },
       {
         q: "Opening ใช้แก้ปัญหาอะไร?",
-        options: ["ลบ Noise จุดเล็ก ๆ ในภาพ binary", "เติมรูใหญ่", "เพิ่มความคม", "เปลี่ยนสีภาพ"],
-        correct: 0,
+        options: ["เพิ่มความคม", "เปลี่ยนสีภาพ", "ลบ Noise จุดเล็ก ๆ ในภาพ binary", "เติมรูใหญ่"],
+        correct: 2,
         explain: "Opening ลบจุด noise เล็ก ๆ (ขาวลอยเดี่ยว) โดยที่วัตถุหลักยังคงขนาดเดิม",
         en: {
           q: "What problem does opening solve?",
-          options: ["Removes small noise dots in a binary image", "Fills big holes", "Sharpens", "Recolors"],
+          options: ["Sharpens", "Recolors", "Removes small noise dots in a binary image", "Fills big holes"],
           explain: "Opening removes small isolated noise dots while keeping main objects the same size"
         },
         steps: [
@@ -3212,12 +3055,12 @@ window.DATA = {
       },
       {
         q: "Contour ใน Object Detection คืออะไร?",
-        options: ["เส้นขอบเขตของวัตถุ (พื้นที่ที่มีค่าเท่ากันติดกัน)", "จุดศูนย์กลางของภาพ", "สีของพื้นหลัง", "ขนาดไฟล์"],
-        correct: 0,
+        options: ["ขนาดไฟล์", "เส้นขอบเขตของวัตถุ (พื้นที่ที่มีค่าเท่ากันติดกัน)", "จุดศูนย์กลางของภาพ", "สีของพื้นหลัง"],
+        correct: 1,
         explain: "Contour = เส้นที่ลากตามขอบของวัตถุในภาพ binary — ใช้วัดพื้นที่/ปริมณฑล/หุ้มด้วย bounding box",
         en: {
           q: "What is a contour in object detection?",
-          options: ["The boundary line of an object (connected same-valued region)", "The image center", "The background color", "The file size"],
+          options: ["The file size", "The boundary line of an object (connected same-valued region)", "The image center", "The background color"],
           explain: "A contour traces the boundary of an object in a binary image — used to measure area/perimeter and fit bounding boxes"
         },
         steps: [
@@ -3247,31 +3090,13 @@ window.DATA = {
         ]
       },
       {
-        q: "SIFT / SURF / ORB คืออะไร?",
-        options: ["Feature Descriptor — สร้างลายเซ็นของจุดเด่นในภาพ", "ฟิลเตอร์เบลอ", "การปรับความสว่าง", "การบีบอัดไฟล์"],
-        correct: 0,
-        explain: "SIFT/SURF/ORB หาจุดเด่น (keypoint) แล้วสร้าง descriptor — ใช้จับคู่ภาพ ตรวจจับวัตถุ สร้าง panorama",
-        en: {
-          q: "What are SIFT / SURF / ORB?",
-          options: ["Feature descriptors — signatures of keypoints in an image", "Blur filters", "Brightness adjustment", "File compression"],
-          explain: "SIFT/SURF/ORB find keypoints and build descriptors — used for image matching, object detection, panorama stitching"
-        },
-        steps: [
-          "Feature Extraction มี 2 ส่วน: หาจุดเด่น + อธิบายจุดเด่น",
-          "Corner/จุดเด่น = ตำแหน่งที่โดดเด่น (มุม, จุด)",
-          "Descriptor = เลข/เวกเตอร์ที่อธิบายรอบจุดเด่นนั้น",
-          "SIFT/SURF/ORB สร้าง descriptor นี้",
-          "ตอบ: Feature Descriptor"
-        ]
-      },
-      {
         q: "Perspective Transform (cv2.getPerspectiveTransform) ใช้ทำอะไร?",
-        options: ["แก้มุมมองเอียงให้เป็นหน้าตรง เช่น สแกนเอกสาร", "ทำให้ภาพเบลอ", "เพิ่มสี", "ลดขนาดภาพ"],
-        correct: 0,
+        options: ["ทำให้ภาพเบลอ", "เพิ่มสี", "ลดขนาดภาพ", "แก้มุมมองเอียงให้เป็นหน้าตรง เช่น สแกนเอกสาร"],
+        correct: 3,
         explain: "จับมุมทั้ง 4 ของเอกสารที่เอียง → ยืดให้เป็นสี่เหลี่ยมตรง (เหมือนสแกนเนอร์)",
         en: {
           q: "What is the perspective transform (cv2.getPerspectiveTransform) for?",
-          options: ["Fixing a tilted view into a straight one, e.g. document scanning", "Blurring the image", "Adding color", "Shrinking the image"],
+          options: ["Blurring the image", "Adding color", "Shrinking the image", "Fixing a tilted view into a straight one, e.g. document scanning"],
           explain: "Grab the 4 corners of a tilted document → warp it into a straight rectangle (like a scanner)"
         },
         steps: [
@@ -3284,12 +3109,12 @@ window.DATA = {
       },
       {
         q: "YOLO / SSD / Faster R-CNN คืออะไร?",
-        options: ["Object Detection Models ใน Deep Learning", "ฟิลเตอร์ใน OpenCV", "การบีบอัดภาพ", "เครื่องพิมพ์ 3 มิติ"],
-        correct: 0,
+        options: ["การบีบอัดภาพ", "เครื่องพิมพ์ 3 มิติ", "Object Detection Models ใน Deep Learning", "ฟิลเตอร์ใน OpenCV"],
+        correct: 2,
         explain: "YOLO, SSD, Faster R-CNN เป็นโมเดล Deep Learning สำหรับตรวจจับวัตถุ (class + bounding box)",
         en: {
           q: "What are YOLO / SSD / Faster R-CNN?",
-          options: ["Deep learning object detection models", "OpenCV filters", "Image compression", "3D printers"],
+          options: ["Image compression", "3D printers", "Deep learning object detection models", "OpenCV filters"],
           explain: "YOLO, SSD, Faster R-CNN are deep learning models for object detection (class + bounding box)"
         },
         steps: [
@@ -3302,12 +3127,12 @@ window.DATA = {
       },
       {
         q: "CNN ย่อมาจากอะไร?",
-        options: ["Convolutional Neural Network", "Computer Network Node", "Central Neural Node", "Color Negative Number"],
-        correct: 0,
+        options: ["Color Negative Number", "Convolutional Neural Network", "Computer Network Node", "Central Neural Node"],
+        correct: 1,
         explain: "CNN = Convolutional Neural Network — โครงข่ายประสาทเทียมที่ใช้ convolution วิเคราะห์ภาพ",
         en: {
           q: "What does CNN stand for?",
-          options: ["Convolutional Neural Network", "Computer Network Node", "Central Neural Node", "Color Negative Number"],
+          options: ["Color Negative Number", "Convolutional Neural Network", "Computer Network Node", "Central Neural Node"],
           explain: "CNN = Convolutional Neural Network — a neural network using convolutions to analyze images"
         },
         steps: [

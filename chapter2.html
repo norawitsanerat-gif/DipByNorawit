@@ -66,7 +66,7 @@
         <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="headerProgressBar">
           <div class="progress-fill" id="headerProgressFill"></div>
         </div>
-        <span class="progress-count" id="headerProgressCount">1 / 29</span>
+        <span class="progress-count" id="headerProgressCount">1 / 30</span>
       </div>
     </div>
   </header>
@@ -79,7 +79,7 @@
       <div class="sidebar-head">
         <div class="sidebar-head-title">
           <h2 id="sidebarChapterTitle">เมนูบทที่ 2</h2>
-          <p id="sidebarChapterSub">หัวข้อในสัปดาห์นี้ · 29 หัวข้อ</p>
+          <p id="sidebarChapterSub">หัวข้อในสัปดาห์นี้ · 30 หัวข้อ</p>
         </div>
         <button class="icon-btn sidebar-close" id="sidebarCloseBtn" aria-label="ปิดเมนูบทเรียน" title="ปิดเมนู">
           <i data-lucide="x"></i>
@@ -117,7 +117,7 @@
               </p>
 
               <div class="stat-chips" style="justify-content:center;margin-top:24px">
-                <span class="stat-chip"><i data-lucide="layers"></i> 29 Slides</span>
+                <span class="stat-chip"><i data-lucide="layers"></i> 30 Slides</span>
                 <span class="stat-chip"><i data-lucide="help-circle"></i> 10 Quiz</span>
                 <span class="stat-chip"><i data-lucide="square-stack"></i> 16 Flashcards</span>
                 <span class="stat-chip"><i data-lucide="book-marked"></i> 18 Glossary</span>
@@ -131,14 +131,14 @@
         </section>
 
         <!-- ============ SLIDE 2 · OVERVIEW ============ -->
-        <section class="slide-view" data-title="OpenCV คืออะไร — และติดตั้งยังไง" aria-label="สไลด์ 2: OpenCV คืออะไร">
+        <section class="slide-view" data-title="เราจะเรียนอะไรบ้าง" aria-label="สไลด์ 2: สิ่งที่จะเรียน">
           <div class="slide-inner">
             <p class="slide-eyebrow">CHAPTER OVERVIEW</p>
             <h2 class="slide-title">เราจะเรียนอะไรบ้างในบทนี้?</h2>
             <p class="slide-subtitle">บทนี้คือ "ภาษาแรก" ของการประมวลผลภาพ — ทุกบทที่เหลือใช้คำสั่งจากบทนี้ทั้งหมด</p>
             <div class="grid-3 mt-6">
               <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="folder-open" class="cyan"></i>อ่าน/แสดง/บันทึก</h3><p class="card-text small">imread · imshow + waitKey · imwrite — เปิดภาพและเก็บภาพ</p></div>
-              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="shape" class="cyan"></i>รู้จักภาพในคอม</h3><p class="card-text small">NumPy array · img.shape · img.dtype — ภาพคือตารางตัวเลข</p></div>
+              <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="box" class="cyan"></i>รู้จักภาพในคอม</h3><p class="card-text small">NumPy array · img.shape · img.dtype — ภาพคือตารางตัวเลข</p></div>
               <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="palette" class="cyan"></i>BGR vs RGB</h3><p class="card-text small">ลำดับสีใน OpenCV กับ Matplotlib และการแปลง cvtColor</p></div>
               <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="square-dot" class="cyan"></i>จัดการพิกเซล</h3><p class="card-text small">img[y, x] · แยก/ตั้งค่าช่องสี · เปลี่ยนทั้งโซน</p></div>
               <div class="card hoverable"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="crop" class="cyan"></i>ROI</h3><p class="card-text small">ตัดเฉพาะบริเวณที่สนใจด้วย slicing — พื้นฐานทุกโปรเจกต์จริง</p></div>
@@ -151,8 +151,42 @@
           </div>
         </section>
 
-        <!-- ============ SLIDE 3 · NumPy Array ============ -->
-        <section class="slide-view" data-title="ภาพใน OpenCV คือ NumPy Array" aria-label="สไลด์ 3: ภาพ = Array">
+        <!-- ============ SLIDE 3 · OPENCV คืออะไร ============ -->
+        <section class="slide-view" data-title="OpenCV คืออะไร — รู้จัก OpenCV ก่อนเริ่ม" aria-label="สไลด์ 3: OpenCV คืออะไร">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WHAT IS OPENCV?</p>
+            <h2 class="slide-title">OpenCV คืออะไร?</h2>
+            <p class="slide-subtitle">ก่อนเขียนโค้ด ต้องรู้ก่อนว่าเรากำลังใช้ "อะไร" — OpenCV คือไลบรารี (library) สำหรับงานประมวลผลภาพและ Computer Vision</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">OpenCV = Open Source Computer Vision Library</span>
+                <div class="grid-3 mt-3">
+                  <div class="card hoverable"><h3 class="card-title" style="font-size:14px"><i data-lucide="boxes" class="cyan"></i>คืออะไร</h3><p class="card-text small">ชุดคำสั่งสำเร็จรูป (library) สำหรับอ่าน/แก้ไข/วิเคราะห์ภาพและวิดีโอ</p></div>
+                  <div class="card hoverable"><h3 class="card-title" style="font-size:14px"><i data-lucide="sparkles" class="cyan"></i>ใช้ทำอะไร</h3><p class="card-text small">ตรวจจับใบหน้า/วัตถุ · OCR อ่านตัวหนังสือ · นับสิ่งของ · ตามวัตถุ · AR</p></div>
+                  <div class="card hoverable"><h3 class="card-title" style="font-size:14px"><i data-lucide="badge-check" class="cyan"></i>ฟรี และเปิดเผย</h3><p class="card-text small">Open Source — ใช้ได้ทั้งงานวิจัยและเชิงพาณิชย์ ไม่ต้องจ่ายเงิน</p></div>
+                </div>
+              </div>
+              <div class="visual-box">
+                <span class="vb-label">ที่มาและภาษา</span>
+                <ul class="no-list">
+                  <li><b>เริ่มจาก Intel</b> ปี 1999 (Gary Bradski) — ตอนนี้ดูแลโดยทีม OpenCV.org</li>
+                  <li><b>รองรับหลายภาษา</b> — C++, Python, Java, JavaScript — บทนี้ใช้ <b>Python</b></li>
+                  <li><b>ทำงานกับ NumPy</b> — ภาพคือ array ตัวเลข เลยต่อยอดกับ ML/AI ได้ง่าย</li>
+                  <li><b>ฟังก์ชันเยอะมาก</b> — กว่า 2,500 อัลกอริทึมสำเร็จรูป ไม่ต้องเขียนเอง</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="tip-box tip-note mt-6">
+              <i data-lucide="lightbulb"></i>
+              <div><b>วิธีติดตั้ง (ทำครั้งเดียว)</b><code>pip install opencv-python numpy matplotlib</code> — แล้วเริ่มทุกไฟล์ด้วย <code>import cv2</code></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 4 · NumPy Array ============ -->
+        <section class="slide-view" data-title="ภาพใน OpenCV คือ NumPy Array" aria-label="สไลด์ 4: ภาพ = Array">
           <div class="slide-inner">
             <p class="slide-eyebrow">FUNDAMENTALS</p>
             <h2 class="slide-title">ภาพใน OpenCV คือ <span class="grad-text">NumPy Array</span></h2>
@@ -189,8 +223,8 @@
           </div>
         </section>
 
-        <!-- ============ SLIDE 4 · IMREAD ============ -->
-        <section class="slide-view" data-title="อ่านภาพ — cv2.imread()" aria-label="สไลด์ 4: cv2.imread">
+        <!-- ============ SLIDE 5 · IMREAD ============ -->
+        <section class="slide-view" data-title="อ่านภาพ — cv2.imread()" aria-label="สไลด์ 5: cv2.imread">
           <div class="slide-inner">
             <p class="slide-eyebrow">READ IMAGE</p>
             <h2 class="slide-title">อ่านภาพ — <span class="grad-text">cv2.imread()</span></h2>
@@ -228,8 +262,8 @@ print(type(img))                 # &lt;class 'numpy.ndarray'&gt;</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 5 · SHAPE ============ -->
-        <section class="slide-view" data-title="img.shape — (Height, Width, Channels)" aria-label="สไลด์ 5: img.shape">
+        <!-- ============ SLIDE 6 · SHAPE ============ -->
+        <section class="slide-view" data-title="img.shape — (Height, Width, Channels)" aria-label="สไลด์ 6: img.shape">
           <div class="slide-inner">
             <p class="slide-eyebrow">IMAGE PROPERTIES</p>
             <h2 class="slide-title">img.shape — <span class="grad-text">(Height, Width, Channels)</span></h2>
@@ -265,8 +299,8 @@ print(img.shape)
           </div>
         </section>
 
-        <!-- ============ SLIDE 6 · DTYPE ============ -->
-        <section class="slide-view" data-title="img.dtype — uint8 (0–255)" aria-label="สไลด์ 6: img.dtype">
+        <!-- ============ SLIDE 7 · DTYPE ============ -->
+        <section class="slide-view" data-title="img.dtype — uint8 (0–255)" aria-label="สไลด์ 7: img.dtype">
           <div class="slide-inner">
             <p class="slide-eyebrow">IMAGE PROPERTIES</p>
             <h2 class="slide-title">img.dtype — <span class="grad-text">uint8</span></h2>
@@ -301,8 +335,8 @@ print(img.shape)
           </div>
         </section>
 
-        <!-- ============ SLIDE 7 · IMSHOW ============ -->
-        <section class="slide-view" data-title="แสดงภาพแบบที่ 1 — cv2.imshow() + waitKey()" aria-label="สไลด์ 7: imshow + waitKey">
+        <!-- ============ SLIDE 8 · IMSHOW ============ -->
+        <section class="slide-view" data-title="แสดงภาพแบบที่ 1 — cv2.imshow() + waitKey()" aria-label="สไลด์ 8: imshow + waitKey">
           <div class="slide-inner">
             <p class="slide-eyebrow">DISPLAY · OPENCV</p>
             <h2 class="slide-title">แสดงภาพ — <span class="grad-text">cv2.imshow()</span></h2>
@@ -338,8 +372,8 @@ cv2.destroyAllWindows()    # 3. ปิดหน้าต่างทั้งห
           </div>
         </section>
 
-        <!-- ============ SLIDE 8 · MATPLOTLIB ============ -->
-        <section class="slide-view" data-title="แสดงภาพแบบที่ 2 — Matplotlib plt.imshow()" aria-label="สไลด์ 8: plt.imshow">
+        <!-- ============ SLIDE 9 · MATPLOTLIB ============ -->
+        <section class="slide-view" data-title="แสดงภาพแบบที่ 2 — Matplotlib plt.imshow()" aria-label="สไลด์ 9: plt.imshow">
           <div class="slide-inner">
             <p class="slide-eyebrow">DISPLAY · MATPLOTLIB</p>
             <h2 class="slide-title">แสดงภาพแบบที่ 2 — <span class="grad-text">Matplotlib</span></h2>
@@ -375,8 +409,8 @@ plt.show()                      # วาดออกจอ</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 9 · SUBPLOT ============ -->
-        <section class="slide-view" data-title="จัดหน้าต่างพล็อต — subplot · title · colorbar" aria-label="สไลด์ 9: subplot · colorbar">
+        <!-- ============ SLIDE 10 · SUBPLOT ============ -->
+        <section class="slide-view" data-title="จัดหน้าต่างพล็อต — subplot · title · colorbar" aria-label="สไลด์ 10: subplot · colorbar">
           <div class="slide-inner">
             <p class="slide-eyebrow">MATPLOTLIB · LAYOUT</p>
             <h2 class="slide-title">จัดหน้าต่างพล็อต — <span class="grad-text">subplot · title · colorbar</span></h2>
@@ -413,8 +447,8 @@ plt.show()</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 10 · พล็อตเสริม ============ -->
-        <section class="slide-view" data-title="พล็อตเสริม — hist · plot · text · axis" aria-label="สไลด์ 10: hist · plot · text">
+        <!-- ============ SLIDE 11 · พล็อตเสริม ============ -->
+        <section class="slide-view" data-title="พล็อตเสริม — hist · plot · text · axis" aria-label="สไลด์ 11: hist · plot · text">
           <div class="slide-inner">
             <p class="slide-eyebrow">MATPLOTLIB · EXTRAS</p>
             <h2 class="slide-title">พล็อตเสริม — <span class="grad-text">hist · plot · text · axis</span></h2>
@@ -439,8 +473,8 @@ plt.colorbar()                       # แถบสี</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 11 · BGR vs RGB ============ -->
-        <section class="slide-view" data-title="BGR vs RGB — กับดักสีสลับ" aria-label="สไลด์ 11: BGR vs RGB">
+        <!-- ============ SLIDE 12 · BGR vs RGB ============ -->
+        <section class="slide-view" data-title="BGR vs RGB — กับดักสีสลับ" aria-label="สไลด์ 12: BGR vs RGB">
           <div class="slide-inner">
             <p class="slide-eyebrow">COLOR ORDER</p>
             <h2 class="slide-title">BGR vs RGB — <span class="grad-text">กับดักสีสลับ</span></h2>
@@ -476,8 +510,8 @@ print(pixel)
           </div>
         </section>
 
-        <!-- ============ SLIDE 12 · CVTCOLOR ============ -->
-        <section class="slide-view" data-title="แปลงสี — cv2.cvtColor()" aria-label="สไลด์ 12: cvtColor">
+        <!-- ============ SLIDE 13 · CVTCOLOR ============ -->
+        <section class="slide-view" data-title="แปลงสี — cv2.cvtColor()" aria-label="สไลด์ 13: cvtColor">
           <div class="slide-inner">
             <p class="slide-eyebrow">COLOR CONVERSION</p>
             <h2 class="slide-title">แปลงสี — <span class="grad-text">cv2.cvtColor()</span></h2>
@@ -496,11 +530,11 @@ plt.show()</pre>
               </div>
               <div class="flex" style="flex-direction:column;gap:14px">
                 <div class="card">
-                  <h3 class="card-title"><i data-lucide="arrows-right-left" class="cyan"></i>อ่านชื่อ flag</h3>
+                  <h3 class="card-title"><i data-lucide="arrow-left-right" class="cyan"></i>อ่านชื่อ flag</h3>
                   <p class="card-text"><code>COLOR_A2B</code> = แปลงจาก A เป็น B — BGR2RGB คือ BGR → RGB</p>
                 </div>
                 <div class="card">
-                  <h3 class="card-title"><i data-lucide="swap" class="cyan"></i>สลับด้วย slicing ก็ได้</h3>
+                  <h3 class="card-title"><i data-lucide="repeat" class="cyan"></i>สลับด้วย slicing ก็ได้</h3>
                   <p class="card-text"><code>img_rgb = img[:, :, ::-1]</code> — กลับลำดับช่องสุดท้าย (เทียบเท่า cvtColor สำหรับ BGR↔RGB)</p>
                 </div>
                 <div class="tip-box tip-exam">
@@ -512,8 +546,8 @@ plt.show()</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 13 · PIXEL ACCESS ============ -->
-        <section class="slide-view" data-title="เข้าถึงพิกเซล — img[y, x]" aria-label="สไลด์ 13: img[y, x]">
+        <!-- ============ SLIDE 14 · PIXEL ACCESS ============ -->
+        <section class="slide-view" data-title="เข้าถึงพิกเซล — img[y, x]" aria-label="สไลด์ 14: img[y, x]">
           <div class="slide-inner">
             <p class="slide-eyebrow">PIXEL ACCESS</p>
             <h2 class="slide-title">เข้าถึงพิกเซล — <span class="grad-text">img[y, x]</span></h2>
@@ -533,7 +567,7 @@ print(pixel)             # [ 50 120 200 ] → BGR</pre>
                   <p class="card-text">เคยชินจากคณิต (x, y) → เขียน img[x, y] → ได้ตำแหน่งคนละจุด! จำให้ขึ้นใจ: <b class="cyan">img[แถว, คอลัมน์]</b></p>
                 </div>
                 <div class="card">
-                  <h3 class="card-title"><i data-lucide="coords" class="cyan"></i>ผลลัพธ์เป็น array 3 ตัว</h3>
+                  <h3 class="card-title"><i data-lucide="move" class="cyan"></i>ผลลัพธ์เป็น array 3 ตัว</h3>
                   <p class="card-text">ภาพสี: [B, G, R] · ภาพเทา: ค่าเดียว เช่น <code>img[100, 200] = 120</code></p>
                 </div>
                 <div class="tip-box tip-exam">
@@ -545,8 +579,8 @@ print(pixel)             # [ 50 120 200 ] → BGR</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 14 · CHANNEL ============ -->
-        <section class="slide-view" data-title="แยก Channel — b, g, r = img[y, x]" aria-label="สไลด์ 14: แยก Channel">
+        <!-- ============ SLIDE 15 · CHANNEL ============ -->
+        <section class="slide-view" data-title="แยก Channel — b, g, r = img[y, x]" aria-label="สไลด์ 15: แยก Channel">
           <div class="slide-inner">
             <p class="slide-eyebrow">CHANNELS</p>
             <h2 class="slide-title">แยก Channel — <span class="grad-text">b, g, r = img[y, x]</span></h2>
@@ -580,8 +614,8 @@ r = img[100, 200, 2]   # ช่อง 2 = Red</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 15 · SET PIXEL ============ -->
-        <section class="slide-view" data-title="เปลี่ยนค่าพิกเซล — img[y, x] = [B, G, R]" aria-label="สไลด์ 15: เปลี่ยนพิกเซล">
+        <!-- ============ SLIDE 16 · SET PIXEL ============ -->
+        <section class="slide-view" data-title="เปลี่ยนค่าพิกเซล — img[y, x] = [B, G, R]" aria-label="สไลด์ 16: เปลี่ยนพิกเซล">
           <div class="slide-inner">
             <p class="slide-eyebrow">PIXEL WRITE</p>
             <h2 class="slide-title">เปลี่ยนค่าพิกเซล — <span class="grad-text">img[y, x] = [B, G, R]</span></h2>
@@ -617,8 +651,8 @@ r = img[100, 200, 2]   # ช่อง 2 = Red</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 16 · SET REGION ============ -->
-        <section class="slide-view" data-title="เปลี่ยนทั้งโซน — img[y1:y2, x1:x2]" aria-label="สไลด์ 16: เปลี่ยนทั้งโซน">
+        <!-- ============ SLIDE 17 · SET REGION ============ -->
+        <section class="slide-view" data-title="เปลี่ยนทั้งโซน — img[y1:y2, x1:x2]" aria-label="สไลด์ 17: เปลี่ยนทั้งโซน">
           <div class="slide-inner">
             <p class="slide-eyebrow">REGION WRITE</p>
             <h2 class="slide-title">เปลี่ยนทั้งโซน — <span class="grad-text">img[y1:y2, x1:x2]</span></h2>
@@ -655,8 +689,8 @@ print(img[150, 200])   # [0 0 255]</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 17 · ROI คืออะไร ============ -->
-        <section class="slide-view" data-title="ROI คืออะไร (Region Of Interest)" aria-label="สไลด์ 17: ROI คืออะไร">
+        <!-- ============ SLIDE 18 · ROI คืออะไร ============ -->
+        <section class="slide-view" data-title="ROI คืออะไร (Region Of Interest)" aria-label="สไลด์ 18: ROI คืออะไร">
           <div class="slide-inner">
             <p class="slide-eyebrow">ROI</p>
             <h2 class="slide-title">ROI คืออะไร — <span class="grad-text">Region Of Interest</span></h2>
@@ -690,8 +724,8 @@ print(img[150, 200])   # [0 0 255]</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 18 · ตัด ROI ============ -->
-        <section class="slide-view" data-title="ตัด ROI — roi = img[y1:y2, x1:x2]" aria-label="สไลด์ 18: ตัด ROI">
+        <!-- ============ SLIDE 19 · ตัด ROI ============ -->
+        <section class="slide-view" data-title="ตัด ROI — roi = img[y1:y2, x1:x2]" aria-label="สไลด์ 19: ตัด ROI">
           <div class="slide-inner">
             <p class="slide-eyebrow">ROI · CROP</p>
             <h2 class="slide-title">ตัด ROI — <span class="grad-text">roi = img[y1:y2, x1:x2]</span></h2>
@@ -729,8 +763,8 @@ print(roi.shape)
           </div>
         </section>
 
-        <!-- ============ SLIDE 19 · แสดง/บันทึก ROI ============ -->
-        <section class="slide-view" data-title="แสดง + บันทึก ROI" aria-label="สไลด์ 19: แสดง/บันทึก ROI">
+        <!-- ============ SLIDE 20 · แสดง/บันทึก ROI ============ -->
+        <section class="slide-view" data-title="แสดง + บันทึก ROI" aria-label="สไลด์ 20: แสดง/บันทึก ROI">
           <div class="slide-inner">
             <p class="slide-eyebrow">ROI · SHOW & SAVE</p>
             <h2 class="slide-title">แสดง + บันทึก ROI</h2>
@@ -766,8 +800,8 @@ cv2.waitKey(0)</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 20 · โค้ดเต็ม ============ -->
-        <section class="slide-view" data-title="รวมโค้ดตัวอย่างเต็ม (อ่าน → ROI → แสดง → บันทึก)" aria-label="สไลด์ 20: โค้ดเต็ม">
+        <!-- ============ SLIDE 21 · โค้ดเต็ม ============ -->
+        <section class="slide-view" data-title="รวมโค้ดตัวอย่างเต็ม (อ่าน → ROI → แสดง → บันทึก)" aria-label="สไลด์ 21: โค้ดเต็ม">
           <div class="slide-inner">
             <p class="slide-eyebrow">FULL EXAMPLE</p>
             <h2 class="slide-title">รวมโค้ดตัวอย่างเต็ม</h2>
@@ -798,8 +832,8 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 21 · ROI งานจริง ============ -->
-        <section class="slide-view" data-title="ROI ในงานจริง — OCR · ทะเบียนรถ · ใบหน้า" aria-label="สไลด์ 21: ROI งานจริง">
+        <!-- ============ SLIDE 22 · ROI งานจริง ============ -->
+        <section class="slide-view" data-title="ROI ในงานจริง — OCR · ทะเบียนรถ · ใบหน้า" aria-label="สไลด์ 22: ROI งานจริง">
           <div class="slide-inner">
             <p class="slide-eyebrow">ROI · APPLICATIONS</p>
             <h2 class="slide-title">ROI ในงานจริง</h2>
@@ -842,8 +876,8 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 22 · ROI ลดงาน ============ -->
-        <section class="slide-view" data-title="ROI ลดงานประมวลผล — 1920×1080 → 300×300" aria-label="สไลด์ 22: ROI ลดงาน">
+        <!-- ============ SLIDE 23 · ROI ลดงาน ============ -->
+        <section class="slide-view" data-title="ROI ลดงานประมวลผล — 1920×1080 → 300×300" aria-label="สไลด์ 23: ROI ลดงาน">
           <div class="slide-inner">
             <p class="slide-eyebrow">ROI · PERFORMANCE</p>
             <h2 class="slide-title">ROI ลดงานประมวลผล</h2>
@@ -877,15 +911,15 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 23 · SUMMARY ============ -->
-        <section class="slide-view" data-title="Chapter Summary — สรุปบทเรียน" aria-label="สไลด์ 23: สรุปบทเรียน">
+        <!-- ============ SLIDE 24 · SUMMARY ============ -->
+        <section class="slide-view" data-title="Chapter Summary — สรุปบทเรียน" aria-label="สไลด์ 24: สรุปบทเรียน">
           <div class="slide-inner">
             <p class="slide-eyebrow">CHAPTER SUMMARY</p>
             <h2 class="slide-title">สรุปบทเรียน</h2>
             <p class="slide-subtitle">เก็บทุกประเด็นสำคัญของบทนี้ไว้ในหน้าเดียว</p>
             <div class="grid-2 mt-6">
               <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="folder-open" class="cyan"></i>อ่าน/แสดง/บันทึก</h3><p class="card-text small">imread อ่านเป็น NumPy array · imshow + waitKey(0) · imwrite บันทึก</p></div>
-              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="shape" class="cyan"></i>shape &amp; dtype</h3><p class="card-text small">(Height, Width, Channels) = (480, 640, 3) · uint8 = 0–255</p></div>
+              <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="box" class="cyan"></i>shape &amp; dtype</h3><p class="card-text small">(Height, Width, Channels) = (480, 640, 3) · uint8 = 0–255</p></div>
               <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="palette" class="cyan"></i>BGR vs RGB</h3><p class="card-text small">OpenCV เก็บ BGR · Matplotlib แสดง RGB · cvtColor ใช้แปลง</p></div>
               <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="square-dot" class="cyan"></i>พิกเซล</h3><p class="card-text small">img[y, x] · แยกช่อง b,g,r = img[y,x] · ตั้งค่า img[y,x] = [B,G,R]</p></div>
               <div class="card"><h3 class="card-title" style="font-size:14.5px"><i data-lucide="crop" class="cyan"></i>ROI</h3><p class="card-text small">roi = img[y1:y2, x1:x2] — ตัดเฉพาะส่วนที่สนใจ (y มาก่อน x เสมอ)</p></div>
@@ -898,8 +932,8 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 24 · CHEAT SHEET ============ -->
-        <section class="slide-view" data-title="Exam Cheat Sheet — สูตรจำก่อนสอบ" aria-label="สไลด์ 24: สูตรจำก่อนสอบ">
+        <!-- ============ SLIDE 25 · CHEAT SHEET ============ -->
+        <section class="slide-view" data-title="Exam Cheat Sheet — สูตรจำก่อนสอบ" aria-label="สไลด์ 25: สูตรจำก่อนสอบ">
           <div class="slide-inner">
             <p class="slide-eyebrow">EXAM CHEAT SHEET</p>
             <h2 class="slide-title">สูตรจำก่อนสอบ</h2>
@@ -908,8 +942,8 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 25 · QUIZ 1 ============ -->
-        <section class="slide-view quiz-slide" data-title="Quiz 1 (ข้อ 1–5)" aria-label="สไลด์ 25: แบบทดสอบชุดที่ 1">
+        <!-- ============ SLIDE 26 · QUIZ 1 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 1 (ข้อ 1–5)" aria-label="สไลด์ 26: แบบทดสอบชุดที่ 1">
           <div class="slide-inner">
             <p class="slide-eyebrow">QUIZ MODE · PART 1</p>
             <h2 class="slide-title">แบบทดสอบ ชุดที่ 1</h2>
@@ -917,8 +951,8 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 26 · QUIZ 2 ============ -->
-        <section class="slide-view quiz-slide" data-title="Quiz 2 (ข้อ 6–10)" aria-label="สไลด์ 26: แบบทดสอบชุดที่ 2">
+        <!-- ============ SLIDE 27 · QUIZ 2 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 2 (ข้อ 6–10)" aria-label="สไลด์ 27: แบบทดสอบชุดที่ 2">
           <div class="slide-inner">
             <p class="slide-eyebrow">QUIZ MODE · PART 2</p>
             <h2 class="slide-title">แบบทดสอบ ชุดที่ 2</h2>
@@ -926,8 +960,8 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 27 · FLASHCARDS ============ -->
-        <section class="slide-view" data-title="Flashcards — ทบทวนการ์ด" aria-label="สไลด์ 27: การ์ดทบทวน">
+        <!-- ============ SLIDE 28 · FLASHCARDS ============ -->
+        <section class="slide-view" data-title="Flashcards — ทบทวนการ์ด" aria-label="สไลด์ 28: การ์ดทบทวน">
           <div class="slide-inner">
             <p class="slide-eyebrow">REVIEW</p>
             <h2 class="slide-title">Flashcards — <span class="grad-text">ทบทวนการ์ด</span></h2>
@@ -958,8 +992,8 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 28 · GLOSSARY ============ -->
-        <section class="slide-view" data-title="Glossary — คำศัพท์" aria-label="สไลด์ 28: คำศัพท์">
+        <!-- ============ SLIDE 29 · GLOSSARY ============ -->
+        <section class="slide-view" data-title="Glossary — คำศัพท์" aria-label="สไลด์ 29: คำศัพท์">
           <div class="slide-inner">
             <p class="slide-eyebrow">GLOSSARY</p>
             <h2 class="slide-title">Glossary — <span class="grad-text">คำศัพท์</span></h2>
@@ -976,8 +1010,8 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </div>
         </section>
 
-        <!-- ============ SLIDE 29 · POST-LESSON EXAM ============ -->
-        <section class="slide-view quiz-slide" data-title="ข้อสอบหลังเรียน — แบบทดสอบท้ายบท 20 ข้อ" aria-label="สไลด์ 29: ข้อสอบหลังเรียน">
+        <!-- ============ SLIDE 30 · POST-LESSON EXAM ============ -->
+        <section class="slide-view quiz-slide" data-title="ข้อสอบหลังเรียน — แบบทดสอบท้ายบท 20 ข้อ" aria-label="สไลด์ 30: ข้อสอบหลังเรียน">
           <div class="slide-inner">
             <p class="slide-eyebrow">POST-LESSON EXAM</p>
             <div id="examHeadTitle"><h2 class="slide-title">ข้อสอบหลังเรียน <span class="grad-text">20 ข้อ</span></h2></div>
@@ -995,7 +1029,7 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
         </button>
 
         <div class="bb-center">
-          สไลด์ <b id="bbCounter">1</b> / <b id="bbTotal">29</b>
+          สไลด์ <b id="bbCounter">1</b> / <b id="bbTotal">30</b>
         </div>
 
         <div class="bb-tools">
@@ -1007,6 +1041,9 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
           </button>
           <button class="icon-btn" id="printCardsBtn" aria-label="พิมพ์การ์ดสรุป" title="พิมพ์การ์ดสรุป">
             <i data-lucide="file-output"></i>
+          </button>
+          <button class="icon-btn" id="printStudyBtn" aria-label="พิมพ์เอกสารสรุปสอบ" title="พิมพ์เอกสารสรุปสอบ (Study Sheet)">
+            <i data-lucide="file-text"></i>
           </button>
         </div>
 
@@ -1047,7 +1084,7 @@ cv2.imwrite("roi.jpg", roi)             # 8. บันทึก ROI</pre>
     <h2 class="slide-title mt-4" style="font-size:28px">Chapter Complete!</h2>
     <p class="text-2 mt-2" id="completionMsg">คุณเรียนครบทุกสไลด์แล้ว — ยอดเยี่ยมมาก! <b class="grad-text">Keep Learning!</b></p>
     <div class="grid-3 mt-5" style="grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneSlides">29</b><p class="text-3" style="font-size:12px">สไลด์</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneSlides">30</b><p class="text-3" style="font-size:12px">สไลด์</p></div>
       <div class="card" style="padding:14px"><b style="font-size:20px" id="doneScore">–</b><p class="text-3" style="font-size:12px">คะแนน Quiz</p></div>
       <div class="card" style="padding:14px"><b style="font-size:20px">100%</b><p class="text-3" style="font-size:12px">ความคืบหน้า</p></div>
     </div>

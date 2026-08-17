@@ -2519,3 +2519,45 @@ body.modal-open { overflow: hidden; }
 .exam-modal-ans { margin-top: 10px; font-size: 13.5px; color: var(--text-2); }
 .exam-modal-ans code { font-family: Consolas, Monaco, monospace; background: rgba(0, 0, 0, 0.35); padding: 2px 8px; border-radius: 6px; color: var(--success); }
 .exam-modal-foot { padding: 13px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+
+/* ==========================================================================
+   PRINT — Study Sheet (สรุปย่อก่อนสอบ) — อ่านง่าย ประหยัดหมึก
+   ========================================================================== */
+@media print {
+  #printArea .pp-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+  #printArea .ps-toc { margin-top: 14px; }
+  #printArea .ps-toc-row { display: flex; gap: 10px; padding: 4px 0; border-bottom: 1px dotted #cbd5e1; font-size: 12px; color: #1e293b; }
+  #printArea .ps-toc-row b { width: 26px; flex: 0 0 26px; color: #2563eb; }
+
+  /* จัดโครงสร้างสไลด์ให้เรียงเป็นแนวตั้ง อ่านง่าย */
+  #printArea .split, #printArea .grid-2, #printArea .grid-3, #printArea .grid-4, #printArea .flex { display: block !important; }
+  #printArea .visual-box { border: none !important; box-shadow: none !important; background: none !important; padding: 0 !important; margin: 10px 0 !important; }
+  #printArea .vb-label { font-size: 11px; font-weight: 700; color: #2563eb; margin-bottom: 4px; display: block; }
+  #printArea .card { border: 1px solid #cbd5e1; border-left: 3px solid #2563eb; border-radius: 8px; padding: 8px 10px; margin: 8px 0; background: #fff; break-inside: avoid; }
+  #printArea .card h3 { font-size: 12.5px; margin: 0 0 3px; color: #0f172a; }
+  #printArea .card p { margin: 0; font-size: 11.5px; line-height: 1.55; color: #334155; }
+  #printArea .card .small { font-size: 11px; }
+  #printArea .tip-box { background: #eff6ff; border: 1px solid #bfdbfe; border-left: 3px solid #2563eb; border-radius: 8px; padding: 8px 10px; margin: 8px 0; break-inside: avoid; }
+  #printArea .tip-box div { font-size: 11.5px; line-height: 1.55; color: #1e3a8a; }
+  #printArea .tip-box b { display: block; margin-bottom: 2px; }
+  #printArea .code-block, #printArea pre.ps-code, #printArea .ps-code {
+    background: #fff !important; color: #0f172a !important; border: 1px solid #cbd5e1; border-radius: 6px;
+    padding: 8px 10px; font-size: 11px; line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+  }
+  #printArea .code-block .cmt { color: #64748b; }
+  #printArea .code-block .fn { color: #0369a1; }
+  #printArea .code-block .kw { color: #6d28d9; }
+  #printArea .code-block .str { color: #15803d; }
+  #printArea .code-block .num { color: #b91c1c; }
+  #printArea .tbl-wrap { border: 1px solid #cbd5e1; border-radius: 6px; margin: 8px 0; overflow: visible !important; }
+  #printArea table.tbl { font-size: 11px; background: #fff; }
+  #printArea .step-list { margin: 8px 0; }
+  #printArea .step-box { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 3px 8px; margin: 3px 3px 3px 0; font-size: 11px; background: #f8fafc; break-inside: avoid; }
+  #printArea .step-box b { background: #2563eb; color: #fff; border-radius: 50%; width: 15px; height: 15px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; flex: 0 0 15px; }
+  #printArea .no-list { padding-left: 0; margin: 8px 0; list-style: none; }
+  #printArea .no-list li { font-size: 11.5px; margin: 3px 0; color: #334155; }
+  #printArea .center, #printArea .center2 { text-align: left !important; }
+  #printArea .mt-3, #printArea .mt-4, #printArea .mt-6 { margin-top: 8px !important; }
+  #printArea .mb-4, #printArea .mb-6 { margin-bottom: 8px !important; }
+  #printArea .text-3 { font-size: 11px; color: #475569; }
+}

@@ -15,9 +15,9 @@
 
   var CHS = {
     1: { start: 0, count: D.slides.length, sections: D.sections, slides: D.slides, cheat: D.cheat, flashcards: D.flashcards, glossary: D.glossary, exam: D.quick, thai: "ภาพดิจิทัลคืออะไร", en: "Digital Image Processing" },
-    2: { start: 0, count: D.ch2.slides.length, sections: D.ch2.sections, slides: D.ch2.slides, cheat: D.ch2.cheat, flashcards: D.ch2.flashcards, glossary: D.ch2.glossary, quiz: D.ch2.quiz, exam: D.ch2.exam, thai: "การประมวลผลภาพสี", en: "Color Image Processing" },
-    3: { start: 0, count: D.ch3.slides.length, sections: D.ch3.sections, slides: D.ch3.slides, cheat: D.ch3.cheat, flashcards: D.ch3.flashcards, glossary: D.ch3.glossary, quiz: D.ch3.quiz, exam: D.ch3.exam, thai: "การทดลองประมวลผลภาพด้วย MATLAB", en: "Image Processing Lab with MATLAB" },
-    4: { start: 0, count: D.ch4.slides.length, sections: D.ch4.sections, slides: D.ch4.slides, cheat: D.ch4.cheat, flashcards: D.ch4.flashcards, glossary: D.ch4.glossary, quiz: D.ch4.quiz, exam: D.ch4.exam, thai: "การปรับปรุงภาพด้วย Spatial Filtering", en: "Image Enhancement by Spatial Filtering" },
+    2: { start: 0, count: D.ch2.slides.length, sections: D.ch2.sections, slides: D.ch2.slides, cheat: D.ch2.cheat, flashcards: D.ch2.flashcards, glossary: D.ch2.glossary, quiz: D.ch2.quiz, exam: D.ch2.exam, thai: "เริ่มต้น OpenCV", en: "Getting Started with OpenCV" },
+    3: { start: 0, count: D.ch3.slides.length, sections: D.ch3.sections, slides: D.ch3.slides, cheat: D.ch3.cheat, flashcards: D.ch3.flashcards, glossary: D.ch3.glossary, quiz: D.ch3.quiz, exam: D.ch3.exam, thai: "Sampling & Quantization", en: "Sampling & Quantization" },
+    4: { start: 0, count: D.ch4.slides.length, sections: D.ch4.sections, slides: D.ch4.slides, cheat: D.ch4.cheat, flashcards: D.ch4.flashcards, glossary: D.ch4.glossary, quiz: D.ch4.quiz, exam: D.ch4.exam, thai: "การปรับปรุงภาพ (Image Enhancement)", en: "Image Enhancement" },
     5: { start: 0, count: D.ch5.slides.length, sections: D.ch5.sections, slides: D.ch5.slides, cheat: D.ch5.cheat, flashcards: D.ch5.flashcards, glossary: D.ch5.glossary, quiz: D.ch5.quiz, exam: D.ch5.exam, thai: "การกรองภาพและตรวจจับขอบ", en: "Image Filtering & Edge Detection" },
     6: { start: 0, count: D.ch6.slides.length, sections: D.ch6.sections, slides: D.ch6.slides, cheat: D.ch6.cheat, flashcards: D.ch6.flashcards, glossary: D.ch6.glossary, quiz: D.ch6.quiz, exam: D.ch6.exam, thai: "Segmentation ถึง Computer Vision", en: "Segmentation to Computer Vision" }
   };
@@ -592,17 +592,17 @@
   function examHint() {
     var h = {
       1: "ลองนึกถึงภาพที่ประกอบด้วยพิกเซล, ระดับการประมวลผล Low/Mid/Higher, Fundamental Steps และความลึกของสี (1/8/24/32 bit) ประกอบคำตอบ",
-      2: "ลองนึกถึงทำไมต้องใช้สี, สีปฐมภูมิ/ทุติยภูมิ, RGB→CMY, pixel depth, Safe RGB และ HSI ประกอบคำตอบ",
-      3: "ลองนึกถึงคำสั่ง MATLAB (imread/imshow/fft2), Sampling/Quantization, Negative/Gamma/Log, Histogram, Spatial/Frequency filter และ Morphology ประกอบคำตอบ",
-      4: "ลองนึกถึง Spatial Filtering (mean/median), Padding 3 แบบ, Finite Difference, Sobel (Sobel_x/y), Laplacian (center 4/5/9), sharpening g=f−∇²f และ Morphology ประกอบคำตอบ",
+      2: "ลองนึกถึงการอ่านภาพด้วย OpenCV (imread → NumPy array), img.shape (H,W,C) / dtype (uint8), BGR vs RGB, การเข้าถึงพิกเซล (item/setitem), ROI (slice) และการแสดงผล (imshow/waitKey) ประกอบคำตอบ",
+      3: "ลองนึกถึง f(x,y) → digitize, Sampling (ความละเอียดเชิงพื้นที่) vs Quantization (grey level), 2^k grey levels, Bit-Plane, Downsampling/Aliasing, การต่อภาพ และข้อมูลที่หายไป ประกอบคำตอบ",
+      4: "ลองนึกถึง Brightness/Contrast (เพิ่ม/ลบค่าคงที่, คูณ gain), Gamma correction, Histogram (ข้อมูลของภาพ), Histogram Equalization และ CLAHE (ตัด Local/Contrast limit) ประกอบคำตอบ",
       5: "ลองนึกถึง Mean/Gaussian/Median/Bilateral, Linear vs Non-linear, Sobel (Sobel_x/y), Laplacian (center 4/8), sharpening g=f−∇²f, Canny, FFT/fftshift/IFFT, Magnitude/Phase และ Walsh/Hadamard ประกอบคำตอบ",
       6: "ลองนึกถึง Threshold 5 โหมด (BINARY/INV/TRUNC/TOZERO), Adaptive (blockSize/C), Otsu, Morphology (Erosion/Dilation/Opening/Closing), Contour (findContours/boundingRect), Feature (Moments/Harris/SIFT) และ YOLO ประกอบคำตอบ"
     };
     var he = {
       1: "Think about pixels, the Low/Mid/Higher processing levels, the Fundamental Steps, and color depth (1/8/24/32 bit) to answer",
-      2: "Think about why we use color, primary/secondary colors, RGB→CMY, pixel depth, Safe RGB, and HSI to answer",
-      3: "Think about MATLAB commands (imread/imshow/fft2), Sampling/Quantization, Negative/Gamma/Log, Histogram, Spatial/Frequency filters, and Morphology to answer",
-      4: "Think about spatial filtering (mean/median), the 3 paddings, finite differences, Sobel (Sobel_x/y), Laplacian (center 4/5/9), sharpening g=f−∇²f, and morphology to answer",
+      2: "Think about reading images with OpenCV (imread → NumPy array), img.shape (H,W,C) / dtype (uint8), BGR vs RGB, pixel access (item/setitem), ROI (slicing), and display (imshow/waitKey) to answer",
+      3: "Think about f(x,y) → digitize, Sampling (spatial resolution) vs Quantization (grey levels), 2^k grey levels, bit-planes, downsampling/aliasing, image stitching, and lost information to answer",
+      4: "Think about brightness/contrast (add/subtract constant, gain), gamma correction, histogram (image information), histogram equalization, and CLAHE (local tiles, contrast limit) to answer",
       5: "Think about Mean/Gaussian/Median/Bilateral, Linear vs Non-linear, Sobel (Sobel_x/y), Laplacian (center 4/8), sharpening g=f−∇²f, Canny, FFT/fftshift/IFFT, Magnitude/Phase, and Walsh/Hadamard to answer",
       6: "Think about the 5 threshold modes (BINARY/INV/TRUNC/TOZERO), Adaptive (blockSize/C), Otsu, Morphology (Erosion/Dilation/Opening/Closing), Contour (findContours/boundingRect), Features (Moments/Harris/SIFT), and YOLO to answer"
     };
@@ -630,9 +630,9 @@
   }
   var EXAM_HEAD = {
     1: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Digital images, processing levels, fundamental steps & color depth — finish all slides to unlock; see the solution right after answering" },
-    2: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Color fundamentals, color models (RGB/CMY/HSI), pseudo-color & full-color processing — finish all slides to unlock; see the solution right after answering" },
-    3: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "MATLAB commands, sampling/quantization, intensity transforms, DFT/transforms, histogram, spatial & frequency filtering, morphology, thresholding — finish all slides to unlock" },
-    4: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Spatial filtering, mean/median, padding, finite differences, Sobel, Laplacian & sharpening, morphology, Otsu threshold — finish all slides to unlock" },
+    2: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "OpenCV basics — imread/shape/dtype, display, BGR vs RGB, pixel access, ROI — finish all slides to unlock; see the solution right after answering" },
+    3: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Sampling & quantization, 2^k grey levels, bit-planes, downsampling & aliasing, image stitching — finish all slides to unlock; see the solution right after answering" },
+    4: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Brightness/contrast, gamma correction, histogram, histogram equalization & CLAHE — finish all slides to unlock; see the solution right after answering" },
     5: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Smoothing (mean/gaussian/median/bilateral), edge detection (Sobel/Laplacian/Canny), Fourier (FFT/magnitude/phase), Walsh-Hadamard — finish all slides to unlock; see the solution right after answering" },
     6: { en: '<h2 class="slide-title">Post-Lesson Exam <span class="grad-text">20 Questions</span></h2>', subEn: "Thresholding (global/adaptive/otsu), morphology, contour & bounding box, features, transforms, object detection (YOLO) — finish all slides to unlock; see the solution right after answering" }
   };
@@ -972,9 +972,93 @@
       '<div class="print-page"><div class="pp-eyebrow">FLASHCARDS</div><div class="pp-title">คำถาม — คำตอบ</div>' +
       '<div class="pp-card-grid">' + fc + "</div></div>";
   }
+  /* ---- Study Sheet: เอกสารสรุปย่อก่อนสอบ ---- */
+  function isMetaSlide(title) {
+    return /^(cover\b|เราจะเรียนอะไรบ้าง)|quiz|flashcards|glossary|ข้อสอบ|แบบทดสอบ|การ์ดทบทวน|คำศัพท์|cheat\s*sheet|สูตรจำก่อนสอบ/i.test(title || "");
+  }
+  function cleanTitle(t) {
+    return String(t || "").split("—")[0].trim();
+  }
+  function stripHtml(html) {
+    var d = document.createElement("div");
+    d.innerHTML = html;
+    return d.textContent.replace(/\s+/g, " ").trim();
+  }
+  function buildPrintStudy() {
+    var area = $("printArea");
+    var c = ch();
+    var pages = [];
+    var contentSlides = [];
+
+    qsa(".slide-view").forEach(function (s, i) {
+      if (i < c.start || i >= c.start + c.count) return;
+      var rel = i - c.start;
+      var title = s.getAttribute("data-title") || c.slides[rel].title || "";
+      if (isMetaSlide(title)) return;
+      contentSlides.push({ s: s, rel: rel, title: title });
+    });
+
+    // หน้า 1 — ปก + สารบัญหัวข้อ
+    var toc = contentSlides.map(function (x) {
+      return '<div class="ps-toc-row"><b>' + (x.rel + 1) + "</b><span>" + esc(cleanTitle(x.title)) + "</span></div>";
+    }).join("");
+    pages.push(
+      '<div class="print-page"><div class="pp-eyebrow">STUDY SHEET · ' + esc(c.thai || "") + "</div>" +
+      '<div class="pp-title">สรุปย่อก่อนสอบ — ' + esc(c.thai || "") + "</div>" +
+      '<div class="pp-sub">' + esc(c.en || "") + " · เอกสารสรุป " + contentSlides.length + " หัวข้อ + สูตร + คำศัพท์ + คำถาม-คำตอบ</div>" +
+      '<div class="ps-toc">' + toc + "</div></div>"
+    );
+
+    // หน้าสรุปสไลด์ — คัดเฉพาะใจความสำคัญ (หัวข้อ · คำอธิบาย · ข้อควรจำ · การ์ด · โค้ด · ตาราง · ขั้นตอน)
+    contentSlides.forEach(function (x) {
+      var inner = x.s.querySelector(".slide-inner");
+      if (!inner) return;
+      var doc = document.createElement("div");
+      doc.innerHTML = inner.innerHTML;
+      qsa("svg, button, script", doc).forEach(function (el) { el.remove(); });
+      qsa(".slide-eyebrow, i", doc).forEach(function (el) { el.remove(); });
+      var h2 = doc.querySelector("h2.slide-title");
+      var title = h2 ? stripHtml(h2.innerHTML) : cleanTitle(x.title);
+      if (h2) h2.remove();
+      qsa(".split, .grid-2, .grid-3, .grid-4", doc).forEach(function (el) { el.classList.add("ps-block"); });
+      qsa(".visual-box", doc).forEach(function (el) { el.classList.add("ps-visual"); });
+      qsa(".card", doc).forEach(function (el) { el.classList.add("ps-card"); });
+      qsa(".tip-box", doc).forEach(function (el) { el.classList.add("ps-tip"); });
+      qsa(".code-block", doc).forEach(function (el) { el.classList.add("ps-code"); });
+      qsa(".tbl-wrap", doc).forEach(function (el) { el.classList.add("ps-tbl"); });
+      qsa(".step-box", doc).forEach(function (el) { el.classList.add("ps-step"); });
+      pages.push(
+        '<div class="print-page"><div class="pp-eyebrow">สรุปสไลด์ "' + (x.rel + 1) + " / " + c.count + '"</div>' +
+        '<div class="pp-title">' + esc(title) + "</div>" +
+        '<div class="pp-body">' + doc.innerHTML + "</div></div>"
+      );
+    });
+
+    // หน้าสูตรจำ + คำศัพท์ + คำถาม-คำตอบ
+    var cheat = (c.cheat || D.cheat).map(function (x) {
+      return '<div class="pp-card"><h4>' + esc(x.term) + "</h4><p>" + esc(x.def) + "</p></div>";
+    }).join("");
+    var gloss = (c.glossary || D.glossary).map(function (g) {
+      return '<div class="pp-card"><h4>' + esc(g.term) + "</h4><p>" + esc(g.def) + "</p></div>";
+    }).join("");
+    var fc = (c.flashcards || D.flashcards).map(function (f) {
+      return '<div class="pp-card"><h4>' + esc(f.q) + "</h4><p>" + esc(f.a) + "</p></div>";
+    }).join("");
+    pages.push(
+      '<div class="print-page"><div class="pp-eyebrow">EXAM CHEAT SHEET</div><div class="pp-title">สูตรจำก่อนสอบ</div>' +
+      '<div class="pp-card-grid">' + cheat + "</div></div>" +
+      '<div class="print-page"><div class="pp-eyebrow">GLOSSARY</div><div class="pp-title">คำศัพท์</div>' +
+      '<div class="pp-card-grid">' + gloss + "</div></div>" +
+      '<div class="print-page"><div class="pp-eyebrow">FLASHCARDS</div><div class="pp-title">คำถาม — คำตอบ</div>' +
+      '<div class="pp-card-grid">' + fc + "</div></div>"
+    );
+
+    area.innerHTML = pages.join("");
+  }
   function doPrint(kind) {
     if (kind === "slides") buildPrintSlides();
-    else buildPrintCards();
+    else if (kind === "cards") buildPrintCards();
+    else buildPrintStudy();
     document.body.classList.add("printing");
     setTimeout(function () {
       window.print();
@@ -1020,6 +1104,7 @@
     on("fullscreenBtn", "click", toggleFullscreen);
     on("printSlidesBtn", "click", function () { doPrint("slides"); });
     on("printCardsBtn", "click", function () { doPrint("cards"); });
+    on("printStudyBtn", "click", function () { doPrint("study"); });
 
     on("homeBtn", "click", goHome);
     on("startBtn", "click", function () { goTo(state.current + 1, 1); });

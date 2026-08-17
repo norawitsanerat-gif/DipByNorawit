@@ -43,7 +43,7 @@
 
       <div class="menu-hero-stats">
         <div class="stat"><b data-count="6">0</b><span>บทเรียน</span></div>
-        <div class="stat"><b data-count="177">0</b><span>สไลด์</span></div>
+        <div class="stat"><b data-count="178">0</b><span>สไลด์</span></div>
         <div class="stat"><b data-count="120">0</b><span>ข้อสอบ</span></div>
         <div class="stat"><b data-count="113">0</b><span>คำศัพท์</span></div>
       </div>
@@ -62,7 +62,7 @@
         <b class="cyan" id="coursePct">0%</b>
       </div>
       <div class="progress-track mt-3" style="width:100%"><div class="progress-fill" id="courseBar" style="width:0%"></div></div>
-      <p class="text-3 mt-2" style="font-size:12.5px" id="courseDone">เรียนแล้ว 0 / 177 สไลด์ · จบแล้ว 0 / 6 บท</p>
+      <p class="text-3 mt-2" style="font-size:12.5px" id="courseDone">เรียนแล้ว 0 / 178 สไลด์ · จบแล้ว 0 / 6 บท</p>
     </div>
 
     <!-- Chapter cards -->
@@ -85,13 +85,13 @@
       </button>
 
       <button class="chapter-card unlocked" data-chapter="2" role="listitem">
-        <span class="ch-top"><span class="ch-num">2</span><span class="ch-icon"><i data-lucide="palette"></i></span></span>
+        <span class="ch-top"><span class="ch-num">2</span><span class="ch-icon"><i data-lucide="code-2"></i></span></span>
         <div class="ch-body">
-          <span class="ch-en">Color Image Processing</span>
-          <b class="ch-title">การประมวลผลภาพสี</b>
-          <p class="ch-desc">ทำไมต้องใช้สี · Color Fundamentals (แสง 400–700 nm, Cones, CIE) · Color Models RGB/CMY/HSI · Pixel Depth &amp; Safe RGB · Pseudo-color (Intensity Slicing) · Full-color &amp; Smoothing/Sharpening</p>
+          <span class="ch-en">Getting Started with OpenCV</span>
+          <b class="ch-title">เริ่มต้น OpenCV</b>
+          <p class="ch-desc">OpenCV คืออะไร · ภาพคือ NumPy Array · cv2.imread() · img.shape (H, W, C) · img.dtype (uint8) · แสดงภาพ cv2.imshow / plt.imshow · BGR vs RGB · จัดการ Pixel · ROI (Region Of Interest)</p>
           <div class="ch-meta">
-            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="2">29</b> สไลด์</span>
+            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="2">30</b> สไลด์</span>
             <span class="chip-sm"><i data-lucide="file-question"></i>ข้อสอบ 20 ข้อ</span>
           </div>
           <div class="ch-progress">
@@ -103,13 +103,13 @@
       </button>
 
       <button class="chapter-card unlocked" data-chapter="3" role="listitem">
-        <span class="ch-top"><span class="ch-num">3</span><span class="ch-icon"><i data-lucide="flask-conical"></i></span></span>
+        <span class="ch-top"><span class="ch-num">3</span><span class="ch-icon"><i data-lucide="grid-3x3"></i></span></span>
         <div class="ch-body">
-          <span class="ch-en">Image Processing Lab · MATLAB</span>
-          <b class="ch-title">การทดลองประมวลผลภาพด้วย MATLAB</b>
-          <p class="ch-desc">Sampling/Quantization · Spatial &amp; Intensity Resolution · Negative/Gamma/Log/Contrast · DFT &amp; Transforms (Walsh/Hadamard/DCT/Haar) · Histogram &amp; Equalization · Spatial &amp; Frequency Filtering · Edge/Line/Point Detection · Morphology · Thresholding &amp; Otsu · Color Models</p>
+          <span class="ch-en">Sampling &amp; Quantization</span>
+          <b class="ch-title">Sampling &amp; Quantization</b>
+          <p class="ch-desc">จากภาพจริงเป็นภาพดิจิทัล (f(x,y)) · Sampling — เก็บตำแหน่ง · Quantization — ระดับความเข้ม (Grey Levels) · False Contours · Bit-Plane Slicing (MSB/LSB) · Compression &amp; Watermarking · Downsampling &amp; Image Pyramid</p>
           <div class="ch-meta">
-            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="3">34</b> สไลด์</span>
+            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="3">29</b> สไลด์</span>
             <span class="chip-sm"><i data-lucide="file-question"></i>ข้อสอบ 20 ข้อ</span>
           </div>
           <div class="ch-progress">
@@ -121,13 +121,13 @@
       </button>
 
       <button class="chapter-card unlocked" data-chapter="4" role="listitem">
-        <span class="ch-top"><span class="ch-num">4</span><span class="ch-icon"><i data-lucide="sparkles"></i></span></span>
+        <span class="ch-top"><span class="ch-num">4</span><span class="ch-icon"><i data-lucide="sun-medium"></i></span></span>
         <div class="ch-body">
-          <span class="ch-en">Image Enhancement by Spatial Filtering</span>
-          <b class="ch-title">การปรับปรุงภาพด้วยตัวกรองเชิงพื้นที่</b>
-          <p class="ch-desc">Spatial Filtering (linear/median) · Correlation vs Convolution · Mean/Median Filters · Finite Differences (Gradient) · Sobel/Prewitt · Laplacian &amp; Unsharp Masking · Morphology (Erosion/Dilation)</p>
+          <span class="ch-en">Image Enhancement</span>
+          <b class="ch-title">การปรับปรุงภาพ (Image Enhancement)</b>
+          <p class="ch-desc">Brightness (beta) · Contrast (alpha) · cv2.convertScaleAbs() · Contrast Stretching · Gamma (s = c·r^γ) · Logarithmic · Histogram &amp; Equalization (cv2.equalizeHist) · CLAHE — ตั้งแต่พื้นฐานจนถึงโค้ดจริง</p>
           <div class="ch-meta">
-            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="4">29</b> สไลด์</span>
+            <span class="chip-sm"><i data-lucide="presentation"></i><b data-slides="4">24</b> สไลด์</span>
             <span class="chip-sm"><i data-lucide="file-question"></i>ข้อสอบ 20 ข้อ</span>
           </div>
           <div class="ch-progress">
