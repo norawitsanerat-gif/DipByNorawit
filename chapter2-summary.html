@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>สรุปสอบ บทที่ 2 — เริ่มต้น OpenCV (A4)</title>
+<style>
+  /* ====== สรุปสอบ บทที่ 2 — เน้นเนื้อหา อัดแน่น ไม่เน้นความสวย ====== */
+  @page { size: A4; margin: 7mm 7mm 7mm 7mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    font-family: "Leelawadee UI", "IBM Plex Sans Thai", Tahoma, "Sukhumvit Set", "Thonburi", "Segoe UI", sans-serif;
+    font-size: 7.5pt;
+    line-height: 1.28;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sheet { max-width: 196mm; margin: 0 auto; }
+  code, .mono { font-family: Consolas, "Courier New", monospace; font-size: 95%; }
+
+  .head { border: 1.1pt solid #000; border-bottom: none; padding: 2px 8px 4px; }
+  .head h1 { font-size: 13pt; line-height: 1.15; }
+  .head .sub { font-size: 8pt; }
+  .formula-strip {
+    display: table; width: 100%; border: 1.1pt solid #000; border-top: none;
+    font-size: 7.5pt; font-weight: 600;
+  }
+  .formula-strip > div {
+    display: table-cell; padding: 2px 6px; border-right: 0.6pt solid #000; vertical-align: middle;
+  }
+  .formula-strip > div:last-child { border-right: none; }
+  .formula-strip b { font-size: 8pt; }
+
+  .cols { columns: 2; column-gap: 8px; margin-top: 4px; }
+
+  .sec { break-inside: avoid; margin-bottom: 6px; border: 0.8pt solid #555; padding: 3px 7px 4px; }
+  .sec > h2 {
+    font-size: 9pt; line-height: 1.2; padding: 1px 5px; margin: -3px -7px 4px;
+    background: #e8e8e8; border-bottom: 0.8pt solid #555;
+  }
+  .sec > h2 .en { font-weight: 600; font-size: 7pt; color: #333; }
+  ul { padding-left: 11px; }
+  li { margin-bottom: 1px; }
+  p { margin: 1.5px 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 2px 0; }
+  th, td { border: 0.5pt solid #000; padding: 0.5px 3px; text-align: left; font-size: 7.1pt; line-height: 1.25; }
+  th { background: #efefef; }
+  td b, .hl { background: #fff3bf; }
+
+  .code {
+    font-family: Consolas, "Courier New", monospace; font-size: 6.9pt; line-height: 1.3;
+    background: #f2f2f2; border: 0.5pt solid #999; padding: 2px 6px; margin: 2px 0;
+    white-space: pre-wrap;
+  }
+  .must { color: #a00; font-weight: 700; }
+  .trap { color: #a00; font-weight: 700; }
+  .qa b { font-weight: 600; }
+
+  .foot {
+    margin-top: 6px; border-top: 1pt solid #000; padding-top: 2px;
+    font-size: 7pt; text-align: center;
+  }
+  .no-print { text-align: right; margin: 0 0 6px; }
+  .no-print button {
+    font-family: inherit; font-size: 9.5pt; font-weight: 600;
+    padding: 7px 18px; cursor: pointer;
+    background: #2563eb; color: #fff;
+    border: none; border-radius: 7px;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, .35);
+    transition: background .15s, transform .1s, box-shadow .15s;
+  }
+  .no-print button:hover { background: #1d4ed8; box-shadow: 0 3px 8px rgba(37, 99, 235, .45); }
+  .no-print button:active { transform: translateY(1px); }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="no-print"><button onclick="window.print()">🖨 พิมพ์ / บันทึก PDF (Ctrl+P)</button></div>
+
+  <div class="head">
+    <h1>บทที่ 2 — เริ่มต้น OpenCV (Getting Started with OpenCV)</h1>
+    <div class="sub">สรุปสอบ A4 · OpenCV · NumPy Array · imread/imshow/imwrite · shape/dtype · BGR vs RGB · พิกเซล · ROI · <b class="must">★ = ต้องจำให้ได้</b> · <span class="trap">⚠ = กับดักข้อสอบ</span></div>
+  </div>
+
+  <div class="formula-strip">
+    <div>อ่าน = <b>cv2.imread()</b> · แสดง = <b>cv2.imshow() + waitKey(0)</b> · บันทึก = <b>cv2.imwrite()</b></div>
+    <div>shape = <b>(H, W, C)</b> · dtype = <b>uint8 (0–255)</b></div>
+    <div>พิกเซล = <b>img[y, x]</b> · ช่อง <b>0=B 1=G 2=R</b> · แดง BGR = <b>[0,0,255]</b></div>
+    <div>ROI = <b>img[y1:y2, x1:x2]</b> · BGR→RGB = <b>cvtColor(COLOR_BGR2RGB)</b></div>
+  </div>
+
+  <div class="cols">
+
+    <!-- ============ 1. OpenCV คืออะไร ============ -->
+    <div class="sec">
+      <h2>1 · OpenCV คืออะไร &amp; ภาพ = NumPy Array</h2>
+      <ul>
+        <li><b class="must">OpenCV = Open Source Computer Vision Library</b> — ไลบรารี (ชุดคำสั่งสำเร็จรูป) สำหรับอ่าน/แก้ไข/วิเคราะห์ภาพและวิดีโอ · ใช้ทำ face/object detection, OCR, นับสิ่งของ, AR</li>
+        <li>เริ่มจาก <b>Intel ปี 1999</b> (Gary Bradski) → ตอนนี้ดูแลโดยทีม OpenCV.org · <b>ฟรี Open Source</b> ใช้ได้ทั้งงานวิจัยและเชิงพาณิชย์</li>
+        <li>รองรับ C++ / Python / Java / JavaScript — บทนี้ใช้ <b>Python</b> · มีอัลกอริทึมสำเร็จรูป <b>กว่า 2,500 ตัว</b></li>
+        <li>ติดตั้ง: <code>pip install opencv-python numpy matplotlib</code> → เริ่มทุกไฟล์ด้วย <code>import cv2</code></li>
+        <li><b class="must">ภาพ = NumPy array (ตารางตัวเลข)</b> — แต่ละช่อง = ค่าพิกเซล (ยิ่งเลขมากยิ่งสว่าง) · แก้พิกเซล = แก้ตัวเลขในตาราง</li>
+        <li>ภาพสี = array 3 มิติ <b>(แถว, คอลัมน์, ช่องสี)</b> — แต่ละจุดมีค่า 3 ตัว (B, G, R)</li>
+        <li>ทำไมต้อง NumPy: คำนวณทั้ง array ได้เร็ว (vectorized) — เช่น ปรับความสว่างทั้งภาพ = บวกเลขทั้งตารางครั้งเดียว · <code>type(img)</code> → <code>numpy.ndarray</code></li>
+      </ul>
+    </div>
+
+    <!-- ============ 2. อ่าน/แสดง/บันทึก ============ -->
+    <div class="sec">
+      <h2>2 · อ่าน · แสดง · บันทึกภาพ</h2>
+      <ul>
+        <li><b class="must">อ่าน: <code>img = cv2.imread("image.jpg")</code></b> → ได้ NumPy array · path ผิดจะได้ <b>None</b> — ควรเช็คเสมอ · <code>cv2.imread(path, 0)</code> = อ่านเป็น grayscale 1 ช่อง</li>
+        <li>ตอนอ่าน <b>นามสกุลไม่สำคัญ</b> (OpenCV เดารูปแบบจากเนื้อไฟล์) แต่ตอนบันทึก <b>นามสกุลกำหนดรูปแบบไฟล์</b> (jpg/png/bmp)</li>
+        <li><b class="must">แสดงแบบ OpenCV</b> — ต้อง 3 คำสั่งคู่กัน:
+          <div class="code">cv2.imshow("Image", img)   # 1. เปิดหน้าต่าง
+cv2.waitKey(0)             # 2. รอคีย์บอร์ด
+cv2.destroyAllWindows()    # 3. ปิดหน้าต่างทั้งหมด</div>
+        </li>
+        <li><span class="trap">⚠</span> <b>ลืม waitKey = หน้าต่างกะพริบแล้วปิดทันที</b> · <code>waitKey(0)</code> = รอไม่จำกัด · <code>waitKey(5000)</code> = รอ 5 วิ (หน่วยมิลลิวินาที)</li>
+        <li><b class="must">แสดงแบบ Matplotlib</b> (นิยมใน Jupyter/Colab): <code>plt.imshow(img, cmap="gray")</code> + <code>plt.show()</code> — <b>ภาพสีต้อง cvtColor BGR→RGB ก่อน!</b> · cmap ที่มี: gray · hot · viridis · jet · plasma</li>
+        <li><b class="must">บันทึก: <code>cv2.imwrite("roi.jpg", roi)</code></b> — อาร์กิวเมนต์แรก = path ไฟล์ใหม่, ตัวที่สอง = ภาพ · คืน True/False ว่าสำเร็จไหม</li>
+        <li>จัดหน้าต่าง Matplotlib: <code>plt.subplot(แถว, คอลัมน์, ตำแหน่ง)</code> เช่น subplot(1,2,1) = 1 แถว 2 คอลัมน์ ช่องซ้าย · <code>plt.title()</code> · <code>plt.xlabel()/ylabel()</code> · <code>plt.colorbar()</code></li>
+        <li>พล็อตเสริม: <code>plt.hist(img.ravel(), bins=256)</code> (histogram ค่าพิกเซล) · <code>plt.plot(100, 200, "ro")</code> จุดแดง · <code>plt.text(100,100,"Pixel")</code> · <code>plt.xlim/ylim</code> (ใส่ ylim(300,100) = กลับแกน) · <code>plt.grid()</code> · <code>plt.axis("off")</code></li>
+      </ul>
+    </div>
+
+    <!-- ============ 3. shape & dtype ============ -->
+    <div class="sec">
+      <h2>3 · img.shape &amp; img.dtype</h2>
+      <ul>
+        <li><b class="must">img.shape = (Height, Width, Channels)</b> — ภาพ 640×480 สี → <b>(480, 640, 3)</b></li>
+        <li><span class="trap">⚠ กับดักที่เจอบ่อยที่สุด:</span> <b>Height (แถว/y) มาก่อน Width (คอลัมน์/x) เสมอ</b> — เพราะ array เรียงแถวก่อนคอลัมน์</li>
+        <li>แยกอ่าน: <code>h, w = img.shape[:2]</code> (grayscale ไม่มีช่อง) · <code>h, w, c = img.shape</code> (ภาพสี)</li>
+        <li><b class="must">img.dtype = uint8</b> — unsigned 8-bit integer = <b>0–255</b> (u = ไม่มีค่าลบ เริ่ม 0 · 8 บิต = 2⁸−1 = 255)</li>
+        <li><span class="trap">⚠ เวลาคำนวณ:</span> uint8 เก็บ 0–255 เท่านั้น — คำนวณเกิน 255 จะ <b>wrap (วนกลับ)/clip</b> → ต้องแปลงเป็น float ก่อนแล้วค่อยกลับ (float32/64 ใช้ตอนคำนวณ · uint16 สำหรับภาพ 16 บิต)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 4. BGR vs RGB ============ -->
+    <div class="sec">
+      <h2>4 · BGR vs RGB — กับดักสีสลับ</h2>
+      <ul>
+        <li><b class="must">OpenCV เก็บช่องสีเรียง BGR</b> (Blue-Green-Red) — มรดกจากยุคแรกของ C/C++ · แต่ Matplotlib/ภาพทั่วไปเรียง <b>RGB</b> — สอบติดชัวร์!</li>
+        <li>ตัวอย่าง: pixel = <code>[50, 120, 200]</code> — อ่านแบบ OpenCV (BGR) = B 50 · G 120 · R 200 (โทนแดง) / แบบ RGB = R 50 · B 200 (โทนน้ำเงิน) → <b>แดงกับน้ำเงินสลับกัน ภาพเพี้ยน</b> (อาการคลาสสิก: ท้องฟ้ากลายเป็นส้ม)</li>
+        <li><b class="must">แก้: <code>img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)</code></b> แล้วค่อย plt.imshow</li>
+        <li>อ่านชื่อ flag: <code>COLOR_A2B</code> = แปลงจาก A → B · flag อื่น: COLOR_BGR2GRAY · COLOR_RGB2BGR · COLOR_BGR2HSV · COLOR_BGR2LAB</li>
+        <li>สลับด้วย slicing ก็ได้: <code>img_rgb = img[:, :, ::-1]</code> (กลับลำดับช่องสุดท้าย — เทียบเท่า cvtColor สำหรับ BGR↔RGB)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 5. พิกเซล ============ -->
+    <div class="sec">
+      <h2>5 · จัดการพิกเซล — img[y, x]</h2>
+      <ul>
+        <li><b class="must">กฎเหล็ก: img[แถว(y), คอลัมน์(x)] — y มาก่อน x เสมอ</b> (ต่างจากคณิตศาสตร์ที่ใช้ (x, y) → เขียน img[x, y] จะได้ตำแหน่งคนละจุด!)</li>
+        <li>อ่าน: <code>pixel = img[100, 200]</code> → ภาพสีได้ <b>[B, G, R] 3 ตัว</b> · ภาพเทาได้ค่าเดียว เช่น <code>img[100, 200] = 120</code></li>
+        <li><b class="must">แยกช่อง:</b> <code>b, g, r = img[100, 200]</code> หรือระบุดัชนี <code>img[100, 200, 0]</code>=B · <code>[..., 1]</code>=G · <code>[..., 2]</code>=R · ดึงช่องทั้งภาพ: <code>blue = img[:, :, 0]</code> (ไว้ทำ mask/แยกวัตถุด้วยสี)</li>
+        <li><b class="must">ตั้งค่า: <code>img[100, 200] = [0, 0, 255]</code></b> — สีแดงใน BGR! (แดง RGB = [255,0,0] แต่ OpenCV สลับเป็น [0,0,255])</li>
+        <li>สีที่ใช้บ่อย (BGR): แดง <code>[0,0,255]</code> · เขียว <code>[0,255,0]</code> · น้ำเงิน <code>[255,0,0]</code> · ขาว <code>[255,255,255]</code> · ดำ <code>[0,0,0]</code></li>
+        <li><b class="must">เปลี่ยนทั้งโซน:</b> <code>img[100:200, 100:300] = [0, 0, 255]</code> — slicing เติมทั้งบล็อกในครั้งเดียว (ปิดบังใบหน้า/ทะเบียน, watermark, mask)</li>
+        <li><span class="trap">⚠ ช่วงสุดท้ายไม่รวม:</span> <code>100:200</code> ครอบแถว <b>100–199</b> — เหมือน Python slicing ทั่วไป</li>
+      </ul>
+    </div>
+
+    <!-- ============ 6. ROI ============ -->
+    <div class="sec">
+      <h2>6 · ROI — Region Of Interest</h2>
+      <ul>
+        <li><b class="must">ROI = Region Of Interest</b> = บริเวณที่เราสนใจในภาพ — ตัดเฉพาะส่วนนั้นมาแล้วประมวลผลต่อ</li>
+        <li>ทำไมต้อง ROI: <b>1.</b> เร็วขึ้น (คำนวณน้อยลง) <b>2.</b> แม่นขึ้น (ไม่โดนพื้นหลัง/noise รบกวน) <b>3.</b> วิเคราะห์เฉพาะจุดง่าย</li>
+        <li><b class="must">ตัด: <code>roi = img[y1:y2, x1:x2]</code></b> เช่น <code>roi = img[100:300, 200:500]</code> → y = 100–300, x = 200–500, ได้ roi.shape = <b>(200, 300, 3)</b> (สูง 200 แถว, กว้าง 300 คอลัมน์)</li>
+        <li><span class="trap">⚠ slicing เป็น view:</span> แก้ roi แล้วภาพต้นฉบับเปลี่ยนตาม — อยากได้สำเนาใช้ <code>roi = img[y1:y2, x1:x2].copy()</code></li>
+        <li>งานจริง (detect → ตัด ROI → วิเคราะห์): OCR อ่านตัวหนังสือ · ป้ายทะเบียนรถ · ตรวจจับใบหน้า</li>
+        <li><b class="must">ROI ลดงาน:</b> ทั้งภาพ 1920×1080 = 2,073,600 px แต่ ROI 300×300 = 90,000 px → 90,000 ÷ 2,073,600 ≈ <b>4.3%</b> (ประมวลผล ~23 เท่าเร็วขึ้น เพราะงานคิดต่อพิกเซล)</li>
+        <li>โจทย์สอบ: <b>% ที่ประมวลผล = พิกเซล ROI ÷ พิกเซลทั้งหมด × 100</b></li>
+      </ul>
+    </div>
+
+    <!-- ============ 7. โค้ดตัวอย่างเต็ม ============ -->
+    <div class="sec">
+      <h2>7 · โค้ดรวมทั้งบท (อ่าน → ROI → แสดง → บันทึก)</h2>
+      <div class="code">import cv2
+
+img = cv2.imread("image.jpg")      # 1. อ่านภาพ → array
+print(img.shape)                   #    (480, 640, 3) = (H, W, C)
+
+roi = img[100:300, 200:500]        # 2. ตัด ROI (y ก่อน x เสมอ)
+
+cv2.imshow("Original", img)        # 3. แสดงภาพเดิม + ROI
+cv2.imshow("ROI", roi)
+cv2.waitKey(0)                     # 4. รอคีย์บอร์ด (ลืม = หน้าต่างปิดทันที)
+cv2.destroyAllWindows()            # 5. ปิดหน้าต่าง
+
+cv2.imwrite("roi.jpg", roi)        # 6. บันทึก (นามสกุลกำหนดรูปแบบ)</div>
+      <p><b>ขั้นตอนระบบจริง:</b> หาของ (detect) → ตัด ROI → วิเคราะห์เฉพาะ ROI — ลดทั้งงานคำนวณและ noise</p>
+    </div>
+
+    <!-- ============ 8. ตารางคำสั่ง ============ -->
+    <div class="sec">
+      <h2>8 · ตารางคำสั่งหลักที่ต้องรู้จัก</h2>
+      <table>
+        <tr><th>คำสั่ง</th><th>หน้าที่</th><th>ตัวอย่าง</th></tr>
+        <tr><td><b>cv2.imread()</b></td><td>อ่านภาพ → NumPy array</td><td>cv2.imread("a.jpg", 0) = เทา</td></tr>
+        <tr><td><b>cv2.imshow()</b></td><td>แสดงภาพบนหน้าต่าง</td><td>ต้องคู่ waitKey(0)</td></tr>
+        <tr><td><b>cv2.waitKey()</b></td><td>รอคีย์บอร์ด (ms)</td><td>waitKey(0) = รอไม่จำกัด</td></tr>
+        <tr><td><b>cv2.destroyAllWindows()</b></td><td>ปิดหน้าต่างทั้งหมด</td><td>หลังเลิกใช้ imshow</td></tr>
+        <tr><td><b>cv2.imwrite()</b></td><td>บันทึกภาพเป็นไฟล์</td><td>นามสกุลกำหนดรูปแบบ</td></tr>
+        <tr><td><b>cv2.cvtColor()</b></td><td>แปลงช่องสี</td><td>COLOR_BGR2RGB / BGR2GRAY / BGR2HSV</td></tr>
+        <tr><td><b>plt.imshow()</b></td><td>แสดงภาพใน Matplotlib</td><td>ภาพสีต้องแปลง RGB ก่อน</td></tr>
+        <tr><td><b>plt.hist()</b></td><td>วาด histogram พิกเซล</td><td>plt.hist(img.ravel(), bins=256)</td></tr>
+      </table>
+      <p><b>จำคู่:</b> อ่าน = im<b>read</b> · แสดง = im<b>show</b> · บันทึก = im<b>write</b> — คำสั่งอ่าน-แสดง-บันทึก อย่าสลับกัน</p>
+    </div>
+
+    <!-- ============ 9. คำศัพท์ ============ -->
+    <div class="sec">
+      <h2>9 · คำศัพท์ที่ต้องรู้ (Glossary ฉบับย่อ)</h2>
+      <ul>
+        <li><b>OpenCV</b> — Open Source Computer Vision Library · ไลบรารีประมวลผลภาพ/CV ยอดนิยม</li>
+        <li><b>NumPy Array</b> — โครงสร้างที่ OpenCV ใช้เก็บภาพ (H, W, C)</li>
+        <li><b>uint8</b> — unsigned 8-bit integer · เก็บค่าพิกเซล 0–255</li>
+        <li><b>BGR</b> — ลำดับช่องสีของ OpenCV: Blue, Green, Red (สลับจาก RGB)</li>
+        <li><b>Channel</b> — ช่องสี · ดัชนี 0=B, 1=G, 2=R</li>
+        <li><b>Pixel Access</b> — img[y, x] · y = แถว (row) · x = คอลัมน์ (column)</li>
+        <li><b>ROI</b> — Region Of Interest · บริเวณที่สนใจ ตัดด้วย img[y1:y2, x1:x2]</li>
+        <li><b>Slicing</b> — การตัด array ด้วยเครื่องหมาย : เช่น img[100:300, 200:500]</li>
+        <li><b>View</b> — slicing ได้มุมมองชี้ไปที่ข้อมูลเดิม (แก้แล้วกระทบต้นฉบับ) ต่างจาก .copy()</li>
+        <li><b>Matplotlib</b> — ไลบรารีพล็อตของ Python · plt.imshow() แสดงภาพ</li>
+        <li><b>cmap</b> — color map เปลี่ยนโทนสีภาพเทา: gray · hot · viridis · jet · plasma</li>
+        <li><b>ravel()</b> — แผ่ array หลายมิติเป็นเส้นตรง · ใช้คู่ plt.hist</li>
+      </ul>
+    </div>
+
+    <!-- ============ 10. กับดัก ============ -->
+    <div class="sec">
+      <h2>10 · กับดักที่ข้อสอบชอบหลอก</h2>
+      <ul>
+        <li><span class="trap">⚠</span> <b>img.shape = (H, W, C)</b> — 480 (แถว) มาก่อน 640 (คอลัมน์) เสมอ</li>
+        <li><span class="trap">⚠</span> เข้าถึงพิกเซล <b>img[y, x]</b> — ไม่ใช่ img[x, y]</li>
+        <li><span class="trap">⚠</span> <b>แดงใน OpenCV = [0, 0, 255]</b> (BGR) — ไม่ใช่ [255, 0, 0]</li>
+        <li><span class="trap">⚠</span> ดัชนีช่อง: <b>0 = B · 1 = G · 2 = R</b></li>
+        <li><span class="trap">⚠</span> imshow ต้องคู่กับ waitKey(0) — ลืม = หน้าต่างปิดทันที</li>
+        <li><span class="trap">⚠</span> ภาพสีโชว์ด้วย Matplotlib ต้อง cvtColor BGR→RGB ก่อน ไม่งั้นสีเพี้ยน</li>
+        <li><span class="trap">⚠</span> slicing ช่วงสุดท้ายไม่รวม: 100:200 = แถว 100–199</li>
+        <li><span class="trap">⚠</span> roi = slicing เป็น view — แก้ roi กระทบต้นฉบับ ต้อง .copy()</li>
+        <li><span class="trap">⚠</span> imread path ผิด → คืน None (ไม่ error) — ควรเช็ค</li>
+        <li><span class="trap">⚠</span> uint8 คำนวณเกิน 255 → wrap/clip — แปลง float ก่อนคำนวณ</li>
+        <li><span class="trap">⚠</span> imread ≠ imshow — อ่าน vs แสดง อย่าสลับ</li>
+      </ul>
+    </div>
+
+    <!-- ============ 11. Q&A เร็ว ============ -->
+    <div class="sec">
+      <h2>11 · คำถาม-คำตอบฉบับเร็ว (จากแบบทดสอบบทนี้)</h2>
+      <ul class="qa">
+        <li><b>คำสั่งอ่านภาพ?</b> → <code>cv2.imread("image.jpg")</code></li>
+        <li><b>shape ของภาพ 640×480 สี?</b> → (480, 640, 3) — H ก่อน W</li>
+        <li><b>shape ของภาพ 720×1280 สี?</b> → (720, 1280, 3)</li>
+        <li><b>dtype ของภาพปกติ?</b> → uint8 (0–255)</li>
+        <li><b>imshow ต้องคู่กับ?</b> → cv2.waitKey()</li>
+        <li><b>waitKey(0) หมายถึง?</b> → รอจนกว่าจะกดปุ่มใดก็ได้ (5000 = รอ 5 วิ)</li>
+        <li><b>OpenCV เรียงช่องสีแบบใด?</b> → BGR (Blue-Green-Red)</li>
+        <li><b>แปลง BGR→RGB?</b> → <code>cv2.cvtColor(img, cv2.COLOR_BGR2RGB)</code></li>
+        <li><b>พิกเซลแถว 100 คอลัมน์ 200?</b> → <code>img[100, 200]</code></li>
+        <li><b>b, g, r = img[y,x] — b คือ?</b> → Blue (ช่อง 0)</li>
+        <li><b>เอาช่องน้ำเงินของ (100, 200)?</b> → <code>img[100, 200, 0]</code></li>
+        <li><b>เปลี่ยนพิกเซล (100, 200) เป็นแดง?</b> → <code>img[100, 200] = [0, 0, 255]</code></li>
+        <li><b>ROI ย่อมาจาก?</b> → Region Of Interest</li>
+        <li><b>ตัด ROI แถว 100–300 คอลัมน์ 200–500?</b> → <code>img[100:300, 200:500]</code></li>
+        <li><b>บันทึกภาพลงไฟล์?</b> → <code>cv2.imwrite("roi.jpg", roi)</code></li>
+        <li><b>destroyAllWindows() ใช้ทำอะไร?</b> → ปิดหน้าต่างทั้งหมดที่ imshow สร้าง</li>
+        <li><b>ภาพที่ imread คืนมาเป็น?</b> → NumPy Array</li>
+        <li><b>plt.hist(img.ravel(), bins=256)?</b> → วาด histogram ของค่าพิกเซล</li>
+        <li><b>ทำไมต้องแปลง BGR→RGB ก่อน plt.imshow?</b> → OpenCV เก็บ BGR แต่ Matplotlib แสดง RGB — ไม่แปลง = สีสลับ/เพี้ยน</li>
+        <li><b>ROI 300×300 จากภาพ 1920×1080 คิดเป็นกี่ %?</b> → 90,000 ÷ 2,073,600 ≈ 4.3%</li>
+      </ul>
+    </div>
+
+  </div><!-- /cols -->
+
+  <div class="foot">
+    สรุปบทที่ 2 · DIP — เริ่มต้น OpenCV · <b>หัวใจทั้งบท: y มาก่อน x เสมอ · BGR ไม่ใช่ RGB · imshow คู่ waitKey · ROI = slicing</b>
+  </div>
+
+</div>
+
+<script>
+  // เปิดจากปุ่ม "พิมพ์เอกสารสรุปสอบ" (?print=1) → โหลดเสร็จแล้วสั่งพิมพ์ทันที
+  if (/[?&]print=1/.test(location.search)) {
+    window.addEventListener("load", function () {
+      setTimeout(function () { window.print(); }, 500);
+    });
+  }
+</script>
+</body>
+</html>

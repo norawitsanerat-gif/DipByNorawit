@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>สรุปสอบ บทที่ 3 — Sampling, Quantization &amp; Bit-Plane (A4)</title>
+<style>
+  /* ====== สรุปสอบ บทที่ 3 — เน้นเนื้อหา อัดแน่น ไม่เน้นความสวย ====== */
+  @page { size: A4; margin: 7mm 7mm 7mm 7mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    font-family: "Leelawadee UI", "IBM Plex Sans Thai", Tahoma, "Sukhumvit Set", "Thonburi", "Segoe UI", sans-serif;
+    font-size: 7.5pt;
+    line-height: 1.28;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sheet { max-width: 196mm; margin: 0 auto; }
+  code, .mono { font-family: Consolas, "Courier New", monospace; font-size: 95%; }
+
+  .head { border: 1.1pt solid #000; border-bottom: none; padding: 2px 8px 4px; }
+  .head h1 { font-size: 13pt; line-height: 1.15; }
+  .head .sub { font-size: 8pt; }
+  .formula-strip {
+    display: table; width: 100%; border: 1.1pt solid #000; border-top: none;
+    font-size: 7.5pt; font-weight: 600;
+  }
+  .formula-strip > div {
+    display: table-cell; padding: 2px 6px; border-right: 0.6pt solid #000; vertical-align: middle;
+  }
+  .formula-strip > div:last-child { border-right: none; }
+  .formula-strip b { font-size: 8pt; }
+
+  .cols { columns: 2; column-gap: 8px; margin-top: 4px; }
+
+  .sec { break-inside: avoid; margin-bottom: 6px; border: 0.8pt solid #555; padding: 3px 7px 4px; }
+  .sec > h2 {
+    font-size: 9pt; line-height: 1.2; padding: 1px 5px; margin: -3px -7px 4px;
+    background: #e8e8e8; border-bottom: 0.8pt solid #555;
+  }
+  .sec > h2 .en { font-weight: 600; font-size: 7pt; color: #333; }
+  ul { padding-left: 11px; }
+  li { margin-bottom: 1px; }
+  p { margin: 1.5px 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 2px 0; }
+  th, td { border: 0.5pt solid #000; padding: 0.5px 3px; text-align: left; font-size: 7.1pt; line-height: 1.25; }
+  th { background: #efefef; }
+  td b, .hl { background: #fff3bf; }
+
+  .code {
+    font-family: Consolas, "Courier New", monospace; font-size: 6.9pt; line-height: 1.3;
+    background: #f2f2f2; border: 0.5pt solid #999; padding: 2px 6px; margin: 2px 0;
+    white-space: pre-wrap;
+  }
+  .must { color: #a00; font-weight: 700; }
+  .trap { color: #a00; font-weight: 700; }
+  .qa b { font-weight: 600; }
+
+  .foot {
+    margin-top: 6px; border-top: 1pt solid #000; padding-top: 2px;
+    font-size: 7pt; text-align: center;
+  }
+  .no-print { text-align: right; margin: 0 0 6px; }
+  .no-print button {
+    font-family: inherit; font-size: 9.5pt; font-weight: 600;
+    padding: 7px 18px; cursor: pointer;
+    background: #2563eb; color: #fff;
+    border: none; border-radius: 7px;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, .35);
+    transition: background .15s, transform .1s, box-shadow .15s;
+  }
+  .no-print button:hover { background: #1d4ed8; box-shadow: 0 3px 8px rgba(37, 99, 235, .45); }
+  .no-print button:active { transform: translateY(1px); }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="no-print"><button onclick="window.print()">🖨 พิมพ์ / บันทึก PDF (Ctrl+P)</button></div>
+
+  <div class="head">
+    <h1>บทที่ 3 — Sampling, Quantization &amp; Bit-Plane (จากภาพจริงเป็นภาพดิจิทัล)</h1>
+    <div class="sub">สรุปสอบ A4 · Sampling vs Quantization · q = (img//16)×16+7 · Bit-Plane MSB/LSB · Compression/Watermark · Downsampling/Pyramid · <b class="must">★ = ต้องจำให้ได้</b> · <span class="trap">⚠ = กับดักข้อสอบ</span></div>
+  </div>
+
+  <div class="formula-strip">
+    <div>2 ขั้นตอน: <b>Sampling</b> (ตำแหน่ง) + <b>Quantization</b> (ความเข้ม)</div>
+    <div>ระดับเทา = <b>2^บิต</b></div>
+    <div>q = <b>(img // 16) × 16 + 7</b> (256 → 16 ระดับ)</div>
+    <div>บิต: <b>MSB = bit 7 (128)</b> · <b>LSB = bit 0 (1)</b></div>
+    <div>Downsample ½×½ = <b>¼ พิกเซล</b></div>
+  </div>
+
+  <div class="cols">
+
+    <!-- ============ 1. ดิจิไตซ์ 2 ขั้นตอน ============ -->
+    <div class="sec">
+      <h2>1 · ทำไมต้องแปลงเป็นดิจิทัล — 2 ขั้นตอน</h2>
+      <ul>
+        <li>ภาพจากกล้อง = สัญญาณ<b>ต่อเนื่อง (analog)</b> แต่คอมพิวเตอร์เก็บได้แค่ตัวเลข → ต้องแปลง (digitize) ด้วย <b class="must">2 ขั้นตอน</b></li>
+        <li><b class="must">ขั้น 1 · Sampling</b> — เก็บตัวอย่างตาม<b>ตำแหน่ง (x, y)</b> เหมือนวางตารางทับภาพแล้วอ่านค่าที่จุดตัด → แต่ละจุดกลายเป็น <b>1 พิกเซล</b></li>
+        <li><b class="must">ขั้น 2 · Quantization</b> — ปัด<b>ค่าความเข้ม (amplitude)</b> ให้เป็นระดับจำกัด เช่น ระดับเทา 0–255</li>
+        <li>ศัพท์ตำรา: ต้อง digitize ทั้ง <b>spatially</b> (ตำแหน่ง = Sampling) และ <b>in amplitude</b> (ความเข้ม = Quantization)</li>
+        <li>Pipeline: กล้อง/สัญญาณวิดีโอ (analog) → <b>Frame Grabber / Digitizer</b> (อุปกรณ์แปลงสัญญาณ) → Sampling → Quantization → ภาพดิจิทัล (ตารางตัวเลข)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 2. Sampling ============ -->
+    <div class="sec">
+      <h2>2 · Sampling — เก็บตัวอย่างตำแหน่ง</h2>
+      <ul>
+        <li><b class="must">Sampling Rate</b> = จำนวนตัวอย่างต่อพื้นที่ — สูง = เก็บถี่ = พิกเซลเยอะ = ละเอียด</li>
+        <li><b class="must">Sampling กำหนด Spatial Resolution</b> (ความละเอียดเชิงพื้นที่ / จำนวนพิกเซล) — <b>ไม่ใช่จำนวนสี!</b></li>
+        <li>Sampling สูง → รายละเอียดชัด แต่ไฟล์ใหญ่ · Sampling ต่ำ → ภาพเป็นบล็อก (pixelated) เห็นตารางชัด</li>
+        <li>โจทย์ถาม "spatial resolution" / "จำนวนพิกเซล" → ตอบ <b>Sampling</b></li>
+      </ul>
+    </div>
+
+    <!-- ============ 3. Quantization ============ -->
+    <div class="sec">
+      <h2>3 · Quantization — ระดับความเข้ม</h2>
+      <ul>
+        <li>ค่าความเข้มต่อเนื่อง → ปัดเป็น<b>ระดับจำกัด (grey levels)</b> — กำหนดโดย<b>บิตต่อพิกเซล</b></li>
+        <li><b class="must">ระดับเทา = 2^บิต</b> — 8 บิต = 256 ระดับ · 16 บิต = 65,536 ระดับ · ยิ่งเยอะยิ่งไล่สีเรียบเนียน</li>
+        <li><b class="must">Quantization Level = จำนวน grey levels</b> — โจทย์ถาม "grey levels" / "ระดับเทา" → ตอบ <b>Quantization</b></li>
+        <li><b class="must">False Contours</b> = รอยหยัก/เส้นขั้นบันได ในบริเวณที่ควรไล่สีเรียบ (เช่น ท้องฟ้า) — เกิดจาก <b>Quantization ด้วยระดับเทาน้อยเกินไป</b> · แก้โดยเพิ่มจำนวน grey levels (บิตต่อพิกเซล)</li>
+      </ul>
+      <table>
+        <tr><th>หัวข้อ</th><th>Sampling</th><th>Quantization</th></tr>
+        <tr><td><b>แปลงอะไร</b></td><td>ตำแหน่ง (spatial / x, y)</td><td>ค่าความเข้ม (amplitude)</td></tr>
+        <tr><td><b>ทำอะไร</b></td><td>เก็บตัวอย่างตามจุด</td><td>ปัดค่าเป็นระดับจำกัด</td></tr>
+        <tr><td><b>กำหนดอะไร</b></td><td>Spatial Resolution</td><td>Grey Levels (ระดับเทา)</td></tr>
+        <tr><td><b>เพิ่มขึ้น =</b></td><td>พิกเซลเยอะขึ้น</td><td>ระดับเทาเยอะขึ้น</td></tr>
+        <tr><td><b>น้อยไป =</b></td><td>ภาพเป็นบล็อก (pixelated)</td><td><b>False Contours</b> (ขั้นบันได)</td></tr>
+        <tr><td><b>อุปกรณ์</b></td><td>Frame Grabber / Digitizer</td><td>Digitizer (แปลง amplitude)</td></tr>
+      </table>
+    </div>
+
+    <!-- ============ 4. สูตร q = ============ -->
+    <div class="sec">
+      <h2>4 · สูตรลด 256 → 16 ระดับ: q = (img // 16) × 16 + 7</h2>
+      <ul>
+        <li>ที่มา: 0–255 มี 256 ค่า ÷ 16 ช่วง = <b>ช่วงละ 16 ค่า</b> → แต่ละช่วงแทนด้วย<b>ค่ากลางของช่วง</b></li>
+        <li><b>1) <code>img // 16</code></b> = หาร 16 ปัดเศษทิ้ง → หาว่าอยู่ช่วงไหน (เช่น 210 ÷ 16 = 13.125 → <b>13</b>)</li>
+        <li><b>2) <code>× 16</code></b> = กลับมาเป็นจุดเริ่มต้นของช่วง (13 × 16 = <b>208</b>)</li>
+        <li><b>3) <code>+ 7</code></b> = ขยับไปกลางช่วง (208 + 7 = <b>215</b>) — เลข 7 = ครึ่งช่วง (16 ÷ 2 − 1)</li>
+        <li><b class="must">ตัวอย่างที่ต้องคำนวณได้:</b> 210 → 215 · 219 → 215 · 223 → 215 (ทั้ง 3 อยู่ในช่วง 208–223) · 108 → 6×16+7 = <b>103</b> · 105, 99 → 103</li>
+        <li>16 ระดับ = <b>4 บิต</b> (2⁴ = 16) — เก็บ 4 บิตแทน 8 บิต → ไฟล์เล็กลงครึ่งหนึ่ง</li>
+        <li>ค่าที่อยู่ในช่วงเดียวกัน → ผลลัพธ์เดียวกันเสมอ</li>
+      </ul>
+    </div>
+
+    <!-- ============ 5. Bit-Plane ============ -->
+    <div class="sec">
+      <h2>5 · Bit-Plane — แยกภาพเป็นชั้นบิต</h2>
+      <ul>
+        <li>พิกเซล 8 บิต = <b>8 ชั้น (plane)</b> — ชั้นที่ i เก็บบิตตำแหน่ง i ของทุกพิกเซล (bit 7 6 5 4 3 2 1 0)</li>
+        <li>แต่ละชั้นเป็นภาพ <b>Binary (0/1)</b> — รวม 8 ชั้นกลับคืนเป็นภาพต้นฉบับได้</li>
+        <li>น้ำหนักบิต: bit 7 = 128 · 6 = 64 · 5 = 32 · 4 = 16 · 3 = 8 · 2 = 4 · 1 = 2 · 0 = 1 — ยิ่งซ้ายยิ่งสำคัญ</li>
+        <li><b class="must">Bit-Plane Slicing: <code>bit_plane[i] = (ex &gt;&gt; i) &amp; 1</code></b> — <code>&gt;&gt; i</code> เลื่อนบิตที่ i มาล่างสุด, <code>&amp; 1</code> ตัดเหลือเฉพาะบิตนั้น (0/1) · วน i = 0–7 ได้ครบ 8 บิต</li>
+        <li>ตัวอย่าง: 147 = 10010011₂ · bit 4 → 147 &gt;&gt; 4 = 9 (1001) → 9 &amp; 1 = <b>1</b> ✓</li>
+        <li><b class="must">MSB</b> = Most Significant Bit = <b>bit 7 (น้ำหนัก 128)</b> — เก็บ<b>โครงสร้างหลัก</b>ของภาพ (bit-plane 7 เห็นโครงร่างชัดเหมือนต้นฉบับ) · ปิดบิต 7: 150 → 22 (มืดทันที)</li>
+        <li><b class="must">LSB</b> = Least Significant Bit = <b>bit 3–0 (8, 4, 2, 1)</b> — เก็บ<b>รายละเอียดเล็ก ๆ + noise</b> (มองดูไม่เป็นภาพ) · ปิดบิต 0: 150 → 149 (แทบไม่ต่าง)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 6. Applications ============ -->
+    <div class="sec">
+      <h2>6 · Applications — Compression &amp; Watermark</h2>
+      <ul>
+        <li><b class="must">Image Compression (บีบอัด 50%):</b> MSB เก็บโครงสร้าง, LSB เก็บรายละเอียดเล็ก/noise → <b>เก็บบิต 4–7 ทิ้งบิต 0–3</b> = เหลือข้อมูล 4/8 = <b>50%</b> — ภาพยังเห็นโครงสร้างชัด แต่ไฟล์เล็กลงครึ่งหนึ่ง (trade-off คุณภาพ vs ขนาด)</li>
+        <li><b class="must">Watermarking / Steganography:</b> ซ่อนข้อมูลลับ/ลายน้ำใน <b>LSB (bit 0)</b> — เช่น 151 (LSB=1) → 150 (LSB=0) ค่าเปลี่ยนแค่ 1/255 ตาแยกไม่ออก · อ่านกลับ = เอา LSB ของทุกพิกเซลมารวมกัน</li>
+        <li>Watermark = ฝังลายน้ำ/ชื่อเจ้าของพิสูจน์ความเป็นเจ้าของ · Steganography = ซ่อนข้อความลับในภาพ (คนดูเห็นภาพปกติ)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 7. Downsampling ============ -->
+    <div class="sec">
+      <h2>7 · Downsampling &amp; Image Pyramid</h2>
+      <ul>
+        <li><b>Downsampling</b> = ลด resolution ของภาพ เช่น 1024×1024 → 512×512 → 256×256</li>
+        <li><b class="must">ลดครึ่งทั้ง 2 ด้าน = พิกเซลเหลือ ¼ (½ × ½) ไม่ใช่ ½!</b> — 1024→512 ไฟล์/การคำนวณลด <b>75%</b> (ข้อนี้พลาดประจำ)</li>
+        <li>ทำไมต้อง downsample: <b>เร็วขึ้น</b> (อัลกอริทึมคิดต่อพิกเซล) · <b>ลด bandwidth</b> (ส่งเน็ต/สตรีม) · <b>ลด noise</b> (เฉลี่ยพิกเซล) · <b>Image Pyramid</b> · หลาย scale (SIFT/SURF/ORB/Optical Flow) · <b>ก่อนป้อน ML Model</b> (input ขนาดคงที่) · ประหยัดพื้นที่เก็บ · ดูภาพย่อ (thumbnail)</li>
+        <li><b class="must">Image Pyramid</b> = ชุดภาพ downsample ต่อเนื่องกันซ้อนเป็นชั้น (1024² → 512² → 256² → 128²) — ใหญ่สุดอยู่ล่าง · <b>ใช้ตรวจจับวัตถุหลายขนาด</b> (Object Detection / Face Detection / SIFT / SURF / ORB)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 8. สูตรต้องจำ ============ -->
+    <div class="sec">
+      <h2>8 · สูตร &amp; เลขต้องจำก่อนเข้าห้องสอบ</h2>
+      <ul>
+        <li>Sampling → spatial resolution (ตำแหน่ง/พิกเซล) · Quantization → grey levels (ระดับเทา)</li>
+        <li>ระดับเทา = 2^บิต · 8 บิต = 256 · 16 บิต = 65,536</li>
+        <li>q = (img // 16) × 16 + 7 · 210 → 215 · 108 → 103 · ค่าในช่วงเดียวกันได้ค่าเดียวกัน</li>
+        <li>bit_plane[i] = (ex &gt;&gt; i) &amp; 1 · 147 = 10010011₂</li>
+        <li>MSB = bit 7 = 128 = โครงสร้างหลัก · LSB = bit 0 = 1 = รายละเอียดเล็ก + noise</li>
+        <li>บีบอัด 50% = เก็บบิต 4–7 ทิ้งบิต 0–3 · ซ่อนข้อมูล = LSB</li>
+        <li>Downsample ½×½ = ¼ พิกเซล (ลด 75%) · Pyramid = ภาพหลาย scale ซ้อนกัน</li>
+      </ul>
+    </div>
+
+    <!-- ============ 9. กับดัก ============ -->
+    <div class="sec">
+      <h2>9 · กับดักที่ข้อสอบชอบหลอก</h2>
+      <ul>
+        <li><span class="trap">⚠</span> Sampling ↔ <b>ตำแหน่ง</b> · Quantization ↔ <b>ความเข้ม</b> — อย่าสลับกัน</li>
+        <li><span class="trap">⚠</span> False Contours = <b>Quantization ไม่พอ</b> (ระดับเทาน้อยไป) — ไม่ใช่ Sampling</li>
+        <li><span class="trap">⚠</span> Downsample 1024→512 = เหลือ <b>¼</b> พิกเซล (½×½) — ไม่ใช่ ½</li>
+        <li><span class="trap">⚠</span> MSB = bit 7 (128) · LSB = bit 0 (1) — อย่าจำสลับ</li>
+        <li><span class="trap">⚠</span> ซ่อนข้อมูล/Steganography ใช้ <b>LSB</b> — ไม่ใช่ MSB</li>
+        <li><span class="trap">⚠</span> สูตร q: หารปัดลง → คูณกลับ → +7 — ค่าช่วงเดียวกันได้ผลลัพธ์เดียวกัน (อย่าคิดว่า 219 ≠ 210 แล้วได้ค่าต่าง)</li>
+        <li><span class="trap">⚠</span> i = 0 ใน (ex &gt;&gt; i) &amp; 1 คือบิตขวาสุด (LSB) — แถวแรกของตารางคือ bit 7 (MSB)</li>
+        <li><span class="trap">⚠</span> 16 ระดับ = 4 บิต (2⁴) — ไฟล์ครึ่งหนึ่งของ 8 บิต</li>
+        <li><span class="trap">⚠</span> spatial resolution ≠ จำนวนสี — อย่าเอา Sampling ไปตอบเรื่องสี/ระดับเทา</li>
+      </ul>
+    </div>
+
+    <!-- ============ 10. Q&A ============ -->
+    <div class="sec">
+      <h2>10 · คำถาม-คำตอบฉบับเร็ว (จากแบบทดสอบบทนี้)</h2>
+      <ul class="qa">
+        <li><b>แปลง analog → digital มี 2 ขั้นตอน?</b> → Sampling + Quantization</li>
+        <li><b>Sampling Rate กำหนดอะไร?</b> → Spatial Resolution (ความละเอียดเชิงพื้นที่)</li>
+        <li><b>Quantization กำหนดอะไร?</b> → จำนวน Grey Levels (ระดับเทา)</li>
+        <li><b>False Contours เกิดจาก?</b> → Quantization ด้วยระดับเทาน้อยเกินไป</li>
+        <li><b>สูตรลด 256 → 16 ระดับ?</b> → q = (img // 16) × 16 + 7</li>
+        <li><b>q ของ img = 210?</b> → 210//16 = 13 → 13×16+7 = <b>215</b></li>
+        <li><b>q ของ img = 108?</b> → 108//16 = 6 → 6×16+7 = <b>103</b></li>
+        <li><b>[210, 219, 223] ผ่านสูตร?</b> → [215, 215, 215] (ช่วง 208–223 เดียวกัน)</li>
+        <li><b>Bit-Plane Slicing คือ?</b> → แยกภาพเป็นชั้นบิต 0–7 (8 ชั้นขาวดำ)</li>
+        <li><b>(ex &gt;&gt; i) &amp; 1 ทำอะไร?</b> → ดึงบิตตำแหน่ง i ของ ex ออกมา (0 หรือ 1)</li>
+        <li><b>MSB (bit 7) น้ำหนักเท่าไร?</b> → 2⁷ = 128</li>
+        <li><b>LSB เหมาะกับอะไร?</b> → เก็บรายละเอียดเล็ก + noise และซ่อนข้อมูล (Steganography)</li>
+        <li><b>บีบอัด 50% ด้วย bit-plane ทำยังไง?</b> → เก็บบิต 4–7 ทิ้งบิต 0–3</li>
+        <li><b>1024×1024 → 512×512 ไฟล์เล็กลงกี่เท่า?</b> → ¼ (ลด 75%)</li>
+        <li><b>Image Pyramid คืออะไร?</b> → ภาพ downsample หลายระดับซ้อนกัน (1024→512→256→128) ใช้จับวัตถุหลายขนาด</li>
+        <li><b>147 ในเลขฐานสอง?</b> → 10010011₂</li>
+        <li><b>Sampling น้อยเกินไปภาพเป็นแบบใด?</b> → เป็นบล็อก (pixelated) · Quantization น้อยไป = False Contours</li>
+      </ul>
+    </div>
+
+  </div><!-- /cols -->
+
+  <div class="foot">
+    สรุปบทที่ 3 · DIP — Sampling, Quantization &amp; Bit-Plane · <b>หัวใจทั้งบท: Sampling = ที่ไหน · Quantization = เท่าไร · q = (img//16)×16+7 · LSB ซ่อนข้อมูล · downsample ½×½ = ¼</b>
+  </div>
+
+</div>
+
+<script>
+  // เปิดจากปุ่ม "พิมพ์เอกสารสรุปสอบ" (?print=1) → โหลดเสร็จแล้วสั่งพิมพ์ทันที
+  if (/[?&]print=1/.test(location.search)) {
+    window.addEventListener("load", function () {
+      setTimeout(function () { window.print(); }, 500);
+    });
+  }
+</script>
+</body>
+</html>

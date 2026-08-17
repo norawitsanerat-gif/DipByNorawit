@@ -19,7 +19,8 @@
     3: { start: 0, count: D.ch3.slides.length, sections: D.ch3.sections, slides: D.ch3.slides, cheat: D.ch3.cheat, flashcards: D.ch3.flashcards, glossary: D.ch3.glossary, quiz: D.ch3.quiz, exam: D.ch3.exam, thai: "Sampling & Quantization", en: "Sampling & Quantization" },
     4: { start: 0, count: D.ch4.slides.length, sections: D.ch4.sections, slides: D.ch4.slides, cheat: D.ch4.cheat, flashcards: D.ch4.flashcards, glossary: D.ch4.glossary, quiz: D.ch4.quiz, exam: D.ch4.exam, thai: "การปรับปรุงภาพ (Image Enhancement)", en: "Image Enhancement" },
     5: { start: 0, count: D.ch5.slides.length, sections: D.ch5.sections, slides: D.ch5.slides, cheat: D.ch5.cheat, flashcards: D.ch5.flashcards, glossary: D.ch5.glossary, quiz: D.ch5.quiz, exam: D.ch5.exam, thai: "การกรองภาพและตรวจจับขอบ", en: "Image Filtering & Edge Detection" },
-    6: { start: 0, count: D.ch6.slides.length, sections: D.ch6.sections, slides: D.ch6.slides, cheat: D.ch6.cheat, flashcards: D.ch6.flashcards, glossary: D.ch6.glossary, quiz: D.ch6.quiz, exam: D.ch6.exam, thai: "Segmentation ถึง Computer Vision", en: "Segmentation to Computer Vision" }
+    6: { start: 0, count: D.ch6.slides.length, sections: D.ch6.sections, slides: D.ch6.slides, cheat: D.ch6.cheat, flashcards: D.ch6.flashcards, glossary: D.ch6.glossary, quiz: D.ch6.quiz, exam: D.ch6.exam, thai: "Segmentation ถึง Computer Vision", en: "Segmentation to Computer Vision" },
+    7: { start: 0, count: D.ch7.slides.length, sections: D.ch7.sections, slides: D.ch7.slides, cheat: D.ch7.cheat, flashcards: D.ch7.flashcards, glossary: D.ch7.glossary, quiz: D.ch7.quiz, thai: "Lab Code Handbook", en: "Lab Code Handbook — Practical Exam Cheat Codes" }
   };
   function ch() { return CHS[state.chapter]; }
   var TOTAL = 0;
@@ -52,6 +53,7 @@
     quiz4: LS.get("dip_quiz4", { answers: {} }),
     quiz5: LS.get("dip_quiz5", { answers: {} }),
     quiz6: LS.get("dip_quiz6", { answers: {} }),
+    quiz7: LS.get("dip_quiz7", { answers: {} }),
     exam: LS.get("dip_exam") || { answers: {}, best: null },
     exam2: LS.get("dip_exam2") || { answers: {}, best: null },
     exam3: LS.get("dip_exam3") || { answers: {}, best: null },
@@ -85,7 +87,7 @@
      ========================================================================== */
   function renderMenuProgress() {
     var doneTotal = 0, slideTotal = 0, doneChapters = 0;
-    [1, 2, 3, 4, 5, 6].forEach(function (n) {
+    [1, 2, 3, 4, 5, 6, 7].forEach(function (n) {
       var el = $("ch" + n + "Pct");
       var comp = LS.get("dip_completed_" + n, []);
       var count = CHS[n].count;
@@ -108,7 +110,7 @@
     var ob = $("courseBar");
     if (ob) ob.style.setProperty("--pct", coursePct + "%");
     var od = $("courseDone");
-    if (od) od.textContent = "เรียนแล้ว " + doneTotal + " / " + slideTotal + " สไลด์ · จบแล้ว " + doneChapters + " / 6 บท";
+    if (od) od.textContent = "เรียนแล้ว " + doneTotal + " / " + slideTotal + " สไลด์ · จบแล้ว " + doneChapters + " / 7 บท";
   }
   function goHome() { location.href = "index.html"; }
   function openChapter(n) {
@@ -897,6 +899,7 @@
     fc.idx = 0;
   }
   function fcRender() {
+    if (!$("fcQ")) return;   // บทที่ไม่มีสไลด์แฟลชการ์ด (เช่น บท 7)
     if (!fc.order.length) fcShuffle();
     var fl = ch().flashcards || D.flashcards;
     var card = fl[fc.order[fc.idx]];
@@ -1104,7 +1107,17 @@
     on("fullscreenBtn", "click", toggleFullscreen);
     on("printSlidesBtn", "click", function () { doPrint("slides"); });
     on("printCardsBtn", "click", function () { doPrint("cards"); });
-    on("printStudyBtn", "click", function () { doPrint("study"); });
+    on("printStudyBtn", "click", function () {
+      // บทที่ 1-6 มีสรุป A4 แยกไฟล์ — เปิดไปพิมพ์หน้านั้นเลย
+      if (PCH === 1) { window.open("chapter1-summary.html?print=1", "_blank"); return; }
+      if (PCH === 2) { window.open("chapter2-summary.html?print=1", "_blank"); return; }
+      if (PCH === 3) { window.open("chapter3-summary.html?print=1", "_blank"); return; }
+      if (PCH === 4) { window.open("chapter4-summary.html?print=1", "_blank"); return; }
+      if (PCH === 5) { window.open("chapter5-summary.html?print=1", "_blank"); return; }
+      if (PCH === 6) { window.open("chapter6-summary.html?print=1", "_blank"); return; }
+      if (PCH === 7) { window.open("chapter7-summary.html?print=1", "_blank"); return; }
+      doPrint("study");
+    });
 
     on("homeBtn", "click", goHome);
     on("startBtn", "click", function () { goTo(state.current + 1, 1); });
@@ -1199,8 +1212,7 @@
     renderQuiz(0);
     renderQuiz(1);
     renderExam();
-    fcShuffle();
-    fcRender();
+    if ($("flashcard")) { fcShuffle(); fcRender(); }
     renderGlossary("");
     goTo(state.current, 0);
     updateHeaderProgress();

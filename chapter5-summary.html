@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>สรุปสอบ บทที่ 5 — การกรองภาพและตรวจจับขอบ (A4)</title>
+<style>
+  /* ====== สรุปสอบ บทที่ 5 — เน้นเนื้อหา อัดแน่น ไม่เน้นความสวย ====== */
+  @page { size: A4; margin: 7mm 7mm 7mm 7mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    font-family: "Leelawadee UI", "IBM Plex Sans Thai", Tahoma, "Sukhumvit Set", "Thonburi", "Segoe UI", sans-serif;
+    font-size: 7.5pt;
+    line-height: 1.26;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sheet { max-width: 196mm; margin: 0 auto; }
+  code, .mono { font-family: Consolas, "Courier New", monospace; font-size: 95%; }
+
+  .head { border: 1.1pt solid #000; border-bottom: none; padding: 2px 8px 4px; }
+  .head h1 { font-size: 13pt; line-height: 1.15; }
+  .head .sub { font-size: 8pt; }
+  .formula-strip {
+    display: table; width: 100%; border: 1.1pt solid #000; border-top: none;
+    font-size: 7.5pt; font-weight: 600;
+  }
+  .formula-strip > div {
+    display: table-cell; padding: 2px 6px; border-right: 0.6pt solid #000; vertical-align: middle;
+  }
+  .formula-strip > div:last-child { border-right: none; }
+  .formula-strip b { font-size: 8pt; }
+
+  .cols { columns: 2; column-gap: 8px; margin-top: 4px; }
+
+  .sec { break-inside: avoid; margin-bottom: 5px; border: 0.8pt solid #555; padding: 2px 7px 3px; }
+  .sec > h2 {
+    font-size: 9pt; line-height: 1.2; padding: 1px 5px; margin: -2px -7px 3px;
+    background: #e8e8e8; border-bottom: 0.8pt solid #555;
+  }
+  .sec > h2 .en { font-weight: 600; font-size: 7pt; color: #333; }
+  ul { padding-left: 11px; }
+  li { margin-bottom: 1px; }
+  p { margin: 1.5px 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 2px 0; }
+  th, td { border: 0.5pt solid #000; padding: 0.5px 3px; text-align: left; font-size: 7.1pt; line-height: 1.25; }
+  th { background: #efefef; }
+  td b, .hl { background: #fff3bf; }
+
+  .code {
+    font-family: Consolas, "Courier New", monospace; font-size: 6.9pt; line-height: 1.3;
+    background: #f2f2f2; border: 0.5pt solid #999; padding: 2px 6px; margin: 2px 0;
+    white-space: pre-wrap;
+  }
+  .must { color: #a00; font-weight: 700; }
+  .trap { color: #a00; font-weight: 700; }
+  .qa b { font-weight: 600; }
+
+  .foot {
+    margin-top: 6px; border-top: 1pt solid #000; padding-top: 2px;
+    font-size: 7pt; text-align: center;
+  }
+  .no-print { text-align: right; margin: 0 0 6px; }
+  .no-print button {
+    font-family: inherit; font-size: 9.5pt; font-weight: 600;
+    padding: 7px 18px; cursor: pointer;
+    background: #2563eb; color: #fff;
+    border: none; border-radius: 7px;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, .35);
+    transition: background .15s, transform .1s, box-shadow .15s;
+  }
+  .no-print button:hover { background: #1d4ed8; box-shadow: 0 3px 8px rgba(37, 99, 235, .45); }
+  .no-print button:active { transform: translateY(1px); }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="no-print"><button onclick="window.print()">🖨 พิมพ์ / บันทึก PDF (Ctrl+P)</button></div>
+
+  <div class="head">
+    <h1>บทที่ 5 — การกรองภาพและตรวจจับขอบ (Image Filtering &amp; Edge Detection)</h1>
+    <div class="sub">สรุปสอบ A4 · Noise &amp; Filter (Mean/Gaussian/Median/Bilateral) · Sobel/Laplacian/Canny · Fourier &amp; FFT · <b class="must">★ = ต้องจำให้ได้</b> · <span class="trap">⚠ = กับดักข้อสอบ</span></div>
+  </div>
+
+  <div class="formula-strip">
+    <div>Mean = <b>sum ÷ n</b> (linear) · Median = <b>เรียงค่าเอาค่ากลาง</b> (non-linear)</div>
+    <div>Salt&amp;Pepper → <b>Median</b> · Gaussian noise → Mean/Gaussian</div>
+    <div>Sobel_x → <b>ขอบแนวดิ่ง</b> · Sobel_y → <b>ขอบแนวนอน</b></div>
+    <div>Laplacian ∇²f: <b>kernel ผลรวม 0</b> · flat = 0 · Sharpen <b>g = f − ∇²f</b></div>
+    <div>FFT → fftshift → กรอง → ifftshift → <b>IFFT</b></div>
+  </div>
+
+  <div class="cols">
+
+    <!-- ============ 1. Noise ============ -->
+    <div class="sec">
+      <h2>1 · Noise — ทำไมต้องกรอง</h2>
+      <ul>
+        <li><b>Noise</b> = จุดรบกวนในภาพ — ค่าพิกเซลที่ไม่ใช่ของจริง ทำให้ภาพเม็ดเล็ก ๆ/เกลื่อน</li>
+        <li><b class="must">Salt &amp; Pepper</b> = จุดขาว (255) กับจุดดำ (0) กระจัดกระจาย — เหมือนเกลือ-พริกไทย → ใช้ <b>Median</b></li>
+        <li><b>Gaussian Noise</b> = ค่าบวกลบแบบสุ่มรอบค่าเดิม — ภาพดูมีเม็ด (grain) → ใช้ <b>Mean / Gaussian</b></li>
+        <li>Noise ทำให้การวิเคราะห์ต่อผิดพลาด — ขอบปลอม, segmentation พัง, วัดค่าไม่ตรง</li>
+      </ul>
+    </div>
+
+    <!-- ============ 2. Spatial Filtering ============ -->
+    <div class="sec">
+      <h2>2 · Spatial Filtering &amp; Kernel</h2>
+      <ul>
+        <li><b class="must">Spatial filtering</b> = กรองที่พิกเซลโดยตรง — เลื่อน mask (kernel) ทีละจุด คำนวณ <code>response = ΣΣ w(i,j)·f(x+i,y+j)</code> (ผลรวมถ่วงน้ำหนัก) แล้วเขียนค่าลงพิกเซลกลาง</li>
+        <li>mask ขนาด <b>เลขคี่เสมอ</b> (3×3, 5×5, 7×7) — ต้องมีพิกเซลกลางให้เขียนค่า</li>
+        <li><b>Kernel/Mask</b> = เมทริกซ์น้ำหนักเล็ก ๆ · ช่อง + มาก = ฟังพิกเซลนั้นมาก · ผลรวมน้ำหนัก = 1 → ความสว่างรวมคงเดิม</li>
+        <li>kernel ต่างกัน = งานต่างกัน: น้ำหนักเท่ากัน = mean · กลางเยอะขอบน้อย = gaussian · ข้างหนึ่งบวกอีกข้างลบ = หาขอบ</li>
+        <li><b class="must">Linear</b> = ผลรวมถ่วงน้ำหนัก (บวก/คูณ): Mean · Gaussian · Sobel · Laplacian · <b class="must">Non-linear</b> = เรียงลำดับค่าแล้วเลือก: Median · Bilateral</li>
+        <li>โจทย์ถาม "order statistics / เรียงค่า" → <b>Non-linear</b> · ถาม "sum of products" → <b>Linear</b></li>
+      </ul>
+    </div>
+
+    <!-- ============ 3. Mean ============ -->
+    <div class="sec">
+      <h2>3 · Mean Filter (Averaging) — cv2.blur()</h2>
+      <ul>
+        <li><b class="must">เอาค่าเฉลี่ยของพิกเซลใต้ mask มาแทนพิกเซลกลาง</b> — รวมค่าทั้ง 9 (3×3) ÷ 9 → เบลอ + ลด noise (จุดผิดปกติถูกรวมกับค่าปกติ → เพี้ยนน้อยลง)</li>
+        <li>kernel 3×3 = ทุกช่อง 1/9 · <code>blur = cv2.blur(img, (3, 3))</code> · <code>cv2.boxFilter(img, -1, (5, 5))</code></li>
+        <li>ข้อเสีย: <b>ขอบก็ถูกเฉลี่ยด้วย → ภาพเบลอ ขอบไม่คม</b></li>
+        <li><b class="must">ตัวอย่างคำนวณ:</b> patch [5 4 5; 2 1 2; 5 4 5] → รวม 33 ÷ 9 = 3.67 ≈ <b>4</b> (ค่า noise 1 ถูกดึงขึ้นเป็น 4)</li>
+        <li><b class="must">mask ใหญ่ขึ้น = เบลอมากขึ้น</b> (เฉลี่ยพิกเซลมาก) — วัตถุเล็ก/รายละเอียดอาจหายทั้งชิ้น · เริ่มจาก 3×3/5×5</li>
+      </ul>
+    </div>
+
+    <!-- ============ 4. Gaussian ============ -->
+    <div class="sec">
+      <h2>4 · Gaussian Filter — cv2.GaussianBlur()</h2>
+      <ul>
+        <li>เหมือน mean แต่<b>พิกเซลใกล้กลางมีน้ำหนักมากกว่า</b> (รูปกระดิ่ง/bell curve) — เบลอเนียนกว่า ไม่เกิด artifact เหลี่ยม</li>
+        <li><b class="must">kernel 3×3 = [1 2 1; 2 4 2; 1 2 1] × 1/16</b> — กลาง 4 (น้ำหนักมากสุด) · ขอบ 1 · ผลรวมน้ำหนัก = 16</li>
+        <li>โค้ด: <code>blur = cv2.GaussianBlur(img, (5, 5), 0)</code> — ใช้บ่อยสุด<b>ก่อนทำ edge detection</b></li>
+        <li>โจทย์ถาม "เบลอถ่วงน้ำหนักรูปกระดิ่ง" → Gaussian · สั่งใน OpenCV = <code>cv2.GaussianBlur()</code></li>
+      </ul>
+    </div>
+
+    <!-- ============ 5. Lowpass ============ -->
+    <div class="sec">
+      <h2>5 · Smoothing = Lowpass Filter</h2>
+      <ul>
+        <li>ภาพมองเป็น "ความถี่": <b>บริเวณเรียบ = ความถี่ต่ำ</b> (พื้น ท้องฟ้า ผนัง) · <b>ขอบ/รายละเอียด/noise = ความถี่สูง</b> (ค่าเปลี่ยนเร็ว)</li>
+        <li><b class="must">Lowpass (LPF)</b> = ผ่านความถี่ต่ำ บล็อกสูง → <b>เบลอ (smoothing)</b> — Mean/Gaussian เป็น LPF</li>
+        <li><b>Highpass (HPF)</b> = ผ่านความถี่สูง บล็อกต่ำ → <b>คม/ขอบ (sharpening)</b> — Sobel/Laplacian</li>
+        <li>เฉลี่ยพิกเซล = ลดการเปลี่ยนแปลงเร็ว (high freq) แต่เก็บบริเวณเรียบ (low freq) ไว้</li>
+      </ul>
+    </div>
+
+    <!-- ============ 6. Median ============ -->
+    <div class="sec">
+      <h2>6 · Median Filter — cv2.medianBlur()</h2>
+      <ul>
+        <li><b class="must">เรียงค่าพิกเซลใน neighborhood แล้วใช้ค่าตรงกลาง (median) แทน</b> — non-linear (ไม่ใช้บวก/คูณ)</li>
+        <li>ตัวอย่าง 3×3: [10, 12, <b>255</b>, 11, 13, 11, 12, 10, 14] → เรียง 10 10 11 11 12 12 13 14 255 → ค่ากลาง = <b>12</b> (จุด noise 255 ตกไปอยู่ปลาย)</li>
+        <li><b class="must">เก่งสุดกับ Salt &amp; Pepper</b> — ค่าสุดโต่ง (255/0) ไปอยู่ปลายสุด ไม่เคยเป็นค่ากลาง · รักษาขอบได้ดีกว่า mean</li>
+        <li>โค้ด: <code>median = cv2.medianBlur(img, 3)</code> (ksize = 3)</li>
+      </ul>
+      <table>
+        <tr><th>หัวข้อ</th><th>Mean</th><th>Median</th></tr>
+        <tr><td>ชนิด</td><td>Linear</td><td>Non-linear</td></tr>
+        <tr><td>คำนวณ</td><td>ค่าเฉลี่ย (sum ÷ n)</td><td>ค่ากลางหลังเรียงลำดับ</td></tr>
+        <tr><td>Salt &amp; Pepper</td><td>จุด 255 ยังดึงค่าเฉลี่ยขึ้น</td><td><b>ลบได้ดีมาก</b></td></tr>
+        <tr><td>ขอบ (edge)</td><td>เบลอ</td><td>รักษาได้ดีกว่า</td></tr>
+        <tr><td>โค้ด</td><td>cv2.blur()</td><td>cv2.medianBlur()</td></tr>
+      </table>
+    </div>
+
+    <!-- ============ 7. Bilateral ============ -->
+    <div class="sec">
+      <h2>7 · Bilateral Filter — เบลอแต่ขอบคม</h2>
+      <ul>
+        <li><b class="must">เบลอลด noise แต่ไม่เบลอขอบ</b> — ถ่วงน้ำหนัก 2 อย่าง: <b>ระยะทาง</b> (ไกล = น้ำหนักน้อย เหมือน gaussian) + <b>ความต่างค่า</b> (ค่าต่างจากกลางมาก = ขอบ → น้ำหนักน้อย → ไม่ถูกเฉลี่ย)</li>
+        <li>ผล: พื้นที่เรียบเบลอ (noise หาย) แต่ขอบถูกรักษา — ต่างจาก Gaussian ที่เบลอทุกอย่างรวมขอบ</li>
+        <li>โค้ด: <code>cv2.bilateralFilter(img, d=9, sigmaColor=75, sigmaSpace=75)</code></li>
+        <li>ข้อเสีย: <b>ช้ามาก</b> (คำนวณน้ำหนัก 2 มิติทุกจุด)</li>
+        <li>โจทย์ "เบลอแต่รักษาขอบ" → <b>Bilateral</b></li>
+      </ul>
+    </div>
+
+    <!-- ============ 8. Edge & Sobel ============ -->
+    <div class="sec">
+      <h2>8 · Edge &amp; Sobel (อนุพันธ์อันดับ 1)</h2>
+      <ul>
+        <li><b class="must">Edge = จุดที่ความเข้ม (intensity) เปลี่ยนเร็ว</b> = gradient สูง · ตรงรอยต่อวัตถุ-พื้นหลัง · ใช้อนุพันธ์ (derivative) วัด</li>
+        <li>อนุพันธ์อันดับ 1 = วัด "ความชัน": f(x+1) − f(x−1) — ค่าคงที่ = 0 · ค่ากระโดด = ค่าใหญ่ · ขอบออกมาเป็น<b>เส้นหนา (ridge)</b></li>
+        <li><b class="must">Sobel_x kernel</b> [−1 0 +1; −2 0 +2; −1 0 +1] → จับ<b>ขอบแนวดิ่ง (vertical)</b> · <b class="must">Sobel_y kernel</b> [−1 −2 −1; 0 0 0; +1 +2 +1] → จับ<b>ขอบแนวนอน (horizontal)</b></li>
+        <li><b class="must">จำ:</b> เลขเรียงตาม<b>แถว</b> = Sobel_x · เลขเรียงตาม<b>คอลัมน์</b> = Sobel_y · น้ำหนักกลาง 2 = ลดผล noise</li>
+        <li><span class="trap">⚠ กับดัก:</span> ถาม "vertical edges" → <b>Sobel_x</b> (แกน x) · "horizontal edges" → <b>Sobel_y</b> — ตรงข้ามกับที่คิด!</li>
+        <li>โค้ด: <code>gx = cv2.Sobel(gray, cv2.CV_64F, 1, 0)</code> · <code>gy = cv2.Sobel(gray, cv2.CV_64F, 0, 1)</code> · รวม: <code>mag = cv2.magnitude(gx, gy)</code></li>
+      </ul>
+    </div>
+
+    <!-- ============ 9. Laplacian ============ -->
+    <div class="sec">
+      <h2>9 · Laplacian (อนุพันธ์อันดับ 2)</h2>
+      <ul>
+        <li><b class="must">∇²f = second-order derivative</b> — วัด "อัตราการเปลี่ยนของอัตราการเปลี่ยน" · ขอบ = จุดที่ gradient เปลี่ยนทิศ (zero crossing) · ขอบ<b>บางเฉียบ</b> + จับได้<b>ทุกทิศ (isotropic)</b></li>
+        <li><b class="must">kernel ผลรวม = 0</b> → บริเวณเรียบ (flat region) ได้ค่า <b>0</b> — ตอบเฉพาะจุดที่ "ต่าง" เท่านั้น</li>
+        <li>kernel 4-neighbor: [0 −1 0; −1 4 −1; 0 −1 0] (กลาง 4, รอบ 4 ทิศ) · 8-neighbor: [−1 −1 −1; −1 8 −1; −1 −1 −1] (กลาง 8, แรงกว่า, ไว noise กว่า)</li>
+        <li>ต่างจาก Sobel: Sobel = อันดับ 1 (ขอบหนา) · Laplacian = อันดับ 2 (ขอบบาง, ทุกทิศ, <b>ไว noise กว่า</b>)</li>
+        <li>โค้ด: <code>lap = cv2.Laplacian(gray, cv2.CV_64F)</code></li>
+      </ul>
+    </div>
+
+    <!-- ============ 10. Sharpening ============ -->
+    <div class="sec">
+      <h2>10 · Sharpening — g = f − ∇²f</h2>
+      <ul>
+        <li><b class="must">ทำให้ขอบคมขึ้น: g = f − ∇²f</b> — เอาภาพเดิมลบด้วย Laplacian (ส่วนที่เป็นขอบ) → ขอบถูกเน้นชัดขึ้น</li>
+        <li>ทำไมลบแล้วคม: Laplacian เป็นบวกตรงขอบ — ลบออกทำให้ฝั่งมืดมืดลง ฝั่งสว่างสว่างขึ้น = ขอบชัด</li>
+        <li>โค้ด: <code>sharp = gray - lap</code> → <code>np.clip(sharp, 0, 255).astype("uint8")</code></li>
+      </ul>
+    </div>
+
+    <!-- ============ 11. Canny ============ -->
+    <div class="sec">
+      <h2>11 · Canny Edge Detection</h2>
+      <ul>
+        <li><b class="must">5 ขั้นตอน:</b> <b>1)</b> Gaussian Blur (ลด noise — สำคัญมาก) → <b>2)</b> หา Gradient (Sobel x+y) → <b>3)</b> Non-maximum suppression (ขอบบาง — เก็บเฉพาะจุดที่แรงสุดตามทิศ) → <b>4)</b> Double threshold (ขอบแรง/อ่อน) → <b>5)</b> Hysteresis (ขอบอ่อนที่ติดกับขอบแรงถูกรักษา)</li>
+        <li>โค้ด: <code>edges = cv2.Canny(gray, 100, 200)</code> — threshold1=100, threshold2=200 · gradient &gt; 200 = ขอบแรง (เก็บแน่นอน) · &lt; 100 = ทิ้ง · ระหว่างกลาง = เก็บถ้าต่อกับขอบแรง</li>
+        <li>ผล: ขอบบาง ต่อเนื่อง แม่นยำ — ใช้กับ OCR, Robot Vision, หา contour ต่อ</li>
+      </ul>
+    </div>
+
+    <!-- ============ 12. Fourier ============ -->
+    <div class="sec">
+      <h2>12 · Fourier Transform &amp; FFT</h2>
+      <ul>
+        <li><b class="must">Fourier = ย่อยภาพออกเป็นคลื่น sine/cosine</b> — มองภาพเป็น "ความถี่" แทนพิกเซล · <b>Spatial domain</b> (x, y) ↔ <b>Frequency domain</b> (low→high) · ภาพกับผลลัพธ์<b>ขนาดเท่ากัน</b></li>
+        <li>Low frequency = บริเวณเรียบ · High frequency = ขอบ/รายละเอียด/noise</li>
+        <li><b class="must">Workflow: FFT (fft2) → fftshift (ย้าย DC มาตรงกลาง) → กรอง → ifftshift → IFFT (ifft2)</b> — FFT = อัลกอริทึมเร็วของ DFT (ผลลัพธ์เหมือนกัน)</li>
+        <li><b class="must">Magnitude Spectrum:</b> กลางภาพ = <b>DC component (ความสว่างเฉลี่ย — สว่างสุดเสมอ)</b> · ใกล้กลาง = ความถี่ต่ำ (เรียบ) · ไกลกลาง = ความถี่สูง (ขอบ/noise)</li>
+        <li><b>Phase Spectrum</b> = <b>ตำแหน่ง (spatial location)</b> ของโครงสร้าง — magnitude + phase ต้องใช้คู่กัน (เก็บแค่ magnitude แล้วคืน phase เป็น 0 → ภาพพัง)</li>
+        <li><b>LPF</b> (วงกลมตรงกลาง) = เก็บความถี่ต่ำ → เบลอ เหมือน mean/gaussian · <b>HPF</b> (วงแหวนนอก) = เก็บความถี่สูง → คม/ขอบ เหมือน sobel/laplacian</li>
+        <li><b class="must">Walsh / Hadamard Transform:</b> basis เป็น<b>คลื่นสี่เหลี่ยม +1/−1</b> (ต่างจาก Fourier ที่เป็น sin/cos) — คำนวณเร็วมาก (บวก-ลบอย่างเดียว) เหมาะการบีบอัดข้อมูล</li>
+      </ul>
+    </div>
+
+    <!-- ============ 13. สูตรต้องจำ ============ -->
+    <div class="sec">
+      <h2>13 · สูตร &amp; เลขต้องจำก่อนเข้าห้องสอบ</h2>
+      <ul>
+        <li>Mean = sum ÷ n (linear) · Median = ค่ากลางหลังเรียง (non-linear) · mask เลขคี่</li>
+        <li>Salt &amp; Pepper → Median · Gaussian noise → Mean/Gaussian · เบลอแต่รักษาขอบ → Bilateral</li>
+        <li>Mean 3×3 = 1/9 ทุกช่อง · Gaussian 3×3 = [1 2 1;2 4 2;1 2 1]/16</li>
+        <li>Sobel_x → vertical edges · Sobel_y → horizontal · Laplacian = ∇²f กลาง −4/−8 ผลรวม 0 flat = 0</li>
+        <li>Sharpen: g = f − ∇²f · Canny: blur → gradient → suppression → double threshold → hysteresis</li>
+        <li>LPF = เบลอ (low freq ผ่าน) · HPF = คม/ขอบ (high freq ผ่าน)</li>
+        <li>FFT → fftshift → กรอง → ifftshift → IFFT · กลาง magnitude = DC (ความสว่างเฉลี่ย)</li>
+        <li>Walsh/Hadamard = basis +1/−1 (square wave) · Fourier = sin/cos</li>
+      </ul>
+    </div>
+
+    <!-- ============ 14. กับดัก ============ -->
+    <div class="sec">
+      <h2>14 · กับดักที่ข้อสอบชอบหลอก</h2>
+      <ul>
+        <li><span class="trap">⚠</span> Mean = <b>linear</b> (เฉลี่ย) · Median = <b>non-linear</b> (เรียงค่า) — อย่าสลับ</li>
+        <li><span class="trap">⚠</span> Salt &amp; Pepper → <b>Median</b> (ไม่ใช่ mean — mean โดนจุด 255 ดึงค่า)</li>
+        <li><span class="trap">⚠</span> vertical edges → <b>Sobel_x</b> · horizontal edges → <b>Sobel_y</b> — ตรงข้ามกับที่คิด</li>
+        <li><span class="trap">⚠</span> Laplacian: ผลรวม kernel = <b>0</b> · flat region = <b>0</b> · ไว noise กว่า Sobel</li>
+        <li><span class="trap">⚠</span> mask ใหญ่ขึ้น = เบลอ<b>มากขึ้น</b> (ไม่ใช่คมขึ้น)</li>
+        <li><span class="trap">⚠</span> Bilateral รักษาขอบ · Gaussian เบลอทุกอย่างรวมขอบ</li>
+        <li><span class="trap">⚠</span> FFT ต้อง <b>fftshift</b> ก่อนกรอง (DC อยู่ตรงกลาง) — ลืม = กรองผิดที่</li>
+        <li><span class="trap">⚠</span> กลาง magnitude spectrum = <b>DC/ความสว่างเฉลี่ย</b> — ไม่ใช่ noise</li>
+        <li><span class="trap">⚠</span> Canny ขั้นแรก = <b>Gaussian Blur</b> (ไม่ใช่ Sobel ทันที)</li>
+        <li><span class="trap">⚠</span> Walsh/Hadamard = ±1 (square wave) · Fourier = sin/cos — อย่าจำปนกัน</li>
+        <li><span class="trap">⚠</span> Linear = "sum of products" · Non-linear = "order statistics"</li>
+      </ul>
+    </div>
+
+    <!-- ============ 15. Q&A ============ -->
+    <div class="sec">
+      <h2>15 · คำถาม-คำตอบฉบับเร็ว (จากแบบทดสอบบทนี้)</h2>
+      <ul class="qa">
+        <li><b>Spatial filtering กระทำกับอะไร?</b> → พิกเซลของภาพโดยตรง (เลื่อน mask ทีละจุด)</li>
+        <li><b>Spatial filter แบ่งเป็น 2 ประเภท?</b> → Linear และ Non-linear</li>
+        <li><b>Mean filter ใช้ทำอะไร?</b> → เบลอภาพ + ลด noise</li>
+        <li><b>Mean 3×3 [5 4 5; 2 1 2; 5 4 5] ได้ค่า?</b> → รวม 33 ÷ 9 = 3.67 ≈ <b>4</b></li>
+        <li><b>mask ของ mean ใหญ่ขึ้น?</b> → ภาพเบลอมากขึ้น (วัตถุเล็กอาจหาย)</li>
+        <li><b>คำสั่ง Gaussian filter?</b> → cv2.GaussianBlur()</li>
+        <li><b>Smoothing เรียกอีกชื่อว่า?</b> → Lowpass Filter</li>
+        <li><b>Median filter คำนวณยังไง?</b> → เรียงค่าพิกเซลใน neighborhood แล้วเอาค่ากลาง</li>
+        <li><b>Median เหมาะกับ noise แบบใด?</b> → Salt &amp; Pepper (จุดขาว-ดำสุ่ม)</li>
+        <li><b>Mean vs Median ต่างกัน?</b> → Mean = เฉลี่ย (linear) · Median = เรียงค่ากลาง (non-linear)</li>
+        <li><b>Bilateral จุดเด่น?</b> → เบลอ noise แต่รักษาขอบ (edge) ให้คม</li>
+        <li><b>Edge คืออะไร?</b> → จุดที่ค่าความเข้มเปลี่ยนเร็ว (intensity เปลี่ยนฉับพลัน)</li>
+        <li><b>Sobel ใช้หลักการใด?</b> → อนุพันธ์อันดับ 1 (gradient)</li>
+        <li><b>Sobel_x ตรวจจับขอบแบบใด?</b> → ขอบแนวตั้ง (vertical edges)</li>
+        <li><b>Laplacian เป็นอนุพันธ์อันดับ?</b> → 2 (second-order) ∇²f</li>
+        <li><b>Laplacian บนบริเวณเรียบได้ค่า?</b> → 0</li>
+        <li><b>Sharpening สูตร?</b> → g = f − ∇²f</li>
+        <li><b>Canny ขั้นแรกคือ?</b> → Gaussian Blur (ลด noise)</li>
+        <li><b>FFT ย่อมาจาก?</b> → Fast Fourier Transform (อัลกอริทึมเร็วของ DFT)</li>
+        <li><b>กลาง magnitude spectrum คือ?</b> → DC component = ความสว่างเฉลี่ย</li>
+        <li><b>Phase spectrum บอกอะไร?</b> → ตำแหน่ง (spatial location) ของโครงสร้าง</li>
+        <li><b>LPF / HPF ผลต่างกัน?</b> → LPF เบลอ (เก็บเรียบ) · HPF คม/ขอบ (เก็บ high freq)</li>
+        <li><b>Walsh/Hadamard basis เป็นแบบใด?</b> → คลื่นสี่เหลี่ยม +1/−1 (ต่างจาก Fourier sin/cos)</li>
+      </ul>
+    </div>
+
+  </div><!-- /cols -->
+
+  <div class="foot">
+    สรุปบทที่ 5 · DIP — Filtering &amp; Edge Detection · <b>หัวใจทั้งบท: median เก่ง salt&amp;pepper · sobel แยกแกน · laplacian ผลรวม 0 · เบลอ = lowpass ขอบ = highpass · FFT ต้อง fftshift</b>
+  </div>
+
+</div>
+
+<script>
+  // เปิดจากปุ่ม "พิมพ์เอกสารสรุปสอบ" (?print=1) → โหลดเสร็จแล้วสั่งพิมพ์ทันที
+  if (/[?&]print=1/.test(location.search)) {
+    window.addEventListener("load", function () {
+      setTimeout(function () { window.print(); }, 500);
+    });
+  }
+</script>
+</body>
+</html>

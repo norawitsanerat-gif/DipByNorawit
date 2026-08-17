@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>สรุปสอบ บทที่ 4 — การปรับปรุงภาพ (Image Enhancement) · A4</title>
+<style>
+  /* ====== สรุปสอบ บทที่ 4 — เน้นเนื้อหา อัดแน่น ไม่เน้นความสวย ====== */
+  @page { size: A4; margin: 7mm 7mm 7mm 7mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    font-family: "Leelawadee UI", "IBM Plex Sans Thai", Tahoma, "Sukhumvit Set", "Thonburi", "Segoe UI", sans-serif;
+    font-size: 7.4pt;
+    line-height: 1.24;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sheet { max-width: 196mm; margin: 0 auto; }
+  code, .mono { font-family: Consolas, "Courier New", monospace; font-size: 95%; }
+
+  .head { border: 1.1pt solid #000; border-bottom: none; padding: 2px 8px 4px; }
+  .head h1 { font-size: 13pt; line-height: 1.15; }
+  .head .sub { font-size: 8pt; }
+  .formula-strip {
+    display: table; width: 100%; border: 1.1pt solid #000; border-top: none;
+    font-size: 7.5pt; font-weight: 600;
+  }
+  .formula-strip > div {
+    display: table-cell; padding: 2px 6px; border-right: 0.6pt solid #000; vertical-align: middle;
+  }
+  .formula-strip > div:last-child { border-right: none; }
+  .formula-strip b { font-size: 8pt; }
+
+  .cols { columns: 2; column-gap: 8px; margin-top: 4px; }
+
+  .sec { break-inside: avoid; margin-bottom: 4px; border: 0.8pt solid #555; padding: 2px 7px 3px; }
+  .sec > h2 {
+    font-size: 9pt; line-height: 1.2; padding: 1px 5px; margin: -2px -7px 3px;
+    background: #e8e8e8; border-bottom: 0.8pt solid #555;
+  }
+  .sec > h2 .en { font-weight: 600; font-size: 7pt; color: #333; }
+  ul { padding-left: 11px; }
+  li { margin-bottom: 1px; }
+  p { margin: 1.5px 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 2px 0; }
+  th, td { border: 0.5pt solid #000; padding: 0.5px 3px; text-align: left; font-size: 7.1pt; line-height: 1.25; }
+  th { background: #efefef; }
+  td b, .hl { background: #fff3bf; }
+
+  .code {
+    font-family: Consolas, "Courier New", monospace; font-size: 6.9pt; line-height: 1.3;
+    background: #f2f2f2; border: 0.5pt solid #999; padding: 2px 6px; margin: 2px 0;
+    white-space: pre-wrap;
+  }
+  .must { color: #a00; font-weight: 700; }
+  .trap { color: #a00; font-weight: 700; }
+  .qa b { font-weight: 600; }
+
+  .foot {
+    margin-top: 6px; border-top: 1pt solid #000; padding-top: 2px;
+    font-size: 7pt; text-align: center;
+  }
+  .no-print { text-align: right; margin: 0 0 6px; }
+  .no-print button {
+    font-family: inherit; font-size: 9.5pt; font-weight: 600;
+    padding: 7px 18px; cursor: pointer;
+    background: #2563eb; color: #fff;
+    border: none; border-radius: 7px;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, .35);
+    transition: background .15s, transform .1s, box-shadow .15s;
+  }
+  .no-print button:hover { background: #1d4ed8; box-shadow: 0 3px 8px rgba(37, 99, 235, .45); }
+  .no-print button:active { transform: translateY(1px); }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="no-print"><button onclick="window.print()">🖨 พิมพ์ / บันทึก PDF (Ctrl+P)</button></div>
+
+  <div class="head">
+    <h1>บทที่ 4 — การปรับปรุงภาพ (Image Enhancement)</h1>
+    <div class="sub">สรุปสอบ A4 · Brightness (beta) · Contrast (alpha) · Gamma/Log · Histogram · Equalization · CLAHE · <b class="must">★ = ต้องจำให้ได้</b> · <span class="trap">⚠ = กับดักข้อสอบ</span></div>
+  </div>
+
+  <div class="formula-strip">
+    <div>Brightness = <b>beta</b> (บวก/ลบ) · Contrast = <b>alpha</b> (คูณ)</div>
+    <div>new = <b>(alpha × pixel) + beta</b> · คลิป 0–255</div>
+    <div>Gamma: <b>s = c·r^γ</b> — γ&lt;1 สว่าง · γ&gt;1 มืด</div>
+    <div>Log: <b>s = c·log(1+r)</b> — เน้นเงามืด</div>
+    <div>equalizeHist = <b>grayscale 1 ช่อง</b> · CLAHE = local</div>
+  </div>
+
+  <div class="cols">
+
+    <!-- ============ 1. Enhancement คืออะไร ============ -->
+    <div class="sec">
+      <h2>1 · Image Enhancement คืออะไร</h2>
+      <ul>
+        <li><b>Image Enhancement</b> = ทำให้ภาพดูดีขึ้น <b>ก่อน</b>เอาไปวิเคราะห์ต่อ — ปรับความสว่าง, คอนทราสต์, ลด noise</li>
+        <li>เครื่องมือหลัก: <b>Brightness</b> (beta) · <b>Contrast</b> (alpha) · <b>Gamma / Log</b> (ปรับโทนแบบไม่เชิงเส้น) · <b>Histogram</b> (วิเคราะห์การกระจาย) · <b>Equalization</b> (กระจาย histogram) · <b>CLAHE</b> (equalize แบบ local)</li>
+        <li><b class="must">Pipeline งานจริง:</b> Camera → <b>Image Enhancement</b> (บทนี้!) → Threshold (แยก object/background) → Contour (หาขอบเขต) → Object Detection (ตรวจจับ/นับวัตถุ)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 2. Brightness & Contrast ============ -->
+    <div class="sec">
+      <h2>2 · Brightness &amp; Contrast — convertScaleAbs</h2>
+      <ul>
+        <li><b class="must">Brightness (ความสว่าง) = beta</b> — บวก/ลบค่าคงที่กับทุกพิกเซลเท่า ๆ กันทั้งภาพ · <code>cv2.convertScaleAbs(img, beta=50)</code> = สว่างขึ้น 50 · beta=−50 = มืดลง (beta เป็นลบได้)</li>
+        <li><b class="must">Contrast (คอนทราสต์) = alpha</b> — คูณค่าคงที่ทุกพิกเซล · alpha &gt; 1 = ระยะห่างค่ากว้างขึ้น → <b>contrast เพิ่ม</b> · alpha &lt; 1 = ค่ารวมเข้าหากัน → <b>contrast ลด (ซีด)</b></li>
+        <li><b class="must">สูตรรวม: new = (alpha × pixel) + beta</b> — คูณ alpha (contrast) ก่อน → บวก beta (brightness) → <b>คลิป 0–255</b> (เกิน 255 → 255, ต่ำกว่า 0 → 0)</li>
+        <li>ตัวอย่าง: pixel = 100, alpha = 1.5, beta = 30 → (1.5×100)+30 = <b>180</b> · pixel = 200 → (1.5×200)+30 = 330 → คลิปเป็น <b>255</b></li>
+        <li><code>cv2.convertScaleAbs(img, alpha=1.5, beta=30)</code> — ทำทั้งหมดในตัว: Scale (คูณ+บวก) · Abs (ค่าสัมบูรณ์กันค่าลบ) · คลิป 0–255 + แปลง uint8 อัตโนมัติ</li>
+        <li>เขียนเองก็เหมือนกัน: <code>new = np.clip(img.astype(float)*1.5 + 30, 0, 255).astype("uint8")</code></li>
+      </ul>
+    </div>
+
+    <!-- ============ 3. Contrast Stretching ============ -->
+    <div class="sec">
+      <h2>3 · Contrast Stretching — ยืดช่วงค่า</h2>
+      <ul>
+        <li>ภาพซีด = ค่าพิกเซลอยู่ในช่วงแคบ (เช่น 50–150) → <b class="must">ยืดให้เต็ม 0–255</b> เห็นความต่างชัดขึ้น</li>
+        <li>หลักการ: หาค่าต่ำสุด-สูงสุดของภาพ → map ใหม่ (ต่ำสุด → 0, สูงสุด → 255, ค่ากลางยืดตามสัดส่วน)</li>
+        <li>ใช้เมื่อ: ภาพคอนทราสต์ต่ำ (ทุกค่าอยู่กลาง ๆ) เช่น ภาพที่แสงแย่ถ่ายกลางแจ้ง</li>
+      </ul>
+    </div>
+
+    <!-- ============ 4. Gamma ============ -->
+    <div class="sec">
+      <h2>4 · Gamma Transformation — s = c·r^γ</h2>
+      <ul>
+        <li><b class="must">Power-Law Transform: s = c·r^γ</b> — r = ค่าอินพุต (<b>normalize 0–1</b> ก่อน แล้วคูณกลับ 255) · s = เอาต์พุต · c = ค่าคงที่ (ปกติ 1) · γ = ตัวยกกำลัง</li>
+        <li><b class="must">จำ 3 กรณี:</b> <b>γ &lt; 1 → ภาพสว่างขึ้น</b> (ดันค่ามืดขึ้น เห็นเงา) เช่น γ = 0.5 แก้ภาพมืด/ย้อนแสง · <b>γ = 1 → ไม่เปลี่ยน</b> (r¹ = r) · <b>γ &gt; 1 → ภาพมืดลง</b> (กดค่าสว่างลง) เช่น γ = 2.2</li>
+        <li><b class="must">γ = 2.2 = มาตรฐาน sRGB ของจอ</b> — ใช้ตอนแสดงผล / ลดความสว่างภาพที่สว่างเกิน · แก้ภาพมืดใช้ γ = 0.5</li>
+        <li>ตัวอย่าง: 0.25^0.5 = 0.5 (มืดขึ้นสว่าง) · 0.75^2.2 ≈ 0.53 (สว่างลงมืด)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 5. Log ============ -->
+    <div class="sec">
+      <h2>5 · Logarithmic Transformation — s = c·log(1+r)</h2>
+      <ul>
+        <li><b class="must">s = c·log(1+r)</b> — log ยก<b>ค่ามืดขึ้นมาก</b> แต่ค่าสว่างแทบไม่เปลี่ยน → <b>เน้นรายละเอียดในเงามืด</b> (เช่น r=5 → log(6)≈1.79 เพิ่ม ~2.6 เท่า, r=250 → log(251)≈5.52 เพิ่ม ~1.02 เท่า)</li>
+        <li>เหมาะกับภาพ <b>dynamic range กว้าง</b> (สว่างจ้า + มืดสนิทในภาพเดียว เช่น ถ่ายย้อนแสง)</li>
+        <li><b>+1 ใน log(1+r)</b> กัน log(0) = −∞ (ค่าต่ำสุด = log(1) = 0)</li>
+        <li>เทียบกับ Gamma: ทั้งคู่ช่วยเงามืด — Gamma ปรับละเอียดกว่าด้วยค่า γ ตัวเดียว · Log ตายตัว</li>
+      </ul>
+    </div>
+
+    <!-- ============ 6. Histogram ============ -->
+    <div class="sec">
+      <h2>6 · Histogram — กราฟการกระจายพิกเซล</h2>
+      <ul>
+        <li><b class="must">Histogram = กราฟนับจำนวนพิกเซลต่อระดับความเข้ม (0–255)</b> — แกน x = ค่าพิกเซล, แกน y = จำนวนพิกเซล (แท่งสูง = มีพิกเซลเยอะที่ค่านั้น)</li>
+        <li>คำนวณ: <code>cv2.calcHist([gray], [0], None, [256], [0, 256])</code> หรือ <code>plt.hist(img.ravel(), bins=256)</code></li>
+        <li><b class="must">อ่าน 3 รูปแบบ:</b> <b>แท่งเบียดซ้าย</b> = ภาพมืด (Underexposed) · <b>แท่งเบียดขวา</b> = ภาพสว่างเกิน (Overexposed) · <b>แท่งรวมกลางแคบ ๆ</b> = คอนทราสต์ต่ำ (ซีด) · <b>กระจายเต็ม 0–255</b> = ภาพดี</li>
+        <li>ดู histogram ก่อนปรับภาพเสมอ — บอกภาพมืด/สว่าง/contrast ต่ำ-สูง</li>
+      </ul>
+    </div>
+
+    <!-- ============ 7. Equalization ============ -->
+    <div class="sec">
+      <h2>7 · Histogram Equalization</h2>
+      <ul>
+        <li><b class="must">กระจาย histogram ที่เบียดกันให้ "แบน" ครอบทั้ง 0–255</b> → คอนทราสต์ดีขึ้นอัตโนมัติ (ใช้ cumulative/สะสมของ histogram สร้างตารางแปลงค่า)</li>
+        <li>โค้ด: <code>eq = cv2.equalizeHist(gray)</code> — <b class="must">ใช้ได้กับภาพ 1 ช่อง (grayscale) เท่านั้น!</b></li>
+        <li><b class="must">ภาพสี:</b> แปลงเป็น <b>YUV</b> → equalize ช่อง Y (ความสว่าง) → แปลงกลับ — ทำที่ RGB ตรง ๆ จะสีเพี้ยน (<code>cvtColor(COLOR_BGR2YUV)</code> → <code>yuv[:,:,0] = equalizeHist(...)</code> → <code>COLOR_YUV2BGR</code>)</li>
+        <li>ข้อระวัง: ภาพ noise เยอะ → equalize ทั้งภาพอาจทำให้ noise โผล่ชัดขึ้น (แก้ด้วย CLAHE)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 8. CLAHE ============ -->
+    <div class="sec">
+      <h2>8 · CLAHE — Equalization แบบ Local</h2>
+      <ul>
+        <li><b class="must">CLAHE = Contrast Limited Adaptive Histogram Equalization</b> — แบ่งภาพเป็น<b>บล็อกเล็ก (tile)</b> แล้ว equalize ทีละบล็อกด้วย histogram ของตัวเอง + <b>จำกัด contrast</b> (clipLimit)</li>
+        <li>โค้ด: <code>clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))</code> → <code>res = clahe.apply(gray)</code></li>
+        <li>ดีกว่า equalize ปกติ: ไม่ทำให้ noise โผล่ทั้งภาพ (จำกัด contrast ต่อบล็อก) · ปรับตามแสงเฉพาะที่ → เหมาะภาพ<b>แสงไม่สม่ำเสมอ</b>/มี noise</li>
+      </ul>
+      <table>
+        <tr><th>วิธี</th><th>หลักการ</th><th>เหมาะกับ</th><th>ข้อเสีย</th></tr>
+        <tr><td><b>convertScaleAbs</b></td><td>alpha×pixel + beta</td><td>ปรับสว่าง/contrast ทั่วภาพ</td><td>ปรับมือ ต้องเดาค่า</td></tr>
+        <tr><td><b>equalizeHist</b></td><td>กระจาย histogram ทั้งภาพ (global)</td><td>ภาพซีด/มืดทั่วไป</td><td>noise อาจโผล่ชัด</td></tr>
+        <tr><td><b>CLAHE</b></td><td>equalize แบบบล็อกเล็ก + จำกัด contrast</td><td>แสงไม่สม่ำเสมอ, มี noise</td><td>ช้ากว่า, มี parameter</td></tr>
+      </table>
+      <p><b>เลือกยังไง:</b> ภาพซีดปกติ → equalizeHist · ภาพแสงไม่เท่ากัน/มี noise → CLAHE · อยากควบคุมเอง → convertScaleAbs</p>
+    </div>
+
+    <!-- ============ 9. สูตรต้องจำ ============ -->
+    <div class="sec">
+      <h2>9 · สูตร &amp; เลขต้องจำก่อนเข้าห้องสอบ</h2>
+      <ul>
+        <li>Brightness = <b>beta</b> (บวก/ลบ) · Contrast = <b>alpha</b> (คูณ) — อย่าสลับ</li>
+        <li><b>new = (alpha × pixel) + beta</b> → คลิป 0–255 · alpha&gt;1 เพิ่ม contrast · alpha&lt;1 ลด</li>
+        <li><b>s = c·r^γ</b> — γ&lt;1 สว่าง · γ=1 เดิม · γ&gt;1 มืด · γ จอ = 2.2 · แก้ภาพมืด = 0.5</li>
+        <li><b>s = c·log(1+r)</b> — เน้นรายละเอียดในเงามืด · dynamic range กว้าง</li>
+        <li>Contrast Stretching = ยืดช่วงแคบ (50–150) → 0–255</li>
+        <li>Histogram: ซ้าย = มืด · ขวา = สว่าง · กลางแคบ = ซีด · กระจายทั่ว = ดี</li>
+        <li>equalizeHist = grayscale 1 ช่อง · ภาพสี → YUV ช่อง Y · CLAHE = createCLAHE + apply</li>
+      </ul>
+    </div>
+
+    <!-- ============ 10. กับดัก ============ -->
+    <div class="sec">
+      <h2>10 · กับดักที่ข้อสอบชอบหลอก</h2>
+      <ul>
+        <li><span class="trap">⚠</span> beta = <b>บวก/ลบ</b> (brightness) · alpha = <b>คูณ</b> (contrast) — อย่าสลับกัน</li>
+        <li><span class="trap">⚠</span> สูตรรวม: คูณ alpha <b>ก่อน</b> แล้วค่อยบวก beta</li>
+        <li><span class="trap">⚠</span> คลิป 0–255: 200×1.8 = 360 → <b>255</b> (ไม่ใช่ 360)</li>
+        <li><span class="trap">⚠</span> γ&lt;1 = <b>สว่าง</b>, γ&gt;1 = <b>มืด</b> — อย่าจำกลับ (γ=2.2 ไม่ใช่ทำให้สว่าง)</li>
+        <li><span class="trap">⚠</span> equalizeHist รับได้แค่ <b>1 ช่อง</b> — ภาพสีต้องแปลง YUV ไม่ใช่ทำ RGB ตรง ๆ</li>
+        <li><span class="trap">⚠</span> histogram เบียดซ้าย = ภาพมืด (ค่าต่ำ) · เบียดขวา = สว่างเกิน — อย่าสลับ</li>
+        <li><span class="trap">⚠</span> CLAHE = local (บล็อกเล็ก) ไม่ใช่ global</li>
+        <li><span class="trap">⚠</span> log ต้อง +1 ใน log(1+r) — กัน log(0) = −∞</li>
+        <li><span class="trap">⚠</span> Contrast Stretching = <b>ยืด</b>ช่วงให้กว้าง — ไม่ใช่บีบให้แคบ</li>
+      </ul>
+    </div>
+
+    <!-- ============ 11. Q&A ============ -->
+    <div class="sec">
+      <h2>11 · คำถาม-คำตอบฉบับเร็ว (จากแบบทดสอบบทนี้)</h2>
+      <ul class="qa">
+        <li><b>เพิ่มความสว่างใช้พารามิเตอร์ใด?</b> → beta (บวกค่าคงที่ทุกพิกเซล)</li>
+        <li><b>เพิ่มคอนทราสต์ใช้พารามิเตอร์ใด?</b> → alpha (คูณค่าคงที่)</li>
+        <li><b>สูตรรวม Brightness + Contrast?</b> → new = (alpha × pixel) + beta</li>
+        <li><b>convertScaleAbs(img, beta=50) มีผล?</b> → ภาพสว่างขึ้น 50 ระดับ (beta=−50 = มืดลง)</li>
+        <li><b>convertScaleAbs(img, alpha=1.8)?</b> → คอนทราสต์เพิ่มขึ้น (alpha&gt;1)</li>
+        <li><b>alpha = 0.5?</b> → คอนทราสต์ลดลง (ค่าถูกรวมเข้าหากัน)</li>
+        <li><b>convertScaleAbs คลิปค่าเท่าไร?</b> → 0–255 (uint8)</li>
+        <li><b>pixel = 200, alpha = 1.8 ได้ค่า?</b> → 200×1.8 = 360 → คลิป = <b>255</b></li>
+        <li><b>สูตร Gamma?</b> → s = c·r^γ (Power-Law)</li>
+        <li><b>γ &lt; 1 (เช่น 0.5) มีผล?</b> → ภาพสว่างขึ้น เห็นเงามืดชัดขึ้น</li>
+        <li><b>gamma มาตรฐานจอ?</b> → 2.2 (sRGB) · แก้ภาพมืดใช้ 0.5</li>
+        <li><b>Histogram คืออะไร?</b> → การกระจายของจำนวนพิกเซลต่อระดับความเข้ม 0–255</li>
+        <li><b>ภาพมืดเกิน histogram แบบใด?</b> → แท่งส่วนใหญ่อยู่ทางซ้าย (ค่าต่ำ) · ภาพสว่าง = เบียดขวา</li>
+        <li><b>ภาพคอนทราสต์ต่ำ histogram?</b> → แท่งรวมกลางแคบ ๆ</li>
+        <li><b>Histogram Equalization ทำอะไร?</b> → กระจาย histogram ให้ทั่วทั้งช่วง 0–255</li>
+        <li><b>equalizeHist ใช้กับภาพแบบใด?</b> → Grayscale (1 ช่อง) — ภาพสีทำที่ช่อง Y (YUV)</li>
+        <li><b>CLAHE ต่างจาก equalize ยังไง?</b> → ปรับเป็นบล็อกเล็ก ๆ (local) แทนทั้งภาพ + จำกัด contrast</li>
+        <li><b>Contrast Stretching คือ?</b> → ยืดช่วงค่าที่แคบ (50–150) ให้กว้าง (0–255)</li>
+        <li><b>Log transform เหมาะกับภาพแบบใด?</b> → dynamic range กว้าง / เน้นรายละเอียดในเงามืด</li>
+        <li><b>Pipeline งานจริง?</b> → Camera → Enhancement → Threshold → Contour → Object Detection</li>
+      </ul>
+    </div>
+
+  </div><!-- /cols -->
+
+  <div class="foot">
+    สรุปบทที่ 4 · DIP — Image Enhancement · <b>หัวใจทั้งบท: alpha คูณก่อน beta บวกทีหลัง คลิป 0–255 · γ&lt;1 สว่าง γ&gt;1 มืด · equalizeHist 1 ช่อง · CLAHE local</b>
+  </div>
+
+</div>
+
+<script>
+  // เปิดจากปุ่ม "พิมพ์เอกสารสรุปสอบ" (?print=1) → โหลดเสร็จแล้วสั่งพิมพ์ทันที
+  if (/[?&]print=1/.test(location.search)) {
+    window.addEventListener("load", function () {
+      setTimeout(function () { window.print(); }, 500);
+    });
+  }
+</script>
+</body>
+</html>

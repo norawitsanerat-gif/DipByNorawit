@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>สรุปสอบ บทที่ 1 — พื้นฐานภาพดิจิทัล (1 หน้า A4)</title>
+<style>
+  /* ====== สรุปสอบ 1 หน้า A4 — เน้นเนื้อหา อัดแน่น ไม่เน้นความสวย ====== */
+  @page { size: A4; margin: 7mm 7mm 7mm 7mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    font-family: "Leelawadee UI", "IBM Plex Sans Thai", Tahoma, "Sukhumvit Set", "Thonburi", "Segoe UI", sans-serif;
+    font-size: 7.5pt;
+    line-height: 1.28;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sheet { max-width: 196mm; margin: 0 auto; }
+  code, .mono { font-family: Consolas, "Courier New", monospace; font-size: 95%; }
+
+  /* หัวเอกสาร */
+  .head { border: 1.1pt solid #000; border-bottom: none; padding: 2px 8px 4px; }
+  .head h1 { font-size: 13pt; line-height: 1.15; }
+  .head .sub { font-size: 8pt; }
+  .formula-strip {
+    display: table; width: 100%; border: 1.1pt solid #000; border-top: none;
+    font-size: 7.5pt; font-weight: 600;
+  }
+  .formula-strip > div {
+    display: table-cell; padding: 2px 6px; border-right: 0.6pt solid #000; vertical-align: middle;
+  }
+  .formula-strip > div:last-child { border-right: none; }
+  .formula-strip b { font-size: 8pt; }
+
+  /* 2 คอลัมน์ */
+  .cols { columns: 2; column-gap: 8px; margin-top: 4px; }
+
+  /* กลุ่มหัวข้อ — ขอบบาง ๆ เท่านั้น ไม่ตกแต่ง */
+  .sec { break-inside: avoid; margin-bottom: 6px; border: 0.8pt solid #555; padding: 3px 7px 4px; }
+  .sec > h2 {
+    font-size: 9pt; line-height: 1.2; padding: 1px 5px; margin: -4px -7px 4px;
+    background: #e8e8e8; border-bottom: 0.8pt solid #555;
+  }
+  .sec > h2 .en { font-weight: 600; font-size: 7pt; color: #333; }
+  ul { padding-left: 11px; }
+  li { margin-bottom: 1px; }
+  p { margin: 1.5px 0; }
+
+  /* ตารางแน่น ๆ */
+  table { width: 100%; border-collapse: collapse; margin: 2px 0; }
+  th, td { border: 0.5pt solid #000; padding: 0.5px 3px; text-align: left; font-size: 7.1pt; line-height: 1.25; }
+  th { background: #efefef; }
+  td b, .hl { background: #fff3bf; }
+
+  /* เครื่องหมาย */
+  .must { color: #a00; font-weight: 700; }
+  .trap { color: #a00; font-weight: 700; }
+  .qa b { font-weight: 600; }
+
+  .foot {
+    margin-top: 6px; border-top: 1pt solid #000; padding-top: 2px;
+    font-size: 7pt; text-align: center;
+  }
+  .no-print { text-align: right; margin: 0 0 6px; }
+  .no-print button {
+    font-family: inherit; font-size: 9.5pt; font-weight: 600;
+    padding: 7px 18px; cursor: pointer;
+    background: #2563eb; color: #fff;
+    border: none; border-radius: 7px;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, .35);
+    transition: background .15s, transform .1s, box-shadow .15s;
+  }
+  .no-print button:hover { background: #1d4ed8; box-shadow: 0 3px 8px rgba(37, 99, 235, .45); }
+  .no-print button:active { transform: translateY(1px); }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="no-print"><button onclick="window.print()">🖨 พิมพ์ / บันทึก PDF (Ctrl+P)</button></div>
+
+  <script>
+    // เปิดจากปุ่ม "พิมพ์เอกสารสรุปสอบ" ในบทที่ 1 (?print=1) → โหลดเสร็จแล้วสั่งพิมพ์ทันที
+    if (/[?&]print=1/.test(location.search)) {
+      window.addEventListener("load", function () {
+        setTimeout(function () { window.print(); }, 500);
+      });
+    }
+  </script>
+
+  <div class="head">
+    <h1>บทที่ 1 — พื้นฐานภาพดิจิทัล (Digital Image Fundamentals)</h1>
+    <div class="sub">สรุป 1 หน้า A4 · พิกเซล · Resolution · Color Depth · ประเภทภาพ · Color Models · <b class="must">★ = ต้องจำให้ได้</b> · <span class="trap">⚠ = กับดักข้อสอบ</span></div>
+  </div>
+
+  <div class="formula-strip">
+    <div>จำนวนพิกเซล = <b>W × H</b></div>
+    <div>จำนวนสี/ระดับ = <b>2<sup>บิต</sup></b></div>
+    <div>ขนาดไฟล์ (ไบต์) = <b>W × H × บิต ÷ 8</b></div>
+    <div>8 bit = 1 B · 24 bit = 3 B · 32 bit = 4 B/พิกเซล</div>
+    <div>OpenCV = <b>BGR</b> · เข้าถึง <code>img[y, x]</code> · uint8 (0–255)</div>
+  </div>
+
+  <div class="cols">
+
+    <!-- ============ 1. ภาพดิจิทัล & พิกเซล ============ -->
+    <div class="sec">
+      <h2>1 · ภาพดิจิทัล = f(x, y) — กับพิกเซล <span class="en">(Pixel)</span></h2>
+      <ul>
+        <li><b>ภาพ = ฟังก์ชัน 2 มิติ f(x, y)</b> — <code>x, y</code> = ตำแหน่ง (x แนวนอน, y แนวตั้ง), ค่าของ <code>f</code> = ความเข้ม/ระดับเทา (intensity / gray level) ณ จุดนั้น</li>
+        <li>จะเรียกว่า <b class="must">“ดิจิทัล”</b> เมื่อทั้ง <b>ตำแหน่ง (x,y)</b> และ <b>ความเข้ม</b> ถูกแบ่งเป็นค่า <b>จำกัด/ไม่ต่อเนื่อง</b> (discrete / finite)</li>
+        <li>ภาพ = องค์ประกอบจำนวนจำกัด แต่ละตัวมี <b>ตำแหน่ง (location)</b> + <b>ค่า (value)</b> → เรียกว่า <b class="must">พิกเซล (Pixel = Pic-ture El-ement)</b> = จุดเล็กที่สุดของภาพ</li>
+        <li>1 พิกเซล เก็บ 2 อย่าง: (1) ตำแหน่ง (x,y) (2) ค่า — ระดับเทา หรือสี RGB/BGR</li>
+        <li>พิกเซลเยอะขึ้น → <b>ละเอียด (detail) มากขึ้น</b> แต่ไฟล์ใหญ่ขึ้น + ประมวลผลช้าลง</li>
+        <li>OpenCV เข้าถึงพิกเซลด้วย <code>img[y, x]</code> (y = แถว, x = คอลัมน์)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 2. Resolution ============ -->
+    <div class="sec">
+      <h2>2 · Resolution <span class="en">(ความละเอียด)</span></h2>
+      <p><b class="must">Resolution = จำนวนพิกเซลทั้งหมด = กว้าง (W) × สูง (H)</b> — เช่น 1920×1080 = 2,073,600 พิกเซล</p>
+      <table>
+        <tr><th>มาตรฐาน</th><th>Resolution</th><th>พิกเซล</th></tr>
+        <tr><td>QQVGA</td><td>160×120</td><td>19,200</td></tr>
+        <tr><td>QVGA</td><td>320×240</td><td>76,800</td></tr>
+        <tr><td>VGA</td><td>640×480</td><td>307,200</td></tr>
+        <tr><td>SVGA</td><td>800×600</td><td>480,000</td></tr>
+        <tr><td>HD / <b>720p</b></td><td><b>1280×720</b></td><td>921,600</td></tr>
+        <tr><td>Full HD / <b>1080p</b></td><td><b>1920×1080</b></td><td>2,073,600</td></tr>
+        <tr><td>QHD / 1440p</td><td>2560×1440</td><td>3,686,400</td></tr>
+        <tr><td>4K UHD / <b>2160p</b></td><td><b>3840×2160</b></td><td>8,294,400</td></tr>
+        <tr><td>DCI 4K (โรงหนัง)</td><td>4096×2160</td><td>8,847,360</td></tr>
+      </table>
+      <p><b class="must">เทคนิคจำ:</b> ตัวเลข <b>p = ความสูง (แถว)</b> → 720p = 1280×720 · 1080p = 1920×1080 · 2160p = 3840×2160</p>
+      <p><span class="trap">⚠</span> DCI 4K (4096×2160) ≠ 4K UHD (3840×2160)</p>
+    </div>
+
+    <!-- ============ 3. Color Depth ============ -->
+    <div class="sec">
+      <h2>3 · Color Depth <span class="en">(บิตต่อพิกเซล)</span></h2>
+      <p><b class="must">จำนวนค่าที่เป็นไปได้ = 2<sup>บิต</sup></b> — ยิ่งบิตมาก ยิ่งมีสี/ระดับเทามาก</p>
+      <table>
+        <tr><th>บิต</th><th>จำนวนสี</th><th>ชื่อ</th><th>หมายเหตุ</th></tr>
+        <tr><td>1</td><td>2</td><td>Monochrome/Binary</td><td>ขาว-ดำ (0, 1)</td></tr>
+        <tr><td>2</td><td>4</td><td>—</td><td>ดำ·เทาเข้ม·เทาอ่อน·ขาว</td></tr>
+        <tr><td>4</td><td>16</td><td>—</td><td>กราฟิกยุคแรก</td></tr>
+        <tr><td>8</td><td>256</td><td>Grayscale</td><td>0–255 · uint8</td></tr>
+        <tr><td>16</td><td>65,536</td><td>High Color (RGB565)</td><td>R5 G6 B5</td></tr>
+        <tr><td>24</td><td>16,777,216</td><td>True Color (RGB)</td><td>R/G/B อย่างละ 8</td></tr>
+        <tr><td>32</td><td>16.7 ล้าน + Alpha</td><td>RGBA</td><td>RGB 24 + Alpha 8</td></tr>
+      </table>
+      <ul>
+        <li><b>8 bit = 256</b> เพราะ <code>00000000</code>–<code>11111111</code> = 0–255 (พอดี uint8 ใน OpenCV)</li>
+        <li><b class="must">RGB565 (16-bit High Color):</b> แดง 5 (32) + เขียว 6 (64) + น้ำเงิน 5 (32) → 32×64×32 = <b>65,536 สี</b> — เขียวได้เยอะเพราะ <b>ตาคนไวต่อสีเขียวที่สุด</b> · ใช้จอเก่า/มือถือยุคแรก (ประหยัดหน่วยความจำ)</li>
+        <li><b class="must">24-bit True Color:</b> 256×256×256 = <b>16,777,216 ≈ 16.7 ล้านสี</b> · 1 พิกเซล = 3 ไบต์ · ตาแยกแทบไม่ออก</li>
+        <li><b class="must">32-bit RGBA:</b> RGB 24 + <b>Alpha 8 บิต (ความโปร่งใส)</b> — Alpha 0 = โปร่งใส (มองทะลุ) · 128 = ครึ่ง · 255 = ทึบ · ใช้ PNG โปร่งใส / ซ้อนภาพ / watermark</li>
+      </ul>
+    </div>
+
+    <!-- ============ 4. ขนาดไฟล์ ============ -->
+    <div class="sec">
+      <h2>4 · ขนาดไฟล์ภาพ</h2>
+      <p><b class="must">ขนาด (ไบต์) = W × H × บิตต่อพิกเซล ÷ 8</b> — ค่านี้คือขนาด <b>ดิบ (raw) ยังไม่บีบอัด</b></p>
+      <ul>
+        <li>โจทย์: grayscale 8-bit 100×100 → 10,000 พิกเซล × 1 B = <b>10,000 B</b></li>
+        <li>Full HD 24-bit → 2,073,600 × 3 B = 6,220,800 B ≈ <b>6.2 MB</b></li>
+        <li>Full HD 8-bit → 2,073,600 B ≈ <b>2.07 MB</b></li>
+        <li>ไฟล์จริง (JPEG/PNG) เล็กกว่าค่าที่คำนวณ เพราะถูก <b>บีบอัด</b></li>
+      </ul>
+    </div>
+
+    <!-- ============ 5. ประเภทภาพ ============ -->
+    <div class="sec">
+      <h2>5 · ประเภทของภาพ (Image Types)</h2>
+      <ul>
+        <li><b class="must">Binary</b> — 1 บิต/พิกเซล · ค่า <b>0 (ดำ) / 1 (ขาว)</b> เท่านั้น · เป็นผลลัพธ์ของ Threshold / Segmentation (แยก object–background)</li>
+        <li><b class="must">Grayscale</b> — เก็บแค่ <b>ความเข้ม</b> 1 ช่อง · 8-bit = 0–255 (256 ระดับ) · อัลกอริทึมหลายตัวทำงาน 1 ช่อง (เร็ว/ง่ายกว่า) · <code>cv2.imread(img, 0)</code> หรือ <code>cvtColor(...COLOR_BGR2GRAY)</code></li>
+        <li><b class="must">Color</b> — 1 พิกเซล = 3 ช่อง (RGB หรือ BGR) · 24-bit = 3 ไบต์ · shape = (H, W, 3)</li>
+        <li><b class="must">Multispectral</b> — เก็บ <b>หลาย band (ช่วงคลื่น) เกิน 3 แถบ</b> (RGB มีแค่ 3) · ดาวเทียม / รีโมตเซนซิ่ง / การเกษตร — NIR บอกสุขภาพพืชได้ (ตา/ภาพ RGB มองไม่เห็น)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 6. Color Models ============ -->
+    <div class="sec">
+      <h2>6 · Color Models (ระบบสี)</h2>
+      <p>Color Model / Color Space = วิธีแทนสีด้วยตัวเลข · สีเดียวกันแปลงระหว่างระบบได้ (<code>cvtColor</code>) · แต่ละระบบเหมาะกับงานต่างกัน</p>
+      <ul>
+        <li><b class="must">RGB</b> — <b>additive (รวมแสง)</b> · ใช้กับ<b>จอภาพ</b> · ขาว = R+G+B ครบ, ดำ = ไม่มีแสง · แดง+เขียว=เหลือง · แดง+น้ำเงิน=ม่วง · เขียว+น้ำเงิน=ฟ้า · <b>OpenCV เรียง BGR</b> (แดง-น้ำเงินสลับถ้าโชว์ด้วย Matplotlib โดยไม่แปลง → ใช้ <code>COLOR_BGR2RGB</code>)</li>
+        <li><b class="must">CMYK</b> — <b>subtractive (ลบแสง)</b> · ใช้กับ<b>เครื่องพิมพ์/งานสิ่งพิมพ์</b> · Cyan, Magenta, Yellow, Key(Black) · เริ่มจากกระดาษขาว หมึกดูดกลืนแสง · C+M+Y = ดำคล้ำ → ใช้ K แทนเพื่อประหยัดหมึก</li>
+        <li><b class="must">HSL / HSV</b> — Hue (สี, องศา <b>0–360°</b>: 0°=แดง, 120°=เขียว, 240°=น้ำเงิน) · Saturation (ความสด, %; 0 = เทา) · Lightness/Value (ความสว่าง, %)</li>
+        <li><b>HSL vs HSV ต่างกัน:</b> HSL L=100% → <b>ขาวเสมอ</b> (จาง) แต่ HSV V=100% → <b>สีสดเต็ม</b> (ไม่จาง) — HSV นิยมในคอมกราฟิก/UI · จำ: L เพิ่ม→ใกล้ขาว, V เพิ่ม→สีสด, S ลด→ซีด/เทา</li>
+        <li><b>LAB</b> — L = Lightness (แยกความสว่างออกจากสี) · a = เขียว(−)→แดง(+) · b = น้ำเงิน(−)→เหลือง(+) · นิยมวิเคราะห์/เทียบสี (ใกล้เคียงการมองของคน)</li>
+        <li><b>YCrCb</b> — Y = Luminance (ความสว่าง) · Cr = แดง−L · Cb = น้ำเงิน−L · ใช้ในวิดีโอ/ทีวี (JPEG, MPEG) — ตาไวต่อความสว่างเลยให้ Y เยอะ</li>
+        <li><b>จุดร่วม LAB / YCrCb:</b> แยกความสว่างออกจากสี → เทคนิค equalize ภาพสีมักทำที่ช่อง L / Y เท่านั้น</li>
+      </ul>
+    </div>
+
+    <!-- ============ 7. สูตรต้องจำ ============ -->
+    <div class="sec">
+      <h2>7 · สูตร &amp; เลขต้องจำก่อนเข้าห้องสอบ</h2>
+      <ul>
+        <li>จำนวนพิกเซล = <b>W × H</b> · จำนวนสี = <b>2<sup>บิต</sup></b> · ขนาดไฟล์ = <b>W×H×บิต÷8</b> ไบต์</li>
+        <li>8 bit = 1 B · 24 bit = 3 B · 32 bit = 4 B ต่อพิกเซล</li>
+        <li>1 Hex digit = 4 บิต · 2<sup>10</sup> ≈ 1,024 · 2<sup>20</sup> ≈ 1 ล้าน</li>
+        <li>565 → High Color 16-bit = 65,536 สี · 888 → True Color 24-bit = 16.7 ล้าน · RGBA = 24+8</li>
+        <li>720p = 1280×720 · 1080p = 1920×1080 · 2160p = 3840×2160 (p = ความสูง)</li>
+        <li>OpenCV: BGR · <code>img[y, x]</code> · uint8 0–255 · <code>cvtColor</code> แปลงสี</li>
+      </ul>
+    </div>
+
+    <!-- ============ 8. กับดัก ============ -->
+    <div class="sec">
+      <h2>8 · กับดักที่ข้อสอบชอบหลอก <span class="en">(ระวังให้ดี)</span></h2>
+      <ul>
+        <li><span class="trap">⚠</span> 16-bit = 65,536 สี แต่ <b>24-bit = 16.7 ล้าน</b> — อย่าสลับกัน</li>
+        <li><span class="trap">⚠</span> Binary (2 ค่า: 0/1) ≠ Grayscale (256 ค่า: 0–255)</li>
+        <li><span class="trap">⚠</span> DCI 4K = 4096×2160 ≠ 4K UHD = 3840×2160</li>
+        <li><span class="trap">⚠</span> OpenCV ใช้ <b>BGR</b> ไม่ใช่ RGB</li>
+        <li><span class="trap">⚠</span> HSL L=100% → ขาว แต่ HSV V=100% → สีสด (ต่างกัน!)</li>
+        <li><span class="trap">⚠</span> Alpha: 0 = โปร่งใส, 255 = ทึบ — อย่าจำสลับ</li>
+        <li><span class="trap">⚠</span> ขนาดไฟล์ที่คำนวณได้ = raw ก่อนบีบอัด (ไฟล์จริงเล็กกว่า)</li>
+        <li><span class="trap">⚠</span> Multispectral = หลาย band เกิน 3 (RGB แค่ 3)</li>
+        <li><span class="trap">⚠</span> RGB = additive (จอ, เริ่มดำ) vs CMYK = subtractive (พิมพ์, เริ่มขาว)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 9. Q&A เร็ว ============ -->
+    <div class="sec">
+      <h2>9 · คำถาม-คำตอบฉบับเร็ว (จากแบบทดสอบบทนี้)</h2>
+      <ul class="qa">
+        <li><b>1920×1080 มีกี่พิกเซล?</b> → 2,073,600 (W×H)</li>
+        <li><b>Full HD (1080p) คือ?</b> → 1920×1080</li>
+        <li><b>8-bit grayscale กี่ระดับเทา?</b> → 2⁸ = 256 (0–255)</li>
+        <li><b>24-bit True Color กี่สี?</b> → 2²⁴ = 16,777,216 (16.7 ล้าน)</li>
+        <li><b>Binary 1 พิกเซลมีค่าได้กี่ค่า?</b> → 2 (0 หรือ 1)</li>
+        <li><b>RGB565 ช่องเขียวกี่บิต?</b> → 6 (R5 G6 B5, 16 บิต, 65,536 สี)</li>
+        <li><b>RGBA ตัว A คือ?</b> → Alpha = ความโปร่งใส (0 โปร่งใส, 255 ทึบ)</li>
+        <li><b>ภาพแบบไหนพิกเซลเป็น 0/1 เท่านั้น?</b> → Binary Image</li>
+        <li><b>OpenCV เรียงช่องสีแบบใด?</b> → BGR (ต้อง cvtColor ก่อนแสดง)</li>
+        <li><b>งานพิมพ์ใช้ระบบสีใด?</b> → CMYK (subtractive)</li>
+        <li><b>640×480 กี่พิกเซล?</b> → 307,200 (VGA)</li>
+        <li><b>4K UHD (2160p) คือ?</b> → 3840×2160 (DCI 4K = 4096×2160)</li>
+        <li><b>ภาพ 2-bit กี่สี?</b> → 2² = 4</li>
+        <li><b>16-bit High Color กี่สี?</b> → 2¹⁶ = 65,536</li>
+        <li><b>Grayscale 8-bit พิกเซลอยู่ในช่วง?</b> → 0–255 (0=ดำ, 255=ขาว)</li>
+        <li><b>Multispectral คือ?</b> → ภาพหลาย band เกิน 3 แถบ (ดาวเทียม/รีโมตเซนซิ่ง)</li>
+      </ul>
+    </div>
+
+  </div><!-- /cols -->
+
+  <div class="foot">
+    สรุปบทที่ 1 · DIP — พื้นฐานภาพดิจิทัล · อ่านสูตร/ตารางบนหัวกระดาษซ้ำก่อนสอบ · <b>จำเลขคู่ให้แม่น: 256 · 65,536 · 16,777,216 · 2,073,600</b>
+  </div>
+
+</div>
+</body>
+</html>

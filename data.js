@@ -3225,5 +3225,168 @@ window.DATA = {
       { term: "Perspective", def: "getPerspectiveTransform() — สแกนเอกสาร" },
       { term: "CV+AI", def: "CNN · YOLO/SSD/Faster R-CNN · PyTorch/TensorFlow" }
     ]
+  },
+
+  /* ========================================================================
+     CHAPTER 7 — Lab Code Handbook (โค้ดเข้าห้องสอบปฏิบัติ)
+     ======================================================================== */
+  ch7: {
+    title: "Lab Code Handbook (โค้ดเข้าห้องสอบปฏิบัติ)",
+    thai: "Lab Code Handbook",
+    en: "Lab Code Handbook — Practical Exam Cheat Codes",
+
+    slides: [
+      { title: "Cover — Lab Code Handbook", short: "เปิดบทเรียน" },
+      { title: "โครงสร้างโค้ดมาตรฐาน — เริ่มทุกข้อแบบนี้", short: "โครงสร้างโค้ด" },
+      { title: "Lab2 · NumPy พื้นฐาน", short: "NumPy พื้นฐาน" },
+      { title: "Lab2 · อ่าน/แปลง/แสดงภาพ", short: "อ่าน/แปลง/แสดง" },
+      { title: "Lab2 · ช่องสี · resize · flip", short: "ช่องสี · resize · flip" },
+      { title: "Lab2 · วาดรูป/ข้อความ + imread ภาษาไทย", short: "วาดรูป + imread ไทย" },
+      { title: "Lab3 · Threshold 5 โหมด", short: "Threshold 5 โหมด" },
+      { title: "Lab3 · Contrast / Brightness", short: "Contrast/Brightness" },
+      { title: "Lab3 · Contrast Stretch + Equalize", short: "Stretch + Equalize" },
+      { title: "Week4 · Quantization + Downsampling", short: "Quantization" },
+      { title: "Week4 · Bit-Plane Slicing", short: "Bit-Plane" },
+      { title: "Week4 · Watermark (ซ่อนใน Bit-Plane)", short: "Watermark" },
+      { title: "Week4 · วัดคุณภาพ MSE / PSNR", short: "MSE / PSNR" },
+      { title: "Week4 · Intensity Transforms", short: "Intensity Transforms" },
+      { title: "Week4 · Fourier / FFT Workflow", short: "FFT Workflow" },
+      { title: "Week4 · Rotation + FFT", short: "Rotation + FFT" },
+      { title: "Week4 · Walsh / Hadamard + Compression", short: "Walsh/Hadamard" },
+      { title: "Week4 · Spatial Filters", short: "Spatial Filters" },
+      { title: "Week4 · Sobel + Order Statistics", short: "Sobel + Order Stats" },
+      { title: "week5 · Noise + Restore (S&P / Gaussian)", short: "Noise + Restore" },
+      { title: "week5 · Periodic Noise + Notch Filter", short: "Periodic + Notch" },
+      { title: "week5 · Wiener + Morphology", short: "Wiener + Morphology" },
+      { title: "Cheat Sheet — สูตร/คำสั่งต้องจำ", short: "Cheat Sheet" },
+      { title: "Glossary — คำศัพท์", short: "คำศัพท์" },
+      { title: "Quiz 1 (ข้อ 1–5)", short: "แบบทดสอบ 1" },
+      { title: "Quiz 2 (ข้อ 6–10)", short: "แบบทดสอบ 2" }
+    ],
+
+    sections: [
+      { label: "ภาพรวมสัปดาห์", topics: [1, 2] },
+      { label: "1. Lab2 — NumPy & OpenCV พื้นฐาน", topics: [3, 4, 5, 6] },
+      { label: "2. Lab3 — Threshold & Enhancement", topics: [7, 8, 9] },
+      { label: "3. Week4 — Quantization & Transform", topics: [10, 11, 12, 13, 14, 15, 16, 17] },
+      { label: "4. Week4 — Filtering & Edge", topics: [18, 19] },
+      { label: "5. week5 — Noise, Restore & Morphology", topics: [20, 21, 22] },
+      { label: "ทบทวนและฝึกฝน", topics: [23, 24, 25, 26] }
+    ],
+
+    cheat: [
+      { term: "อ่านภาพ", def: "cv2.imread(path, 0) — grayscale · path ไทย → imdecode(np.fromfile())" },
+      { term: "BGR → RGB", def: "cv2.cvtColor(img, cv2.COLOR_BGR2RGB) — แสดงด้วย plt ต้องแปลง" },
+      { term: "Threshold", def: "ret, binary = cv2.threshold(img, 128, 255, cv2.THRESH_BINARY)" },
+      { term: "Contrast/Brightness", def: "cv2.convertScaleAbs(gray, alpha, beta) — new = pixel×alpha + beta" },
+      { term: "Equalize", def: "cv2.equalizeHist(gray) — grayscale เท่านั้น" },
+      { term: "Quantize 16 ระดับ", def: "q = (img // 16) * 16 + 7 (Mid)" },
+      { term: "Bit-plane", def: "(img >> i) & 1 — ดึงบิต i · รวมบิต: result |= img & (1 << b)" },
+      { term: "Watermark", def: "mask = 255 ^ (1<<bit) → (img & mask) | (wm << bit)" },
+      { term: "MSE / PSNR", def: "MSE = mean((a-b)²) · PSNR = 10·log10(255²/MSE)" },
+      { term: "Gamma / Log", def: "s = β·r^γ (normalize 0–1) · s = c·log(1+r), c = 1/log(1+domain)" },
+      { term: "FFT", def: "fft2 → fftshift → (mask) → ifftshift → ifft2 → np.abs()" },
+      { term: "Spatial filter", def: "cv2.filter2D(img.astype(float), -1, kernel, borderType=cv2.BORDER_REFLECT)" },
+      { term: "Sobel", def: "cv2.Sobel(img, cv2.CV_64F, dx, dy, ksize=3) — dx=1 ขอบแนวดิ่ง" },
+      { term: "Sharpening", def: "g = f − ∇²f → sharp = img.astype(float) − laplacian" },
+      { term: "Salt & Pepper", def: "cv2.medianBlur(img, 7) · Gaussian noise → cv2.GaussianBlur" },
+      { term: "Periodic noise", def: "A·sin(2πfx·X/cols)+… → ปิด peak ใน FFT ด้วย mask (Notch)" },
+      { term: "Wiener", def: "mean + (max(var−noise_var,0)/max(var,noise_var))·(img−mean)" },
+      { term: "Morphology", def: "erode=หด · dilate=ขยาย · OPEN=E→D · CLOSE=D→E" },
+      { term: "หลังคำนวณ", def: "np.clip(x, 0, 255).astype(np.uint8) — กันค่าล้นเสมอ" }
+    ],
+
+    flashcards: [
+      { term: "cv2.resize รับขนาดแบบไหน", def: "(กว้าง, สูง) = (W, H) — ไม่ใช่ (H, W)!" },
+      { term: "OpenCV อ่านสีเป็นอะไร", def: "BGR — แสดงด้วย plt ต้อง cvtColor(BGR2RGB)" },
+      { term: "cv2.threshold คืนค่าอะไร", def: "2 ค่า: ret (ค่าขีด) + ภาพผลลัพธ์" },
+      { term: "Salt & Pepper ใช้ filter ไหน", def: "Median (medianBlur) — กันจุดสุดขั้ว" },
+      { term: "FFT workflow", def: "fft2 → fftshift → (กรอง) → ifftshift → ifft2 → abs" },
+      { term: "Watermark ฝังยังไง", def: "& mask (ปิดบิต) แล้ว | wm<<bit (ฝัง)" },
+      { term: "MSE / PSNR", def: "MSE น้อยดี · PSNR มากดี · PSNR = 10·log10(255²/MSE)" },
+      { term: "Opening / Closing", def: "OPEN = erode→dilate (ลบจุดเล็ก) · CLOSE = dilate→erode (ปิดรู)" }
+    ],
+
+    glossary: [
+      { term: "BGR", def: "ลำดับช่องสีของ OpenCV — 0=Blue 1=Green 2=Red" },
+      { term: "uint8", def: "ชนิดข้อมูล 0–255 — ภาพ 8-bit ปกติ" },
+      { term: "Grayscale", def: "ภาพขาว-ดำ 1 channel · shape (H, W)" },
+      { term: "reshape", def: "เปลี่ยนมิติ Array — จำนวนสมาชิกต้องเท่าเดิม (6×6=36)" },
+      { term: "Slicing", def: "img[y1:y2, x1:x2] · [::2, ::2] = เลือกทุก 2 = downsampling" },
+      { term: "Threshold", def: "แบ่งพิกเซลด้วยค่าขีด → ภาพ binary (0/255)" },
+      { term: "convertScaleAbs", def: "new = pixel×alpha + beta (contrast/brightness) + clip อัตโนมัติ" },
+      { term: "Quantization", def: "ลดระดับเทา — Mid: (img//step)*step + step//2" },
+      { term: "Bit-Plane", def: "ชั้นบิตของภาพ 8 ชั้น — MSB(7)=โครงสร้าง LSB(0)=รายละเอียด" },
+      { term: "Watermark", def: "ซ่อนข้อมูลในบิตของภาพ — ฝังด้วย mask + shift" },
+      { term: "MSE / PSNR", def: "ค่าความคลาดเคลื่อน/คุณภาพภาพ (PSNR หน่วย dB)" },
+      { term: "Gamma", def: "s = β·r^γ — γ<1 สว่าง · γ>1 มืด" },
+      { term: "FFT / fftshift", def: "แปลงภาพเป็นความถี่ — fftshift ย้าย DC มาตรงกลาง" },
+      { term: "Notch filter", def: "ปิดจุด noise ในสเปกตรัม (periodic noise)" },
+      { term: "Median filter", def: "เรียงค่าหน้าต่าง 3×3 แล้วเอาค่ากลาง — ลบ salt & pepper" },
+      { term: "Morphology", def: "ปรับรูปร่างภาพ binary — erode/dilate/open/close" }
+    ],
+
+    quiz: [
+      {
+        q: "cv2.resize(img, (1300, 500)) — ตัวเลขสองตัวคืออะไร?",
+        options: ["(สูง, กว้าง)", "(กว้าง, สูง)", "(แถว, คอลัมน์)", "(x, y) มุมซ้ายบน"],
+        correct: 1,
+        explain: "cv2.resize รับ (width, height) = (กว้าง, สูง) — ต่างจาก img.shape ที่เป็น (H, W)"
+      },
+      {
+        q: "OpenCV อ่านภาพแล้วสีเป็นแบบไหน?",
+        options: ["RGB", "BGR", "HSV", "CMYK"],
+        correct: 1,
+        explain: "OpenCV อ่านเป็น BGR เสมอ — แสดงด้วย plt.imshow ต้อง cvtColor(COLOR_BGR2RGB) ก่อน"
+      },
+      {
+        q: "cv2.threshold() คืนค่ากลับมากี่ค่า?",
+        options: ["1", "2", "3", "4"],
+        correct: 1,
+        explain: "ret (ค่าขีดที่ใช้จริง) + ภาพผลลัพธ์ — เขียน ret, binary = cv2.threshold(...)"
+      },
+      {
+        q: "ภาพ Salt & Pepper noise ควรใช้ filter ไหนลบ?",
+        options: ["Mean (cv2.blur)", "Median (cv2.medianBlur)", "Laplacian", "Sobel"],
+        correct: 1,
+        explain: "Median ลบจุดสุดขั้ว (ขาว/ดำ) ได้ดี — Mean ทำให้จุด noise กระจายแทน"
+      },
+      {
+        q: "ลำดับ FFT ที่ถูกต้องคือข้อใด?",
+        options: ["ifft2 → fftshift → fft2", "fft2 → fftshift → ifftshift → ifft2", "fftshift → fft2 → ifft2", "fft2 → ifft2 → fftshift"],
+        correct: 1,
+        explain: "fft2 → fftshift (DC กลาง) → กรอง → ifftshift → ifft2 → np.abs()"
+      },
+      {
+        q: "Uniform quantization 16 ระดับ (Mid) ใช้สูตรอะไร?",
+        options: ["(img // 16) * 16", "(img // 16) * 16 + 7", "(img // 16) + 7", "(img % 16) * 16 + 7"],
+        correct: 1,
+        explain: "Mid = (img//step)*step + step//2 — 16 ระดับ → step=16, step//2=7"
+      },
+      {
+        q: "ดึงบิต i ของภาพออกมาทำยังไง?",
+        options: ["(img >> i) & 1", "(img << i) & 1", "img & (i >> 1)", "img // (2**i)"],
+        correct: 0,
+        explain: "(img >> i) & 1 = เลื่อนบิต i มาหลักหน่วยแล้วตัดเอาแค่ 0/1"
+      },
+      {
+        q: "ฝัง watermark ลง bit-plane ใช้ขั้นตอนไหน?",
+        options: ["(img | mask) & (wm << bit)", "(img & mask) | (wm << bit)", "(img ^ mask) | wm", "img + wm"],
+        correct: 1,
+        explain: "& mask (ปิดบิตเป้าหมาย) แล้ว | (wm << bit) (ฝัง watermark) — mask = 255 ^ (1<<bit)"
+      },
+      {
+        q: "PSNR ยิ่งมีค่าแบบไหน = ภาพยิ่งดี?",
+        options: ["ยิ่งน้อย", "ยิ่งมาก", "เท่ากับ 0", "ติดลบ"],
+        correct: 1,
+        explain: "PSNR = 10·log10(255²/MSE) — MSE น้อย → PSNR มาก (ภาพใกล้ต้นฉบับ)"
+      },
+      {
+        q: "Opening และ Closing ต่างกันยังไง?",
+        options: ["Opening = dilate→erode · Closing = erode→dilate", "Opening = erode→dilate · Closing = dilate→erode", "ทั้งคู่เหมือนกัน", "Opening ใช้กับภาพสีเท่านั้น"],
+        correct: 1,
+        explain: "Opening = erode→dilate (ลบจุดเล็ก) · Closing = dilate→erode (ปิดรู) — เริ่มจากตัวแรกเป็นตัวหลัก"
+      }
+    ]
   }
 };

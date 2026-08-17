@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Interactive Digital Textbook — Digital Image Processing / Lab Code Handbook (โค้ดเข้าห้องสอบปฏิบัติ)" />
+  <title>DIP · บทที่ 7 — Lab Code Handbook</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* code slide — compact code blocks */
+    .code-wrap { min-width: 0; }
+    .code-block { font-size: 13.5px; line-height: 1.55; overflow-x: auto; }
+    @media (max-width: 640px) { .code-block { font-size: 12px; } }
+    .lab-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: rgba(56,189,248,.12); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+  </style>
+</head>
+<body data-page="chapter" data-chapter="7">
+
+  <!-- ================= TOP HEADER ================= -->
+  <header id="topbar">
+    <button class="icon-btn" id="menuBtn" aria-label="เปิดเมนูบทเรียน" title="เมนู">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <div class="brand">
+      <div class="cn-logo" aria-hidden="true">DIP</div>
+      <div class="brand-titles">
+        <h1>การประมวลผลภาพดิจิทัล</h1>
+        <p id="headerChapterLabel">Lab Code Handbook · บทที่ 7</p>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" id="homeBtn" aria-label="กลับไปเมนูหลัก" title="เมนูหลัก">
+        <i data-lucide="home"></i>
+      </button>
+      <button class="icon-btn" id="notesBtn" aria-label="เปิดบันทึกย่อ" title="บันทึกย่อ (Notes)">
+        <i data-lucide="notebook-pen"></i>
+      </button>
+
+      <div class="header-progress" aria-label="ความคืบหน้า">
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="headerProgressBar">
+          <div class="progress-fill" id="headerProgressFill"></div>
+        </div>
+        <span class="progress-count" id="headerProgressCount">1 / 26</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SHELL ================= -->
+  <div class="shell">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside id="sidebar" aria-label="เมนูบทเรียน">
+      <div class="sidebar-head">
+        <div class="sidebar-head-title">
+          <h2 id="sidebarChapterTitle">เมนูบทที่ 7</h2>
+          <p id="sidebarChapterSub">หัวข้อในสัปดาห์นี้ · 26 หัวข้อ</p>
+        </div>
+        <button class="icon-btn sidebar-close" id="sidebarCloseBtn" aria-label="ปิดเมนูบทเรียน" title="ปิดเมนู">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="sidebar-info">
+        <i data-lucide="info"></i>
+        <span>คลิกหัวข้อหรือสไลด์เพื่อข้ามไปได้เลย<br />เรียนทีละสไลด์เพื่อเก็บเนื้อหาให้ครบ</span>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav" aria-label="สารบัญสไลด์"></nav>
+      <div class="sidebar-foot">
+        <div class="sf-top"><span>ความคืบหน้า</span><b id="sidebarPct">0%</b></div>
+        <div class="progress-track"><div class="progress-fill" id="sidebarProgressFill"></div></div>
+        <p class="mt-2 text-3" style="font-size:12px" id="sidebarDone">ยังไม่ได้เรียนสไลด์ใดเลย — เริ่มที่ Cover ได้เลย!</p>
+      </div>
+    </aside>
+
+    <!-- ================= STAGE ================= -->
+    <main class="stage">
+
+      <div class="slide-viewport" id="viewport">
+
+        <!-- ============ SLIDE 1 · COVER ============ -->
+        <section class="slide-view" data-title="Cover — Lab Code Handbook" aria-label="สไลด์ 1: เปิดบทเรียน">
+          <div class="slide-inner">
+            <div class="center">
+              <div class="cn-logo float-y" style="width:74px;height:74px;font-size:28px;border-radius:22px;margin:0 auto 18px;background:linear-gradient(135deg,#f59e0b,#22d3ee)">DIP</div>
+              <p class="slide-eyebrow" style="justify-content:center">DIGITAL IMAGE PROCESSING · CHAPTER 7 · PRACTICAL EXAM</p>
+              <h2 class="slide-title" style="font-size:clamp(30px,5vw,54px);text-align:center">
+                Lab Code <span class="grad-text">Handbook</span>
+              </h2>
+              <p class="slide-subtitle" style="text-align:center;margin:6px auto 0;max-width:680px">
+                โค้ดจาก Lab2 · Lab3 · Week4 · week5 — ครบทุกหัวข้อที่อาจารย์ให้ลงมือทำ
+                เอาไปเปิดล้อตามตอนสอบปฏิบัติได้เลย (มีปุ่มพิมพ์สรุป A4 ให้ด้วย)
+              </p>
+
+              <div class="stat-chips" style="justify-content:center;margin-top:24px">
+                <span class="stat-chip"><i data-lucide="layers"></i> 26 Slides</span>
+                <span class="stat-chip"><i data-lucide="code-2"></i> Lab2 · Lab3 · Week4 · week5</span>
+                <span class="stat-chip"><i data-lucide="help-circle"></i> 10 Quiz</span>
+                <span class="stat-chip"><i data-lucide="book-marked"></i> 14 Glossary</span>
+              </div>
+
+              <button class="btn btn-primary mt-6" id="startBtn" style="font-size:16px;padding:14px 30px">
+                Start Learning <i data-lucide="arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 2 · SKELETON ============ -->
+        <section class="slide-view" data-title="โครงสร้างโค้ดมาตรฐาน — เริ่มทุกข้อแบบนี้" aria-label="สไลด์ 2: โครงสร้างโค้ดมาตรฐาน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">STANDARD SKELETON</p>
+            <h2 class="slide-title">โครงสร้างโค้ดมาตรฐาน <span class="grad-text">— เริ่มทุกข้อแบบนี้</span></h2>
+            <p class="slide-subtitle">imports + อ่านภาพ + แสดงผล — ก๊อปบล็อกนี้ไปวางก่อน แล้วเติมส่วนที่โจทย์ถาม</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <span class="vb-label">โค้ดตั้งต้น (ทุกข้อ)</span>
+                <pre class="code-block">import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+
+img  = cv2.imread("ภาพ.jpg")            # BGR
+gray = cv2.imread("ภาพ.jpg", 0)        # grayscale
+
+plt.imshow(gray, cmap="gray"); plt.axis("off"); plt.show()
+
+cv2.imshow("win", img); cv2.waitKey(0); cv2.destroyAllWindows()
+cv2.imwrite("out.png", img)</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>BGR</b><span>OpenCV อ่านสีเป็น BGR — จะแสดงด้วย plt ต้อง cvtColor(COLOR_BGR2RGB) ก่อน</span></div>
+                  <div class="step-box"><b>0</b><span>flag ตัวที่ 2 = IMREAD_GRAYSCALE (ขาว-ดำ 1 channel)</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>จับคู่ Lab</h3>
+                  <p class="card-text">Lab2 (NumPy/OpenCV พื้นฐาน) · Lab3 (Threshold/Enhancement) · Week4 (Quantization/Transform/FFT) · week5 (Filter/Noise/Morphology)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>โจทย์ปฏิบัติส่วนใหญ่ = "อ่านภาพ → ทำ X → แสดงผล" — เตรียม skeleton ไว้ในหัวก่อนเข้าห้องสอบ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 3 · NUMPY ============ -->
+        <section class="slide-view" data-title="Lab2 · NumPy พื้นฐาน" aria-label="สไลด์ 3: NumPy พื้นฐาน">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">LAB 2 · 01 Numpy_arrays</p>
+            <h2 class="slide-title">NumPy <span class="grad-text">— สร้าง/สุ่ม/อ่านค่า Array</span></h2>
+            <p class="slide-subtitle">ภาพใน Python = NumPy Array (ตารางตัวเลข) — สกิลแรกของทุก Lab</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">arr = np.array([0,1,2,3,4,5]);  arr[2] = 5
+arr1 = np.arange(0, 11)          # 0..10
+arr2 = np.arange(0, 11, 2)       # step 2 → 0,2,4,...
+np.zeros((5, 5))                 # 0 ทั้งหมด
+np.ones((5, 5)) * 99             # 1 แล้วคูณ 99
+
+np.random.seed(199)              # ตั้ง seed → สุ่มซ้ำได้ผลเดิม
+arr6 = np.random.randint(0, 100, 5)
+arr6.max() / arr6.argmax()       # ค่าสูงสุด / ตำแหน่งของค่าสูงสุด
+arr6.min() / arr6.argmin() / arr6.mean()
+
+mat = arr7.reshape(6, 6)         # 1D 36 ตัว → 6×6 (36 = 6×6)
+mat[::2, ::2]                    # เก็บทุก 2 แถว/คอลัมน์</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>จำให้ขึ้นใจ</h3>
+                  <p class="card-text"><b>argmax/argmin = index</b> (ตำแหน่ง) ไม่ใช่ค่า · reshape ต้องคูณกันพอดี</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="crop" class="cyan"></i>Slicing</h3>
+                  <p class="card-text"><code>[::2, ::2]</code> = เลือกทุก ๆ 2 → ใช้เป็น <b>downsampling</b> (ภาพเล็กลง ¼)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>โจทย์ให้สุ่มแล้วถาม max/min/mean — อย่าลืม seed เดียวกันเพื่อผลซ้ำ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 4 · อ่าน/แปลง/แสดง ============ -->
+        <section class="slide-view" data-title="Lab2 · อ่าน/แปลง/แสดงภาพ" aria-label="สไลด์ 4: อ่าน/แปลง/แสดงภาพ">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">LAB 2 · 02–03 Numpy_image</p>
+            <h2 class="slide-title">อ่านภาพ → แปลงสี → <span class="grad-text">แสดงผล</span></h2>
+            <p class="slide-subtitle">PIL กับ OpenCV อ่านภาพคนละแบบ — และ OpenCV อ่านเป็น BGR เสมอ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block"># PIL
+pic = Image.open("./image/pic1.png")
+pic_arr = np.asarray(pic)          # PIL → ndarray
+
+# OpenCV
+img = cv2.imread("./image/pic2.jpg")             # BGR!
+img_gray = cv2.imread("./image/pic2.jpg", cv2.IMREAD_GRAYSCALE)
+img_rgb  = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # → RGB
+
+img.shape                          # (H, W, 3) — สูงมาก่อนเสมอ
+
+# แสดง 3 รูปในกรอบเดียว
+fig, axis = plt.subplots(1, 3, figsize=(6, 6))
+axis[0].imshow(img)                # BGR → สีเพี้ยน!
+axis[1].imshow(img_rgb)            # สีถูกต้อง
+axis[2].imshow(img_gray, cmap="gray")
+axis[0].axis("off"); plt.show()</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>กับดักยอดฮิต</h3>
+                  <p class="card-text"><b>plt.imshow รับ BGR ไม่ได้</b> — ต้อง cvtColor(BGR2RGB) ก่อน ไม่งั้นสีฟ้า-แดงสลับ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>Grayscale</h3>
+                  <p class="card-text">1 channel → shape <b>(H, W)</b> ไม่มีเลข 3 · แสดงด้วย <code>cmap="gray"</code></p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>โจทย์ถาม "ทำไมสีเพี้ยน" → ตอบ: OpenCV เป็น BGR แต่ Matplotlib ต้องการ RGB</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 5 · ช่องสี/resize/flip ============ -->
+        <section class="slide-view" data-title="Lab2 · ช่องสี · resize · flip" aria-label="สไลด์ 5: ช่องสี resize flip">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">LAB 2 · 03–04</p>
+            <h2 class="slide-title">ช่องสี · Resize · <span class="grad-text">Flip</span></h2>
+            <p class="slide-subtitle">จัดการพิกเซล/ขนาด/ทิศทางของภาพ — จำพารามิเตอร์ให้แม่น</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block"># แยกช่องสี RGB: [:, :, 0]=R · 1=G · 2=B
+img_red = img_rgb.copy()           # copy() เสมอ กันไปแก้ต้นฉบับ
+img_red[:, :, 1] = 0               # G = 0
+img_red[:, :, 2] = 0               # B = 0 → เหลือ R
+
+# resize — ตัวแรกคือ (W, H) ไม่ใช่ (H, W)!
+img_new  = cv2.resize(img, (1300, 500))
+img_half = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)   # ย่อ 50%
+
+# flip
+cv2.flip(img, 1)    # 1 = ซ้าย-ขวา · 0 = บน-ล่าง · -1 = ทั้งสอง
+
+# แสดงหน้าต่าง OpenCV
+cv2.imshow("Show image", img)
+cv2.waitKey()        # รอปุ่มกด — ไม่ใส่ = หน้าต่างปิดทันที</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>กับดัก resize</h3>
+                  <p class="card-text"><b>cv2.resize(ภาพ, (กว้าง, สูง))</b> — เอา (H, W) ไปใส่ = ภาพเพี้ยนแน่นอน</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>Channel index</h3>
+                  <p class="card-text">หลังแปลง RGB: <b>0=R 1=G 2=B</b> · ถ้ายังเป็น BGR: <b>0=B 1=G 2=R</b></p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ถาม "เหลือช่องสีแดง" → ตั้งอีก 2 ช่องเป็น 0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 6 · วาดรูป/ข้อความ ============ -->
+        <section class="slide-view" data-title="Lab2 · วาดรูป/ข้อความ + imread ภาษาไทย" aria-label="สไลด์ 6: วาดรูปและข้อความ">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">LAB 2 · 05 Drawing_on_Image</p>
+            <h2 class="slide-title">วาดรูป / ข้อความ <span class="grad-text">+ อ่าน path ภาษาไทย</span></h2>
+            <p class="slide-subtitle">สร้างภาพเปล่าแล้ววาดสี่เหลี่ยม/วงกลม/เส้น/ตัวอักษร — สีเป็น BGR</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">img = np.zeros(shape=(512, 512, 3), dtype=np.int16)
+
+cv2.rectangle(img, pt1=(384, 0), pt2=(500, 100),
+              color=(0,128,0), thickness=3)      # เขียว (BGR)
+cv2.circle(img, center=(250, 250), radius=40,
+           color=(0,255,255), thickness=-1)      # -1 = เต็มวง
+cv2.line(img, pt1=(200,300), pt2=(300,200),
+         color=(255,255,255), thickness=5)
+cv2.putText(img, "Hello", (10,100),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+            (255,255,0), 1, cv2.LINE_AA)
+plt.imshow(img)</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>ภาษาไทย</b><span>cv2.imread อ่าน path ไทยไม่ได้ → ใช้ imdecode+np.fromfile (บล็อกขวา)</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="palette" class="cyan"></i>สี BGR ให้จำ</h3>
+                  <p class="card-text">(0,128,0) เขียว · (255,0,0) น้ำเงิน · (0,255,255) เหลือง · (255,255,0) ฟ้า · (255,255,255) ขาว</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>imread wrapper</h3>
+                  <pre class="code-block" style="font-size:11.5px">def imread(filename, flags=cv2.IMREAD_COLOR):
+    img = cv2.imread(filename, flags)
+    if img is not None: return img
+    try:
+        return cv2.imdecode(
+            np.fromfile(filename, dtype=np.uint8), flags)
+    except Exception as e:
+        print("error:", e); return None</pre>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>เจอ "อ่านไฟล์ไม่ได้" → wrapper imread นี้คือคำตอบ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 7 · THRESHOLD ============ -->
+        <section class="slide-view" data-title="Lab3 · Threshold 5 โหมด" aria-label="สไลด์ 7: Threshold 5 โหมด">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">LAB 3 · lab3_1</p>
+            <h2 class="slide-title">Threshold <span class="grad-text">— 5 โหมดในลูปเดียว</span></h2>
+            <p class="slide-subtitle">cv2.threshold คืน 2 ค่า (ret, result) · แสดงทั้ง 5 โหมด + histogram ด้วย subplot</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">ret, img2 = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+
+pattern = [cv2.THRESH_BINARY, cv2.THRESH_BINARY_INV,
+           cv2.THRESH_TRUNC, cv2.THRESH_TOZERO,
+           cv2.THRESH_TOZERO_INV]
+title = ["BINARY", "BINARY_INV", "TRUNC",
+         "TOZERO", "TOZERO_INV"]
+for i in range(5):
+    ret, img2 = cv2.threshold(img, 200, 255, pattern[i])
+    plt.subplot(2, 3, i+1); plt.title(title[i])
+    plt.xticks([]); plt.yticks([])
+    plt.imshow(img2, cmap="gray")
+plt.subplot(2, 3, 6); plt.title("Histogram")
+plt.hist(img.ravel(), 256, [0, 256])   # ravel = 2D → 1D
+plt.show()</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>5 โหมดจำง่าย</h3>
+                  <p class="card-text"><b>BINARY:</b> &gt;t→255 · <b>INV:</b> สลับ · <b>TRUNC:</b> ตัด &gt;t→t · <b>TOZERO:</b> ≤t→0 · <b>TOZERO_INV:</b> &gt;t→0</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>ret คืออะไร</h3>
+                  <p class="card-text"><b>ret = ค่า threshold ที่ใช้จริง</b> (สำคัญตอนใช้ Otsu — ค่าขีดอัตโนมัติอยู่ใน ret)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>โจทย์ถามพิกเซล 100/150 ผ่าน BINARY (t=128) → 0 / 255</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 8 · CONTRAST/BRIGHTNESS ============ -->
+        <section class="slide-view" data-title="Lab3 · Contrast / Brightness" aria-label="สไลด์ 8: Contrast Brightness">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">LAB 3 · lab3_1a</p>
+            <h2 class="slide-title">Contrast / Brightness <span class="grad-text">— convertScaleAbs</span></h2>
+            <p class="slide-subtitle">สูตร new = (alpha × pixel) + beta · alpha = contrast · beta = brightness</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+result = cv2.convertScaleAbs(gray, alpha=1.5, beta=50)
+# alpha = contrast (0.1–3.0) · beta = brightness (-100..100)
+
+plt.imshow(result, cmap="gray")
+# เทียบ histogram ก่อน/หลัง
+plt.hist(result.ravel(), bins=256, range=(0, 256), color="red")
+plt.show()</pre>
+                <div class="step-list mt-3">
+                  <div class="step-box"><b>convertScaleAbs</b><span>คูณ alpha + บวก beta + ตัด 0–255 อัตโนมัติ (Abs = ค่าลบกลายเป็นบวก)</span></div>
+                </div>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>อ่านค่า slider</h3>
+                  <p class="card-text">alpha=0.1 → contrast ลด (ภาพซีด) · beta=100 → สว่างขึ้น — ใน lab ใช้ ipywidgets Slider ควบคุม</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="bar-chart-3" class="cyan"></i>เช็คด้วย histogram</h3>
+                  <p class="card-text">วาด histogram ภาพเดิม (ฟ้า) กับภาพใหม่ (แดง) ซ้อนเทียบ — ดูว่ากระจาย/เลื่อนยังไง</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ถาม "เพิ่ม contrast" → alpha &gt; 1 · "เพิ่ม brightness" → beta &gt; 0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 9 · STRETCH + EQUALIZE ============ -->
+        <section class="slide-view" data-title="Lab3 · Contrast Stretch + Equalize" aria-label="สไลด์ 9: Contrast Stretch และ Equalize">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">LAB 3 · lab3_2</p>
+            <h2 class="slide-title">Contrast Stretch <span class="grad-text">+ Histogram Equalization</span></h2>
+            <p class="slide-subtitle">ยืดช่วงค่า (piecewise linear) และกระจาย histogram ให้เต็ม 0–255</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">def pixelVal(pix, r1, s1, r2, s2):
+    if 0 &lt;= pix &lt;= r1:
+        return (s1 / r1) * pix
+    elif r1 &lt; pix &lt;= r2:
+        return ((s2 - s1) / (r2 - r1)) * (pix - r1) + s1
+    else:
+        return ((255 - s2) / (255 - r2)) * (pix - r2) + s2
+
+def contrast_stretch(img, r1, s1, r2, s2):
+    return np.vectorize(
+        lambda p: pixelVal(p, r1, s1, r2, s2)
+    )(img).astype(np.uint8)
+
+result = contrast_stretch(gray, 70, 20, 180, 230)
+
+equalized = cv2.equalizeHist(gray)   # histogram equalization</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>np.vectorize</h3>
+                  <p class="card-text">เอา function ไปรัน<b>ทุกพิกเซล</b> — สุดท้าย <b>.astype(np.uint8)</b> เสมอ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>กับดัก</h3>
+                  <p class="card-text"><b>equalizeHist ใช้ได้กับ grayscale เท่านั้น</b> — ภาพสีต้อง cvtColor เป็น YUV แล้วทำช่อง Y</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>โจทย์ "ยืดช่วง 50–150 → 0–255" = contrast stretch ด้วย r1=50, r2=150, s1=0, s2=255</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 10 · QUANTIZATION ============ -->
+        <section class="slide-view" data-title="Week4 · Quantization + Downsampling" aria-label="สไลด์ 10: Quantization และ Downsampling">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex1–Ex2</p>
+            <h2 class="slide-title">Uniform Quantization <span class="grad-text">+ Downsampling</span></h2>
+            <p class="slide-subtitle">ลดระดับเทา (grey levels) และลดความละเอียดเชิงพื้นที่</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">def quantize(img, levels, option=1):
+    step = 256 // levels
+    if option == 0:                      # Min
+        q = (img // step) * step
+    elif option == 1:                    # Mid (ค่ากลางช่วง)
+        q = (img // step) * step + step // 2
+    elif option == 2:                    # Max
+        q = np.minimum((img // step) * step + step - 1, 255)
+    return q.astype(np.uint8)
+
+# 16 ระดับ: q = (img // 16) * 16 + 7
+
+# Downsampling — เลือกทุก ๆ n พิกเซล
+z = cv2.resize(cv2.imread("cameraman.tif", 0), (1024, 1024))
+a = z[::2, ::2]      # ทุก 2 → ¼ พิกเซล
+b = z[::4, ::4]      # ทุก 4 → 1/16 พิกเซล
+e = z[::16, ::16];  d = z[::32, ::32]</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>Min / Mid / Max</h3>
+                  <p class="card-text">ตัวแทนช่วง: <b>Min = ต้นช่วง · Mid = กลางช่วง (step//2) · Max = ปลายช่วง</b></p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>Ex1 สูตรที่ต้องจำ</h3>
+                  <p class="card-text"><b>q = (img // 16) * 16 + 7</b> → 210→215 · 108→103 (Mid ของ 16 ระดับ)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ลดครึ่ง 2 ด้าน = พิกเซลเหลือ ¼ (กับดัก: ไม่ใช่ ½)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 11 · BIT-PLANE ============ -->
+        <section class="slide-view" data-title="Week4 · Bit-Plane Slicing" aria-label="สไลด์ 11: Bit-Plane Slicing">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex1</p>
+            <h2 class="slide-title">Bit-Plane <span class="grad-text">Slicing</span></h2>
+            <p class="slide-subtitle">แยกภาพเป็น 8 ชั้นบิต — bit 7 (MSB) = โครงสร้างหลัก, bit 0 (LSB) = รายละเอียด/noise</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block"># แยก 8 bit plane
+for i in range(8):
+    bit_plane = (img &gt;&gt; i) &amp; 1          # ดึงบิต i
+    plt.subplot(3, 3, i+2)
+    plt.imshow(bit_plane, cmap="gray")
+    plt.title(f"Bit {i}"); plt.axis("off")
+
+# รวมบิตที่เลือกกลับเป็นภาพ
+result = np.zeros_like(img)
+for b in range(8):
+    if selected[b]:
+        result |= img &amp; (1 &lt;&lt; b)
+
+# ค่าน้ำหนักบิต: 128 64 32 16 8 4 2 1
+a = 2 ** np.arange(8, 1-1, -1)   # [128,64,32,16,8,4,2,1]</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>อ่านบิต</h3>
+                  <p class="card-text"><b>(img &gt;&gt; i) &amp; 1</b> = ดึงบิต i · <code>&amp; (1 &lt;&lt; b)</code> = เปิดบิต b · <code>|=</code> = รวมบิต</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>ตัวอย่าง</h3>
+                  <p class="card-text">147 = 10010011₂ · bit 7 = 128 (โครงร่างชัดสุด) · bit 0 = 1 (รายละเอียดจาง)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Compression: เก็บบิต 4–7 = ข้อมูล 50% · Watermark ฝังที่ LSB (bit 0)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 12 · WATERMARK ============ -->
+        <section class="slide-view" data-title="Week4 · Watermark (ซ่อนใน Bit-Plane)" aria-label="สไลด์ 12: Watermark">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex quiz</p>
+            <h2 class="slide-title">Watermark <span class="grad-text">— ฝังลายน้ำใน Bit-Plane</span></h2>
+            <p class="slide-subtitle">สร้าง layer ข้อความ → ปิดบิตเป้าหมายด้วย mask → OR ฝัง watermark ลงไป</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">from PIL import Image, ImageDraw, ImageFont
+
+def create_watermark(text, shape, position=(50,50), alpha=255):
+    h, w = shape
+    wm = Image.new("L", (w, h), 0)
+    draw = ImageDraw.Draw(wm)
+    try: font = ImageFont.truetype("arial.ttf", 30)
+    except: font = ImageFont.load_default()
+    draw.text(position, text, fill=alpha, font=font)
+    return np.array(wm)
+
+wm = create_watermark("Norawit S.", img.shape, (50, 100), 255)
+wm_bin = (wm &gt; 128).astype(np.uint8)
+
+embed_bit = 7
+mask = np.uint8(255 ^ (1 &lt;&lt; embed_bit))   # เปิดทุกบิต ยกเว้นบิตเป้า
+result = img.copy()
+result = (result &amp; mask) | (wm_bin &lt;&lt; embed_bit)
+
+# ดึงกลับ/ตรวจ
+bit_plane = ((result &gt;&gt; embed_bit) &amp; 1) * 255</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>หลักการ</h3>
+                  <p class="card-text"><b>255 ^ (1&lt;&lt;bit)</b> = mask ปิดบิตเป้าหมาย · <b>| (wm &lt;&lt; bit)</b> = ฝังลายน้ำ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>เลือก bit</h3>
+                  <p class="card-text">bit ต่ำ (0) ซ่อนแนบเนียนแต่เปราะ · bit สูง (7) เห็นชัด — โจทย์กำหนด embed_bit ให้</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ขั้นตอน: &amp; mask (ล้างบิตเดิม) → | wm&lt;&lt;bit (ฝัง) — สลับไม่ได้</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 13 · MSE/PSNR ============ -->
+        <section class="slide-view" data-title="Week4 · วัดคุณภาพ MSE / PSNR" aria-label="สไลด์ 13: MSE PSNR">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex2</p>
+            <h2 class="slide-title">MSE / PSNR <span class="grad-text">— วัดคุณภาพภาพ</span></h2>
+            <p class="slide-subtitle">เปรียบเทียบภาพต้นฉบับกับภาพที่บีบอัด/quantize แล้ว</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">def mse(original, quantized):
+    e = original.astype(float) - quantized.astype(float)
+    return np.mean(e ** 2)
+
+def psnr(original, quantized):
+    err = mse(original, quantized)
+    if err == 0: return float("inf")
+    return 10 * np.log10((255 ** 2) / err)
+
+# ลูปทดสอบทุกระดับ
+for level in [256, 128, 64, 32, 16, 8, 4, 2]:
+    q = quantize(gray, level, "uniform", 2)
+    print(level, mse(gray, q), psnr(gray, q))</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>อ่านผล</h3>
+                  <p class="card-text"><b>MSE ยิ่งน้อยดี · PSNR ยิ่งมากดี (dB)</b> · PSNR = 10·log10(255² / MSE)</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="trending-down" class="cyan"></i>แนวโน้ม</h3>
+                  <p class="card-text">level เทาน้อยลง → MSE เพิ่ม / PSNR ลด (ภาพแย่ลง) — กราฟ inverted x-axis</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>PSNR = ∞ เมื่อภาพเหมือนเป๊ะ (MSE = 0) — กันหารด้วย 0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 14 · INTENSITY TRANSFORMS ============ -->
+        <section class="slide-view" data-title="Week4 · Intensity Transforms" aria-label="สไลด์ 14: Intensity Transforms">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex3</p>
+            <h2 class="slide-title">Intensity Transforms <span class="grad-text">— Negative · Gamma · Log</span></h2>
+            <p class="slide-subtitle">ปรับค่าความเข้มพิกเซลด้วยสมการ — normalize เป็น 0–1 ก่อนเสมอ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block"># Negative (ฟิล์ม)
+J = 255 - I                     # หรือ cv2.bitwise_not(I)
+
+# Gamma / Power-Law  s = β·r^γ
+def power_law(img, gamma=1, beta=1):
+    r = img / 255.0
+    s = np.clip(beta * (r ** gamma), 0, 1)
+    return np.uint8(s * 255)
+# γ&lt;1 สว่าง · γ&gt;1 มืด · γ=0.4 ใช้แก้ภาพมืด
+
+# Log  s = c·log(1+r)
+def log_transform(img, domain=255):
+    f = img.astype(np.float32) / 255.0 * domain
+    c = 1 / np.log(1 + domain)
+    return c * np.log(1 + f)
+
+# Contrast stretch แบบ sigmoid
+def contrast_stretch(img, center=0.5, exponent=4):
+    img = img.astype(np.float32) / 255.0
+    eps = np.finfo(np.float32).eps
+    return np.clip(1 / (1 + (center / (img + eps)) ** exponent), 0, 1)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>สูตรต้องจำ</h3>
+                  <p class="card-text"><b>Negative:</b> 255−r · <b>Gamma:</b> s = β·r^γ · <b>Log:</b> c·log(1+r), c = 1/log(1+domain)</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>ทำไม +1</h3>
+                  <p class="card-text">log(0) หาค่าไม่ได้ → <b>log(1+r)</b> · log ขยายเงามืด (dynamic range กว้าง)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>normalize 0–255 → 0–1 ก่อน แล้วคูณกลับ + clip(0,1) — กันค่าล้น</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 15 · FFT ============ -->
+        <section class="slide-view" data-title="Week4 · Fourier / FFT Workflow" aria-label="สไลด์ 15: FFT">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex4</p>
+            <h2 class="slide-title">Fourier Transform <span class="grad-text">— FFT Workflow</span></h2>
+            <p class="slide-subtitle">fft2 → fftshift → (กรอง) → ifftshift → ifft2 — ลำดับนี้ห้ามสลับ</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">img = cv2.imread("cameraman.tif", 0)
+img = img.astype(np.float32) / 255.0     # 0–1
+
+F = np.fft.fft2(img)
+F_shift = np.fft.fftshift(F)             # ย้าย DC มาอยู่กลาง
+magnitude = np.log1p(np.abs(F_shift))    # spectrum
+phase = np.angle(F_shift)                # phase
+
+img_back = np.abs(np.fft.ifft2(F))       # inverse → ภาพเดิม
+diff = np.abs(img - img_back)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>อ่านสเปกตรัม</h3>
+                  <p class="card-text"><b>กลาง = DC/ความถี่ต่ำ</b> · ขอบ = ความถี่สูง · magnitude = ความแรง, phase = ตำแหน่ง</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>กับดัก</h3>
+                  <p class="card-text">ifft2 คืนค่า <b>complex</b> → ต้อง <b>np.abs()</b> · log1p = log(1+x) กัน log(0)</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>freq profile: ดึงแถวกลาง magnitude[y, :] พล็อตดูความถี่</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 16 · ROTATION ============ -->
+        <section class="slide-view" data-title="Week4 · Rotation + FFT" aria-label="สไลด์ 16: Rotation และ FFT">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex5</p>
+            <h2 class="slide-title">Rotation <span class="grad-text">+ FFT ของภาพหมุน</span></h2>
+            <p class="slide-subtitle">หมุนภาพ 90° แล้วดูว่า spectrum เปลี่ยนยังไง</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">a1 = a.astype(np.float64) / 255.0    # 0–1
+
+c = cv2.rotate(a1, cv2.ROTATE_90_CLOCKWISE)
+# ROTATE_90_COUNTERCLOCKWISE / ROTATE_180
+
+b_shift = np.fft.fftshift(np.fft.fft2(a1))
+d_shift = np.fft.fftshift(np.fft.fft2(c))
+
+plt.imshow(np.log(1 + np.abs(b_shift)), cmap="gray")
+plt.imshow(np.log(1 + np.abs(d_shift)), cmap="gray")</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>ผลที่ได้</h3>
+                  <p class="card-text">หมุนภาพ 90° → <b>spectrum หมุนตาม 90°</b> (แต่ magnitude สมมาตร จึงดูคล้ายเดิม)</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>cv2.rotate</h3>
+                  <p class="card-text">หมุนเฉพาะมุม 90° ทวีคูณ — มุมอื่นต้องใช้ getRotationMatrix2D + warpAffine</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>โจทย์แนวนี้ = พล็อต 4 ภาพ (Original / FFT / Rotated / FFT Rotated) ใน subplot 2×2</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 17 · WALSH ============ -->
+        <section class="slide-view" data-title="Week4 · Walsh / Hadamard + Compression" aria-label="สไลด์ 17: Walsh Hadamard">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex6</p>
+            <h2 class="slide-title">Walsh / Hadamard <span class="grad-text">+ Compression</span></h2>
+            <p class="slide-subtitle">สร้าง basis matrix ±1 แล้ว transform: F = (1/N)·H·img·H — ภาพต้องเป็น 2^n ก่อน</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">N = len(a)                # ต้อง resize เป็น 2^n (เช่น 256)
+n = int(np.log2(N))
+f = np.ones((N, N))
+for x in range(N):
+    for u in range(N):
+        p = format(x, "0{}b".format(n))
+        q = format(u, "0{}b".format(n))
+        value = 1
+        for i in range(n):
+            # Walsh: q[i] · Hadamard: q[n-1-i]
+            value *= (-1) ** (int(p[n-1-i]) * int(q[i]))
+        f[x, u] = value
+
+F = (1 / N) * f @ a.astype(float) @ f   # transform
+G = np.fft.fftshift(F)
+H = np.log(1 + np.abs(G))
+
+# Compression: ตัดค่าสเปกตรัมเล็กทิ้ง (percentile)
+th = np.percentile(np.abs(F), 90)
+F_comp = F.copy()
+F_comp[np.abs(F_comp) &lt; th] = 0
+rec = np.clip((1 / N) * f @ F_comp @ f, 0, 255).astype(np.uint8)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>Walsh vs Hadamard</h3>
+                  <p class="card-text">Walsh = sequency order (<b>q[i]</b>) · Hadamard = natural order (<b>q[n-1-i]</b>) — ต่างที่ index เดียว</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>Compression</h3>
+                  <p class="card-text">ตัดค่าที่ &lt; percentile ทิ้ง → inverse ใหม่ → เทียบ CR/MSE/PSNR</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>matrix @ ภาพ @ matrix (2 ฝั่ง) · หาร 1/N · clip 0–255 + uint8</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 18 · SPATIAL FILTERS ============ -->
+        <section class="slide-view" data-title="Week4 · Spatial Filters" aria-label="สไลด์ 18: Spatial Filters">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex7</p>
+            <h2 class="slide-title">Spatial Filters <span class="grad-text">— Mean · Gaussian · Laplacian</span></h2>
+            <p class="slide-subtitle">กรองภาพในโดเมนพื้นที่ (spatial) ด้วย kernel — filter2D + borderType</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">w = cv2.blur(i, (3, 3))                  # mean filter
+g = cv2.GaussianBlur(i, (3, 3), 0.5)      # gaussian (sigma)
+
+# Laplacian — ผลรวม kernel = 0 → flat = 0
+g2 = cv2.Laplacian(i, cv2.CV_64F, ksize=3)
+alpha = 0.5
+wk = np.array([[alpha, 1, alpha],
+               [1,   -4, 1],
+               [alpha, 1, alpha]]) / (alpha + 1)
+g = cv2.filter2D(i.astype(float), -1, wk,
+                 borderType=cv2.BORDER_REFLECT)
+
+# Sharpening  g = f − ∇²f
+sharp = i.astype(np.float64) - g          # ภาพคมขึ้น</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>kernel ต้อง float</h3>
+                  <p class="card-text"><b>filter2D(ภาพ.astype(float), -1, kernel)</b> — kernel int กับภาพ int = ปัดผิด</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>BORDER_REFLECT</h3>
+                  <p class="card-text">สะท้อนขอบภาพ (เลียนแบบ MATLAB 'symmetric') — ใช้บ่อยใน lab</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>Laplacian ไว noise · sharpening = ภาพ − Laplacian (ลบ ไม่ใช่บวก)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 19 · SOBEL + ORDER ============ -->
+        <section class="slide-view" data-title="Week4 · Sobel + Order Statistics" aria-label="สไลด์ 19: Sobel และ Order Statistics">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 4 · Ex7</p>
+            <h2 class="slide-title">Sobel + <span class="grad-text">Order Statistics</span></h2>
+            <p class="slide-subtitle">ตรวจจับขอบด้วย Sobel และกรองแบบ non-linear (เรียงค่าแล้วเลือกตัวที่ rank)</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block"># Sobel — ขอบ
+gx = cv2.Sobel(i, cv2.CV_64F, 1, 0, ksize=3)   # ขอบแนวดิ่ง
+gy = cv2.Sobel(i, cv2.CV_64F, 0, 1, ksize=3)   # ขอบแนวนอน
+gm = np.sqrt(gx ** 2 + gy ** 2)                # magnitude
+
+# order statistics (non-linear)
+kernel = np.ones((3, 3), np.uint8)
+h  = cv2.erode(i, kernel)      # rank=1 minimum
+h1 = cv2.dilate(i, kernel)     # rank=9 maximum
+h2 = cv2.medianBlur(i, 3)      # rank=5 median</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>กับดัก Sobel</h3>
+                  <p class="card-text"><b>dx=1 → ขอบแนวดิ่ง</b> · dy=1 → ขอบแนวนอน — ตรงข้ามสัญชาตญาณ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>ordfilt2</h3>
+                  <p class="card-text">MATLAB ordfilt2(i, rank, ones(3,3)): rank 1=min · 5=median · 9=max → erode/medianBlur/dilate</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>cv2.CV_64F กันค่าลบ/เกิน — ภาพขอบมีค่าลบได้</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 20 · NOISE ============ -->
+        <section class="slide-view" data-title="week5 · Noise + Restore (S&P / Gaussian)" aria-label="สไลด์ 20: Noise และ Restore">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 5 · Lab5_1</p>
+            <h2 class="slide-title">สร้าง Noise <span class="grad-text">+ กู้ภาพคืน</span></h2>
+            <p class="slide-subtitle">Salt &amp; Pepper กับ Gaussian noise — วิธีลบต่างกัน!</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block"># Salt &amp; Pepper — สุ่มจุดขาว/ดำ
+noisy = img.copy(); rows, cols = img.shape
+d = 0.40
+salt   = np.random.rand(rows, cols) &lt; d/2
+noisy[salt] = 255
+pepper = (np.random.rand(rows, cols) &lt; d/2) &amp; (~salt)
+noisy[pepper] = 0
+
+median = cv2.medianBlur(noisy, 7)     # 3/5/7 ใหญ่=เนียน
+_, binary = cv2.threshold(median, 20, 255, cv2.THRESH_BINARY)
+
+# Gaussian noise
+gauss = np.random.normal(0, 40, img.shape)
+noisy = np.clip(img.astype(np.float32) + gauss, 0, 255).astype(np.uint8)
+restored = cv2.GaussianBlur(noisy, (7, 7), 2.5)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>เลือก filter ให้ตรง</h3>
+                  <p class="card-text"><b>Salt&amp;Pepper → Median</b> (กันจุดสุดขั้ว) · <b>Gaussian noise → Mean/Gaussian</b></p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>กับดัก</h3>
+                  <p class="card-text">บวก float แล้วต้อง <b>np.clip(…, 0, 255).astype(np.uint8)</b> — ไม่งั้นภาพดำ/ขาวโพลน</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>putText สีเข้ม (25) กับสีอ่อน (225) บนพื้นดำ → หลัง median + threshold แยกตัวอักษรออก</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 21 · PERIODIC NOISE ============ -->
+        <section class="slide-view" data-title="week5 · Periodic Noise + Notch Filter" aria-label="สไลด์ 21: Periodic Noise และ Notch">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 5 · Lab5_1</p>
+            <h2 class="slide-title">Periodic Noise <span class="grad-text">+ Notch Filter</span></h2>
+            <p class="slide-subtitle">noise แบบ sine → กลายเป็นจุดสว่างในสเปกตรัม → ปิดด้วย mask วงกลม</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">rows, cols = img.shape
+x = np.arange(cols); y = np.arange(rows)
+X, Y = np.meshgrid(x, y)
+fx = fy = 80
+noise = (A * np.sin(2*np.pi*fx*X/cols) +
+         A * np.sin(2*np.pi*fy*Y/rows))
+noisy = np.clip(img.astype(float) + noise, 0, 255).astype(np.uint8)
+
+F_shift = np.fft.fftshift(np.fft.fft2(noisy))
+mag = np.log1p(np.abs(F_shift))
+
+# Notch mask — ปิด peak (ยกเว้น DC กลาง)
+mask = np.ones((rows, cols), np.float32)
+th = 0.8 * np.max(mag)
+for y_, x_ in zip(*np.where(mag &gt; th)):
+    if abs(x_ - cols//2) &gt; 5 or abs(y_ - rows//2) &gt; 5:
+        cv2.circle(mask, (x_, y_), size, 0, -1)
+
+F_filtered = F_shift * mask
+result = np.abs(np.fft.ifft2(np.fft.ifftshift(F_filtered)))
+result = np.clip(result, 0, 255).astype(np.uint8)</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>หลักการ</h3>
+                  <p class="card-text">sine ใน spatial = <b>จุดสว่างคู่สมมาตร</b> ในสเปกตรัม · ปิดจุดนั้น = ตัด noise</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>กับดัก</h3>
+                  <p class="card-text">ห้ามปิด <b>DC (กลางภาพ)</b> — เป็นข้อมูลหลักของภาพ · ลำดับ fftshift → คูณ mask → ifftshift</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>ลำดับ: fft2 → fftshift → mask → ifftshift → ifft2 → abs — จดให้ขึ้นใจ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 22 · WIENER + MORPH ============ -->
+        <section class="slide-view" data-title="week5 · Wiener + Morphology" aria-label="สไลด์ 22: Wiener และ Morphology">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">WEEK 5 · Lab5_1</p>
+            <h2 class="slide-title">Wiener Filter <span class="grad-text">+ Morphology</span></h2>
+            <p class="slide-subtitle">ปรับตาม variance ท้องถิ่น (เก็บขอบ เบลอพื้นเรียบ) และปรับรูปร่างภาพ binary</p>
+
+            <div class="split mt-6">
+              <div class="visual-box">
+                <pre class="code-block">def wiener_filter(img, k=7, noise_var=500):
+    img = img.astype(np.float32)
+    mean    = cv2.boxFilter(img, -1, (k, k), normalize=True)
+    mean_sq = cv2.boxFilter(img*img, -1, (k, k), normalize=True)
+    var = np.maximum(mean_sq - mean*mean, 0)
+    out = mean + (np.maximum(var - noise_var, 0) /
+                  np.maximum(var, noise_var)) * (img - mean)
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+# Morphology (ภาพ binary)
+se = np.ones((5, 5), np.uint8)
+erosion  = cv2.erode(img, se, iterations=1)    # หด
+dilation = cv2.dilate(img, se, iterations=2)   # ขยาย
+opening  = cv2.morphologyEx(img, cv2.MORPH_OPEN, se)   # E→D
+closing  = cv2.morphologyEx(img, cv2.MORPH_CLOSE, se)  # D→E</pre>
+              </div>
+              <div class="flex" style="flex-direction:column;gap:14px">
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="info" class="cyan"></i>Wiener logic</h3>
+                  <p class="card-text">variance สูง = ขอบ → เก็บ · variance ต่ำ = เรียบ → เบลอ — ดีกว่า blur ตรง ๆ</p>
+                </div>
+                <div class="card">
+                  <h3 class="card-title"><i data-lucide="alert-triangle" class="cyan"></i>จำให้ถูก</h3>
+                  <p class="card-text"><b>Opening = erode→dilate</b> (ลบจุดเล็ก) · <b>Closing = dilate→erode</b> (ปิดรู) — อย่าสลับ</p>
+                </div>
+                <div class="tip-box tip-exam">
+                  <i data-lucide="graduation-cap"></i>
+                  <div><b>เทคนิคสอบ</b>erode = ทุกช่องต้องขาว (AND) · dilate = มีขาวจุดเดียวพอ (OR)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 23 · CHEAT SHEET ============ -->
+        <section class="slide-view" data-title="Cheat Sheet — สูตร/คำสั่งต้องจำ" aria-label="สไลด์ 23: Cheat Sheet">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">EXAM CHEAT SHEET</p>
+            <h2 class="slide-title">สูตร / คำสั่ง <span class="grad-text">ต้องจำก่อนเข้าห้องสอบ</span></h2>
+            <p class="slide-subtitle">รวมคำสั่งที่ใช้บ่อยที่สุดในทุก Lab — กดปุ่มพิมพ์สรุป A4 ด้านล่างได้เลย</p>
+            <div class="cheat-grid mt-6" id="cheatGrid"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 24 · GLOSSARY ============ -->
+        <section class="slide-view" data-title="Glossary — คำศัพท์" aria-label="สไลด์ 24: คำศัพท์">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">GLOSSARY</p>
+            <h2 class="slide-title">Glossary — <span class="grad-text">คำศัพท์</span></h2>
+            <p class="slide-subtitle">คำศัพท์สำคัญของบทนี้ — ค้นหาได้ด้วยช่องด้านล่าง</p>
+
+            <div class="glossary-wrap mt-6">
+              <div class="glossary-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="glossarySearch" placeholder="ค้นหาคำศัพท์ เช่น imread, uint8, fftshift, morphology..." aria-label="ค้นหาคำศัพท์" />
+              </div>
+              <div class="glossary-count" id="glossaryCount">0 คำศัพท์</div>
+              <div class="glossary-list" id="glossaryList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 25 · QUIZ 1 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 1 (ข้อ 1–5)" aria-label="สไลด์ 25: แบบทดสอบชุดที่ 1">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 1</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 1</h2>
+            <div id="quiz1" class="mt-4"></div>
+          </div>
+        </section>
+
+        <!-- ============ SLIDE 26 · QUIZ 2 ============ -->
+        <section class="slide-view quiz-slide" data-title="Quiz 2 (ข้อ 6–10)" aria-label="สไลด์ 26: แบบทดสอบชุดที่ 2">
+          <div class="slide-inner">
+            <p class="slide-eyebrow">QUIZ MODE · PART 2</p>
+            <h2 class="slide-title">แบบทดสอบ ชุดที่ 2</h2>
+            <div id="quiz2" class="mt-4"></div>
+          </div>
+        </section>
+
+      </div><!-- /viewport -->
+
+      <!-- ================= BOTTOM BAR ================= -->
+      <footer class="bottombar">
+        <button class="bb-nav-btn" id="prevBtn" aria-label="สไลด์ก่อนหน้า">
+          <i data-lucide="chevron-left"></i><span class="bb-label">ก่อนหน้า</span>
+        </button>
+
+        <div class="bb-center">
+          สไลด์ <b id="bbCounter">1</b> / <b id="bbTotal">26</b>
+        </div>
+
+        <div class="bb-tools">
+          <button class="icon-btn" id="fullscreenBtn" aria-label="ขยายสไลด์เต็มจอ" title="ขยายสไลด์">
+            <i data-lucide="maximize-2"></i>
+          </button>
+          <button class="icon-btn" id="printSlidesBtn" aria-label="พิมพ์สไลด์ทั้งหมด" title="พิมพ์สไลด์ทั้งหมด">
+            <i data-lucide="printer"></i>
+          </button>
+          <button class="icon-btn" id="printCardsBtn" aria-label="พิมพ์การ์ดสรุป" title="พิมพ์การ์ดสรุป">
+            <i data-lucide="file-output"></i>
+          </button>
+          <button class="icon-btn" id="printStudyBtn" aria-label="พิมพ์เอกสารสรุปสอบ" title="พิมพ์เอกสารสรุปสอบ (Study Sheet)">
+            <i data-lucide="file-text"></i>
+          </button>
+        </div>
+
+        <button class="bb-nav-btn next" id="nextBtn" aria-label="สไลด์ถัดไป">
+          <span class="bb-label">ถัดไป</span><i data-lucide="chevron-right"></i>
+        </button>
+      </footer>
+
+    </main>
+  </div><!-- /shell -->
+
+<!-- ================= DRAWER BACKDROP ================= -->
+<div id="drawerBackdrop" aria-hidden="true"></div>
+
+<!-- ================= NOTES PANEL ================= -->
+<aside class="notes-panel" id="notesPanel" aria-label="บันทึกย่อ">
+  <div class="flex items-center justify-between" style="padding:16px 20px;border-bottom:1px solid var(--border)">
+    <div>
+      <b style="font-size:15px">📝 บันทึกย่อ (Notes)</b>
+      <p class="text-3" style="font-size:12px" id="notesLabel">สไลด์ที่กำลังเรียน</p>
+    </div>
+    <button class="icon-btn" id="notesCloseBtn" aria-label="ปิดบันทึกย่อ"><i data-lucide="x"></i></button>
+  </div>
+  <textarea id="notesTextarea" placeholder="เขียนสิ่งที่ต้องจำจากสไลด์นี้...&#10;เช่น:&#10;- cv2.resize รับ (W, H) ไม่ใช่ (H, W)&#10;- FFT: fft2 → fftshift → ifft2&#10;- salt &amp; pepper ใช้ median" aria-label="บันทึกย่อ"></textarea>
+  <div class="text-3" style="padding:10px 20px 14px;font-size:12px;border-top:1px solid var(--border)">
+    💾 บันทึกอัตโนมัติลงในเครื่องของคุณ (localStorage)
+  </div>
+</aside>
+
+<!-- ================= TOAST ================= -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================= COMPLETION OVERLAY ================= -->
+<div id="completionOverlay" role="dialog" aria-modal="true" aria-label="จบบทเรียน">
+  <div class="card center" style="max-width:440px;position:relative;padding:40px 32px;z-index:1">
+    <div style="font-size:56px" class="float-y">🎉</div>
+    <h2 class="slide-title mt-4" style="font-size:28px">Chapter Complete!</h2>
+    <p class="text-2 mt-2" id="completionMsg">คุณเรียนครบทุกสไลด์แล้ว — ยอดเยี่ยมมาก! <b class="grad-text">Keep Learning!</b></p>
+    <div class="grid-3 mt-5" style="grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneSlides">26</b><p class="text-3" style="font-size:12px">สไลด์</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px" id="doneScore">–</b><p class="text-3" style="font-size:12px">คะแนน Quiz</p></div>
+      <div class="card" style="padding:14px"><b style="font-size:20px">100%</b><p class="text-3" style="font-size:12px">ความคืบหน้า</p></div>
+    </div>
+    <div class="flex items-center gap-3 mt-6 wrap" style="justify-content:center">
+      <button class="btn btn-ghost" id="completionCloseBtn">ปิด 🎊</button>
+      <button class="btn btn-primary" id="completionRestartBtn"><i data-lucide="rotate-ccw"></i> เรียนใหม่อีกครั้ง</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PRINT AREA ================= -->
+<div id="printArea" aria-hidden="true"></div>
+
+<!-- App scripts -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

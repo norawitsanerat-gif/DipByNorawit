@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>สรุปสอบ บทที่ 6 — Segmentation ถึง Computer Vision (A4)</title>
+<style>
+  /* ====== สรุปสอบ บทที่ 6 — เน้นเนื้อหา อัดแน่น ไม่เน้นความสวย ====== */
+  @page { size: A4; margin: 7mm 7mm 7mm 7mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    font-family: "Leelawadee UI", "IBM Plex Sans Thai", Tahoma, "Sukhumvit Set", "Thonburi", "Segoe UI", sans-serif;
+    font-size: 7.5pt;
+    line-height: 1.26;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sheet { max-width: 196mm; margin: 0 auto; }
+  code, .mono { font-family: Consolas, "Courier New", monospace; font-size: 95%; }
+
+  .head { border: 1.1pt solid #000; border-bottom: none; padding: 2px 8px 4px; }
+  .head h1 { font-size: 13pt; line-height: 1.15; }
+  .head .sub { font-size: 8pt; }
+  .formula-strip {
+    display: table; width: 100%; border: 1.1pt solid #000; border-top: none;
+    font-size: 7.5pt; font-weight: 600;
+  }
+  .formula-strip > div {
+    display: table-cell; padding: 2px 6px; border-right: 0.6pt solid #000; vertical-align: middle;
+  }
+  .formula-strip > div:last-child { border-right: none; }
+  .formula-strip b { font-size: 8pt; }
+
+  .cols { columns: 2; column-gap: 8px; margin-top: 4px; }
+
+  .sec { break-inside: avoid; margin-bottom: 5px; border: 0.8pt solid #555; padding: 2px 7px 3px; }
+  .sec > h2 {
+    font-size: 9pt; line-height: 1.2; padding: 1px 5px; margin: -2px -7px 3px;
+    background: #e8e8e8; border-bottom: 0.8pt solid #555;
+  }
+  .sec > h2 .en { font-weight: 600; font-size: 7pt; color: #333; }
+  ul { padding-left: 11px; }
+  li { margin-bottom: 1px; }
+  p { margin: 1.5px 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 2px 0; }
+  th, td { border: 0.5pt solid #000; padding: 0.5px 3px; text-align: left; font-size: 7.1pt; line-height: 1.25; }
+  th { background: #efefef; }
+  td b, .hl { background: #fff3bf; }
+
+  .code {
+    font-family: Consolas, "Courier New", monospace; font-size: 6.9pt; line-height: 1.3;
+    background: #f2f2f2; border: 0.5pt solid #999; padding: 2px 6px; margin: 2px 0;
+    white-space: pre-wrap;
+  }
+  .must { color: #a00; font-weight: 700; }
+  .trap { color: #a00; font-weight: 700; }
+  .qa b { font-weight: 600; }
+
+  .foot {
+    margin-top: 6px; border-top: 1pt solid #000; padding-top: 2px;
+    font-size: 7pt; text-align: center;
+  }
+  .no-print { text-align: right; margin: 0 0 6px; }
+  .no-print button {
+    font-family: inherit; font-size: 9.5pt; font-weight: 600;
+    padding: 7px 18px; cursor: pointer;
+    background: #2563eb; color: #fff;
+    border: none; border-radius: 7px;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, .35);
+    transition: background .15s, transform .1s, box-shadow .15s;
+  }
+  .no-print button:hover { background: #1d4ed8; box-shadow: 0 3px 8px rgba(37, 99, 235, .45); }
+  .no-print button:active { transform: translateY(1px); }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="no-print"><button onclick="window.print()">🖨 พิมพ์ / บันทึก PDF (Ctrl+P)</button></div>
+
+  <div class="head">
+    <h1>บทที่ 6 — Segmentation ถึง Computer Vision</h1>
+    <div class="sub">สรุปสอบ A4 · Threshold (Global/Adaptive/Otsu) · Morphology · Contour · Feature · Transform · CV+AI (YOLO/CNN) · <b class="must">★ = ต้องจำให้ได้</b> · <span class="trap">⚠ = กับดักข้อสอบ</span></div>
+  </div>
+
+  <div class="formula-strip">
+    <div>BINARY: ≥t → <b>255</b> · INV = สลับ · TRUNC = ตัด · TOZERO = ต่ำ→0</div>
+    <div>Adaptive(<b>blockSize, C</b>) · Otsu = <b>BINARY + OTSU</b></div>
+    <div>Erosion = <b>หด (AND)</b> · Dilation = <b>ขยาย (OR)</b></div>
+    <div>Opening = <b>E→D</b> (ลบจุดเล็ก) · Closing = <b>D→E</b> (ปิดรู)</div>
+    <div>findContours → <b>boundingRect (x, y, w, h)</b></div>
+  </div>
+
+  <div class="cols">
+
+    <!-- ============ 1. Segmentation ============ -->
+    <div class="sec">
+      <h2>1 · Segmentation คืออะไร</h2>
+      <ul>
+        <li><b class="must">Segmentation = แบ่งภาพออกเป็นส่วน ๆ — แยก "วัตถุ (object)" ออกจาก "พื้นหลัง (background)"</b></li>
+        <li>Pipeline: Camera → Enhancement (บท 4) → Filter (บท 5) → <b>Threshold/Segmentation (บทนี้)</b> → Contour → Detection</li>
+        <li>ก่อนนับ/วัด/ตรวจจับอะไร ต้องรู้ก่อนว่า "ตรงไหนคือตัววัตถุ" — segmentation คือก้าวแรก · วิธีง่ายสุด = <b>Threshold</b> (แบ่งด้วยค่าความเข้ม)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 2. Threshold 5 โหมด ============ -->
+    <div class="sec">
+      <h2>2 · Threshold — 5 โหมด (cv2.threshold)</h2>
+      <ul>
+        <li><b class="must">Global Threshold</b> = ค่าขีด (thresh) หนึ่งเดียวใช้ทั้งภาพ — <code>ret, binary = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY)</code> (thresh = 128, maxval = 255)</li>
+      </ul>
+      <table>
+        <tr><th>โหมด</th><th>ต่ำกว่า t</th><th>สูงกว่า t</th><th>ตัวอย่าง (100 / 150, t=128)</th></tr>
+        <tr><td><b>THRESH_BINARY</b></td><td>0</td><td>maxval (255)</td><td>0 / 255</td></tr>
+        <tr><td><b>THRESH_BINARY_INV</b></td><td>255</td><td>0</td><td>255 / 0 (กลับด้าน)</td></tr>
+        <tr><td><b>THRESH_TRUNC</b></td><td>ค่าเดิม</td><td>ตัด = t</td><td>100 / 128 (ล็อกค่าบน)</td></tr>
+        <tr><td><b>THRESH_TOZERO</b></td><td>0</td><td>ค่าเดิม</td><td>0 / 150</td></tr>
+        <tr><td><b>THRESH_TOZERO_INV</b></td><td>ค่าเดิม</td><td>0</td><td>100 / 0</td></tr>
+      </table>
+      <ul>
+        <li><b class="must">INV = INVerse = เอาสีสลับ</b> — ใช้เมื่อวัตถุ<b>มืดกว่า</b>พื้นหลัง (กลับให้วัตถุเป็นขาวก่อนทำงานต่อ)</li>
+        <li>TRUNC ใช้ลบ highlight · TOZERO = "เก็บของที่ผ่านขีด โละของที่ต่ำกว่า"</li>
+        <li>ผลลัพธ์ = ภาพ binary (0 กับ 255) — เหมาะภาพแสงสม่ำเสมอ พื้นหลังชัด</li>
+      </ul>
+    </div>
+
+    <!-- ============ 3. Global vs Adaptive vs Otsu ============ -->
+    <div class="sec">
+      <h2>3 · Global vs Adaptive vs Otsu</h2>
+      <ul>
+        <li><b class="must">ปัญหา Global:</b> ภาพ<b>แสงไม่สม่ำเสมอ</b> (gradient/เงา/แดดส่องบางส่วน) → ขีดเดียวตัดพลาดเสมอ (ขีดสูง: ฝั่งมืดดำหมด · ขีดต่ำ: ฝั่งสว่างตัวหนังสือหาย) → ต้อง Adaptive หรือ Otsu</li>
+        <li><b class="must">Adaptive Threshold</b> = คำนวณขีด<b>ใหม่ทุกตำแหน่ง</b>จาก neighborhood (sliding window) — ฝั่งสว่างได้ขีดสูง ฝั่งมืดได้ขีดต่ำ · ใช้กับสแกนเอกสาร/OCR</li>
+        <li>โค้ด: <code>cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)</code></li>
+        <li><b class="must">อ่านพารามิเตอร์ 2 ตัวท้าย:</b> <b>11 = blockSize</b> (ขนาด window 11×11 ใช้คำนวณขีด — ต้อง<b>เลขคี่</b>, ใหญ่ = ขีดเนียนแต่ช้า) · <b>2 = ค่าคงที่ C</b> (ลบออกจากขีด — ปรับความไว กัน noise ถูกตัดเป็นขาว)</li>
+        <li><b class="must">Otsu</b> = หาขีดที่ดีที่สุด<b>อัตโนมัติจาก histogram</b> (ลองทุกค่า 0–255 เลือกที่แยก 2 กลุ่มได้ห่างสุด) — เหมาะ histogram <b>2 ยอด (bimodal)</b> · ใช้ flag <code>cv2.THRESH_BINARY + cv2.THRESH_OTSU</code> ส่ง 0 แทน thresh · ค่าขีดที่หาได้คืนใน <b>ret</b></li>
+      </ul>
+      <table>
+        <tr><th>วิธี</th><th>ขีด</th><th>เหมาะกับ</th><th>จุดอ่อน</th></tr>
+        <tr><td><b>Global</b></td><td>1 ค่าทั้งภาพ</td><td>แสงสม่ำเสมอ</td><td>แสงไม่เท่ากัน → ตัดพลาด</td></tr>
+        <tr><td><b>Adaptive</b></td><td>เปลี่ยนตามตำแหน่ง (local)</td><td>แสงไม่สม่ำเสมอ, OCR, สแกน</td><td>ช้ากว่า, มี parameter</td></tr>
+        <tr><td><b>Otsu</b></td><td>หาอัตโนมัติ 1 ค่า</td><td>histogram 2 ยอดชัดเจน</td><td>แสงไม่สม่ำเสมอ ยังพัง</td></tr>
+      </table>
+      <p><b>เลือกยังไง:</b> แสงดี → Global · แสงไม่เท่ากัน → Adaptive · ไม่รู้ค่าขีด + histogram 2 ยอด → Otsu</p>
+    </div>
+
+    <!-- ============ 4. Morphology ============ -->
+    <div class="sec">
+      <h2>4 · Morphology — ปรับรูปร่างภาพ binary</h2>
+      <ul>
+        <li><b class="must">Morphology</b> = ปรับ "รูปร่าง" ของวัตถุในภาพ binary ด้วย kernel (structuring element) — ลบจุด noise, ปิดรู, ต่อรอยขาด, ทำให้ contour สวย</li>
+        <li><b class="must">Erosion (กร่อน/หด):</b> เก็บพิกเซลกลางก็ต่อเมื่อ<b>ทุกช่อง</b>ใต้ kernel เป็นขาว (AND/min) → วัตถุเล็กลงรอบด้าน + ลบจุด noise เล็ก (เล็กกว่า kernel หายทั้งจุด) · <code>cv2.erode(binary, kernel)</code></li>
+        <li><b class="must">Dilation (ขยาย):</b> กลางเป็นขาวเมื่อมีขาว<b>อย่างน้อย 1 จุด</b>ใต้ kernel (OR/max) → ขอบขยายออกทุกทิศ ใช้ปิดรู/เชื่อมรอยขาด · <code>cv2.dilate(binary, kernel)</code></li>
+        <li><b class="must">Opening = Erosion → Dilation</b> (เริ่ม E ลบจุด noise ขาวเล็ก โดยไม่หดวัตถุใหญ่) · <b class="must">Closing = Dilation → Erosion</b> (เริ่ม D ปิดรู/รอยขาดดำ โดยไม่ขยายวัตถุใหญ่)</li>
+        <li>โค้ด: <code>cv2.morphologyEx(b, cv2.MORPH_OPEN, kernel)</code> / <code>cv2.MORPH_CLOSE</code></li>
+        <li>จำ: Opening = เริ่มด้วย Erosion (ลบจุดเล็ก) · Closing = เริ่มด้วย Dilation (ปิดรู) — เริ่มจากตัวแรกเป็นตัวหลัก</li>
+      </ul>
+    </div>
+
+    <!-- ============ 5. Contour ============ -->
+    <div class="sec">
+      <h2>5 · Contour &amp; Bounding Box</h2>
+      <ul>
+        <li><b class="must">Contour</b> = เส้นขอบที่ลากรอบวัตถุ (เส้นโค้งเชื่อมจุดขอบเดียวกัน) — ใช้บอกตำแหน่ง/รูปร่าง · <b>Edge</b> = จุดที่ความเข้มเปลี่ยน (พิกเซล) แต่ <b>Contour</b> = เส้นปิดรอบวัตถุทั้งชิ้น (โครงสร้าง)</li>
+        <li>Pipeline: Threshold → Morphology (ลบ noise) → <b>findContours (หาวัตถุ)</b> → นับ/วัด/ตรวจจับ</li>
+        <li><b class="must">cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)</b> → contours, hierarchy · รับ<b>ภาพ binary</b> · <b>RETR_EXTERNAL</b> = เอาเฉพาะขอบนอกสุด · <b>CHAIN_APPROX_SIMPLE</b> = เก็บเฉพาะมุม (ประหยัดหน่วยความจำ) · <code>len(contours)</code> = นับวัตถุ</li>
+        <li><b class="must">Bounding Box: <code>x, y, w, h = cv2.boundingRect(cnt)</code></b> — สี่เหลี่ยมที่เล็กที่สุดครอบ contour (axis-aligned) · x, y = มุมซ้ายบน · เอาไป crop / วาดกรอบ / วัดขนาดจริง (พิกเซล → mm เทียบสเกล)</li>
+        <li>วาด: <code>cv2.drawContours(img, contours, -1, (0,255,0), 2)</code> · <code>cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)</code></li>
+      </ul>
+    </div>
+
+    <!-- ============ 6. Feature ============ -->
+    <div class="sec">
+      <h2>6 · Feature Extraction — Shape · Corner · Descriptor</h2>
+      <ul>
+        <li>แปลง "รูปร่างของวัตถุ" เป็น<b>ตัวเลข (features)</b> ที่เครื่องคำนวณ/เปรียบเทียบได้ — เป็น input ของ ML/การจำแนก</li>
+        <li><b class="must">Shape:</b> <code>area = cv2.contourArea(cnt)</code> (พื้นที่) · <code>peri = cv2.arcLength(cnt, True)</code> (เส้นรอบรูป) · <code>moments = cv2.moments(cnt)</code> → จุดศูนย์ถ่วง <code>cx = m10/m00</code>, <code>cy = m01/m00</code></li>
+        <li>แยกวงกลม vs สี่เหลี่ยมด้วยอัตราส่วน area/perimeter (วงกลม area ≈ πr², peri ≈ 2πr · สี่เหลี่ยม area = w·h)</li>
+        <li><b class="must">Corner Detection:</b> มุม = จุดที่เลื่อนนิดเดียวค่าพิกเซลเปลี่ยน<b>ทุกทิศ</b> (จดจำง่าย ไม่กำกวม — ขอบเปลี่ยนแค่ทิศเดียว, พื้นเรียบไม่มีข้อมูล) · <b>Harris</b> = <code>cv2.cornerHarris(gray, 2, 3, 0.04)</code> (คะแนนทุกจุด) · <b>Shi-Tomasi</b> = <code>cv2.goodFeaturesToTrack(gray, 50, 0.01, 10)</code> (คืนเฉพาะ N จุดดีที่สุด)</li>
+        <li><b class="must">Feature Descriptor:</b> เลขบรรยาย "หน้าตา" รอบจุดเด่น — <code>kp, des = orb.detectAndCompute(gray, None)</code> · <b>SIFT</b> = แม่นยำสูง (ช้า, จดสิทธิบัตร) · <b>SURF</b> = SIFT เวอร์ชันเร็ว · <b>ORB</b> = ฟรี+เร็ว เหมาะมือถือ/เรียลไทม์ · ใช้จับคู่ภาพ (matching) / สร้าง panorama (stitching)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 7. Transform ============ -->
+    <div class="sec">
+      <h2>7 · Geometric Transform — Resize · Rotate · Perspective</h2>
+      <ul>
+        <li><b>Resize</b> = ย่อ/ขยาย: <code>cv2.resize(img, (640, 480))</code> — สำคัญกับ AI เพราะ CNN รับขนาดคงที่ (เช่น 224×224) ต้อง resize ให้เท่ากันก่อน</li>
+        <li><b>Rotate</b> = หมุน 90° ทวีคูณ: <code>cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)</code> · <b>Translate</b> = เลื่อนด้วยเมทริกซ์ + <code>cv2.warpAffine(img, M, (w, h))</code></li>
+        <li><b class="must">Affine</b> = เลื่อน/หมุน/ย่อ (เส้นขนานยังขนาน) · <b class="must">Perspective</b> = แก้ภาพเอียง/เบี้ยวด้วย 4 มุม (เส้นอาจไม่ขนาน) — สแกนเอกสาร</li>
+        <li><b class="must">Perspective workflow:</b> หา 4 มุมเอกสาร (เช่น จาก contour) → <code>M = cv2.getPerspectiveTransform(pts_src, pts_dst)</code> → <code>scanned = cv2.warpPerspective(img, M, (w, h))</code> — ได้ภาพตรงเหมือนสแกน (CamScanner)</li>
+      </ul>
+    </div>
+
+    <!-- ============ 8. Advanced + CV+AI ============ -->
+    <div class="sec">
+      <h2>8 · Advanced &amp; Computer Vision + AI</h2>
+      <ul>
+        <li><b>Image Restoration</b> = กู้ภาพที่เสีย: Deblur (แก้เบลอจากมือสั่น/โฟกัสพลาด) + Denoising (ลบ noise — ต่อจากบท 5) + ใช้ Fourier (บท 5) กรองแบบความถี่</li>
+        <li><b>Image Stitching</b> = ต่อภาพหลายใบเป็นภาพพาโนรามา — ใช้ feature matching (SIFT/ORB) หาจุดที่ตรงกัน + perspective ต่อภาพ</li>
+        <li><b class="must">วิวัฒนาการ CV:</b> Classic CV (กฎเขียนด้วยมือ: threshold+contour+feature) → <b>ML</b> (feature ด้วยมือ + classifier: SVM/Random Forest) → <b>DL/CNN</b> (เรียนรู้ feature เองจากภาพตรง ๆ — ไม่ต้องออกแบบ feature) · Framework: PyTorch · TensorFlow</li>
+        <li><b>CNN</b> = Convolutional Neural Network — โครงข่ายที่ใช้ convolution (kernel!) หลายชั้น เรียนรู้ค่าน้ำหนักเองจากข้อมูล</li>
+      </ul>
+      <table>
+        <tr><th>โมเดลตรวจจับวัตถุ</th><th>แนวคิด</th><th>จุดเด่น</th></tr>
+        <tr><td><b>YOLO</b></td><td>ดูทั้งภาพครั้งเดียว (one-stage)</td><td><b>เร็วมาก</b> — เรียลไทม์</td></tr>
+        <tr><td><b>SSD</b></td><td>Single Shot — ตรวจจับหลายขนาดครั้งเดียว</td><td>เร็ว + แม่นยำสมดุล</td></tr>
+        <tr><td><b>Faster R-CNN</b></td><td>สองขั้นตอน: เสนอพื้นที่ → จำแนก</td><td><b>แม่นยำสูงสุด</b> แต่ช้า</td></tr>
+      </table>
+      <p>Output ของ object detection = <b>bounding box (x, y, w, h)</b> + <b>class + confidence</b> (เช่น "person 0.95") — เหมือน boundingRect ที่เรียนมา</p>
+    </div>
+
+    <!-- ============ 9. สูตรต้องจำ ============ -->
+    <div class="sec">
+      <h2>9 · สูตร &amp; คำสั่งต้องจำก่อนเข้าห้องสอบ</h2>
+      <ul>
+        <li>BINARY: ≥t → 255 · INV = สลับ · TRUNC = ตัดเกิน · TOZERO = ต่ำกว่า → 0</li>
+        <li>adaptiveThreshold(..., blockSize, C) — 11 = window 11×11 (เลขคี่) · 2 = ค่าคงที่ C</li>
+        <li>Otsu: cv2.THRESH_BINARY + cv2.THRESH_OTSU (ส่ง 0, ค่าขีดใน ret) · เหมาะ histogram 2 ยอด</li>
+        <li>Erosion = หด (AND/min) · Dilation = ขยาย (OR/max) · Opening = E→D (ลบจุดเล็ก) · Closing = D→E (ปิดรู)</li>
+        <li>findContours(binary, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE) → นับด้วย len()</li>
+        <li>boundingRect → (x, y, w, h) · contourArea = พื้นที่ · arcLength = เส้นรอบรูป · moments = จุดศูนย์ถ่วง (m10/m00)</li>
+        <li>Corner: Harris (cornerHarris) · Shi-Tomasi (goodFeaturesToTrack) · Descriptor: SIFT/SURF/ORB</li>
+        <li>Resize/Rotate/warpAffine (affine) · warpPerspective แก้เอียง 4 มุม (สแกนเอกสาร)</li>
+        <li>YOLO = เร็ว · Faster R-CNN = แม่น · CNN เรียนรู้ feature เอง</li>
+      </ul>
+    </div>
+
+    <!-- ============ 10. กับดัก ============ -->
+    <div class="sec">
+      <h2>10 · กับดักที่ข้อสอบชอบหลอก</h2>
+      <ul>
+        <li><span class="trap">⚠</span> THRESH_BINARY: <b>≥ t → 255</b> (ไม่ใช่ค่าต่ำกว่าเป็น 255)</li>
+        <li><span class="trap">⚠</span> TRUNC = <b>ตัดค่าสูง</b> · TOZERO = <b>โละค่าต่ำ</b> — อย่าสลับ</li>
+        <li><span class="trap">⚠</span> Adaptive = local (ขีดต่อ pixel) · Global = 1 ค่าทั้งภาพ</li>
+        <li><span class="trap">⚠</span> 11 = blockSize (เลขคี่) · 2 = ค่าคงที่ C — ไม่ใช่ threshold/iteration</li>
+        <li><span class="trap">⚠</span> Opening = erode→dilate (ลบจุดขาวเล็ก) · Closing = dilate→erode (ปิดรูดำ) — อย่าจำสลับ</li>
+        <li><span class="trap">⚠</span> erode = หด (ทุกช่องต้องขาว/AND) · dilate = ขยาย (มีขาวจุดเดียวพอ/OR)</li>
+        <li><span class="trap">⚠</span> findContours รับภาพ <b>binary</b> (หลัง threshold) — ไม่ใช่ภาพสี/grayscale ตรง ๆ</li>
+        <li><span class="trap">⚠</span> RETR_EXTERNAL = ขอบนอกสุด · CHAIN_APPROX_SIMPLE = เก็บมุม</li>
+        <li><span class="trap">⚠</span> Otsu เหมาะ histogram 2 ยอด — แสงไม่สม่ำเสมอ Otsu ก็พัง (ต้อง Adaptive)</li>
+        <li><span class="trap">⚠</span> YOLO = <b>เร็ว</b> · Faster R-CNN = <b>แม่น</b> — ไม่ใช่กลับกัน</li>
+        <li><span class="trap">⚠</span> SIFT = แม่น/ช้า · ORB = ฟรี/เร็ว · SURF = เร็ว (กลาง ๆ)</li>
+        <li><span class="trap">⚠</span> Edge ≠ Contour — Edge = จุดเปลี่ยนความเข้ม · Contour = เส้นปิดรอบวัตถุ</li>
+      </ul>
+    </div>
+
+    <!-- ============ 11. Q&A ============ -->
+    <div class="sec">
+      <h2>11 · คำถาม-คำตอบฉบับเร็ว (จากแบบทดสอบบทนี้)</h2>
+      <ul class="qa">
+        <li><b>Thresholding ใช้ทำอะไร?</b> → แยก object ออกจาก background (ภาพขาว-ดำ)</li>
+        <li><b>THRESH_BINARY: พิกเซล ≥ 128 ได้ค่า?</b> → 255 (ขาว) · ต่ำกว่า → 0</li>
+        <li><b>พิกเซล 200 ผ่าน BINARY (t=128)?</b> → 255</li>
+        <li><b>THRESH_BINARY_INV ต่างจาก BINARY?</b> → สลับขาว-ดำ (กลับด้าน)</li>
+        <li><b>THRESH_TRUNC ทำงานยังไง?</b> → ค่าที่เกิน threshold ถูกตัดให้เท่ากับ threshold (ค่าต่ำกว่าคงเดิม)</li>
+        <li><b>THRESH_TOZERO?</b> → ค่าที่ต่ำกว่า threshold กลายเป็น 0 (เกินคงเดิม)</li>
+        <li><b>Global threshold มีปัญหาอะไร?</b> → แสงไม่สม่ำเสมอ — ขีดเดียวใช้ไม่ได้</li>
+        <li><b>Adaptive ต่างจาก Global ยังไง?</b> → คำนวณ threshold แยกเป็นแต่ละพื้นที่ (local จาก neighborhood)</li>
+        <li><b>ค่า 11 ใน adaptiveThreshold?</b> → blockSize — ขนาด neighborhood 11×11 พิกเซล</li>
+        <li><b>ค่า 2 (ตัวสุดท้าย) ใน adaptiveThreshold?</b> → ค่าคงที่ C ที่ลบออกจาก threshold ที่คำนวณได้</li>
+        <li><b>Otsu คืออะไร?</b> → หา threshold อัตโนมัติจาก histogram (แยก 2 กลุ่มได้ดีที่สุด)</li>
+        <li><b>ใช้ Otsu ใน OpenCV ยังไง?</b> → cv2.THRESH_BINARY + cv2.THRESH_OTSU (ค่าขีดอยู่ใน ret)</li>
+        <li><b>Erosion มีผลยังไง?</b> → กร่อนขอบวัตถุให้เล็กลง (ลบพิกเซลขอบ) + ลบ noise จุดเล็ก</li>
+        <li><b>Dilation มีผลยังไง?</b> → ขยายขอบวัตถุให้ใหญ่ขึ้น (เติมรู/ช่องว่างเล็ก)</li>
+        <li><b>Opening / Closing คือ?</b> → Opening = erode→dilate (ลบจุดเล็ก) · Closing = dilate→erode (ปิดรูเล็ก)</li>
+        <li><b>findContours ใช้หาอะไร?</b> → ขอบเขต (contour) ของวัตถุในภาพ binary</li>
+        <li><b>SIFT / SURF / ORB คืออะไร?</b> → Feature Descriptor — อธิบายจุดเด่นของภาพ (จับคู่ภาพ/ตรวจจับวัตถุ)</li>
+        <li><b>boundingRect คืนค่าอะไร?</b> → (x, y, w, h) — สี่เหลี่ยมครอบวัตถุ</li>
+        <li><b>Perspective transform ใช้ทำอะไร?</b> → แก้ภาพเอียง/เบี้ยวให้ตรง (สแกนเอกสาร) ด้วย 4 มุม</li>
+        <li><b>YOLO / SSD / Faster R-CNN คืออะไร?</b> → โมเดล Deep Learning ตรวจจับวัตถุ (class + bounding box)</li>
+        <li><b>YOLO vs Faster R-CNN?</b> → YOLO เร็ว (one-stage) · Faster R-CNN แม่นสุด (two-stage)</li>
+        <li><b>CNN ต่างจาก ML ทั่วไป?</b> → CNN เรียนรู้ feature เองจากภาพตรง ๆ (ไม่ต้องออกแบบ feature ด้วยมือ)</li>
+      </ul>
+    </div>
+
+  </div><!-- /cols -->
+
+  <div class="foot">
+    สรุปบทที่ 6 · DIP — Segmentation ถึง Computer Vision · <b>หัวใจทั้งบท: Pipeline = Threshold → Morphology → Contour → Feature → (AI) Detection · แสงไม่เท่ากัน = Adaptive · erode หด dilate ขยาย · Opening ลบจุด Closing ปิดรู</b>
+  </div>
+
+</div>
+
+<script>
+  // เปิดจากปุ่ม "พิมพ์เอกสารสรุปสอบ" (?print=1) → โหลดเสร็จแล้วสั่งพิมพ์ทันที
+  if (/[?&]print=1/.test(location.search)) {
+    window.addEventListener("load", function () {
+      setTimeout(function () { window.print(); }, 500);
+    });
+  }
+</script>
+</body>
+</html>
